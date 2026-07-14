@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>數感偵探社｜四年級共學</title>
+  <link rel="stylesheet" href="math-style.css">
+</head>
+<body>
+  <header id="topbar" class="topbar hidden">
+    <div><span class="seal">數</span><strong id="bar-title">數感任務</strong></div>
+    <div class="top-actions"><span id="bar-progress" class="tag">1 / 10</span><button id="btn-quit" class="text-btn">回數學首頁</button></div>
+    <div class="rail"><div id="rail-fill"></div></div>
+  </header>
+
+  <main>
+    <section id="screen-home" class="screen active">
+      <div class="wrap">
+        <header class="hero">
+          <div class="number-mark">4</div>
+          <p class="eyebrow">四年級共同主線＋個別加強</p>
+          <h1>數感偵探社</h1>
+          <p>先估、再算、說理由。需要幫忙時，可以開啟「同學有愛」提示。</p>
+        </header>
+
+        <section class="setup">
+          <label>偵探姓名<input id="student-name" maxlength="12" placeholder="輸入姓名或代號"></label>
+
+          <fieldset><legend>今天走哪條路？</legend>
+            <div class="choices three">
+              <button class="choice selected" data-path="common"><strong>四年級共學</strong><span>全班共同核心</span></button>
+              <button class="choice" data-path="foundation"><strong>基礎補強</strong><span>短題、位值與基本四則</span></button>
+              <button class="choice" data-path="extension"><strong>進階延伸</strong><span>多步驟與逆向推理</span></button>
+            </div>
+          </fieldset>
+
+          <fieldset><legend>練習方式</legend>
+            <div class="choices three">
+              <button class="choice selected" data-mode="quick"><strong>暖身10題</strong><span>適合共同課前</span></button>
+              <button class="choice" data-mode="practice"><strong>練習15題</strong><span>單元學習後</span></button>
+              <button class="choice" data-mode="check"><strong>檢核20題</strong><span>找出補強方向</span></button>
+            </div>
+          </fieldset>
+
+          <label>指定單元
+            <select id="skill-filter">
+              <option value="all">混合練習</option><option>位值</option><option>加減</option>
+              <option>乘法</option><option>除法</option><option>估算</option><option>應用</option>
+            </select>
+          </label>
+
+          <button id="btn-start" class="primary">開始數感任務</button>
+          <a class="lobby" href="../index.html">← 回學習大廳切換科目</a>
+        </section>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <div class="play-wrap">
+        <article class="card">
+          <p id="q-meta" class="meta"></p>
+          <h2 id="q-text"></h2>
+          <div id="options" class="options"></div>
+          <button id="btn-hint" class="hint-btn">♡ 同學有愛：給我一個線索</button>
+          <div id="hint-box" class="hint hidden"></div>
+          <div id="feedback" class="feedback hidden">
+            <strong id="fb-title"></strong><p id="fb-message"></p><p id="fb-explain"></p>
+          </div>
+          <button id="btn-next" class="primary hidden">下一題</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen">
+      <div class="result-wrap"><article class="card report">
+        <p class="eyebrow">數感偵探報告</p><h2 id="r-name"></h2><p id="r-context" class="muted"></p>
+        <div class="score"><strong id="r-score">0%</strong><span id="r-count"></span></div>
+        <h3>各項能力</h3><div id="r-skills"></div>
+        <h3>下一步練習</h3><p id="r-next"></p>
+        <div class="result-actions"><button id="btn-export" class="primary">匯出結果</button><button id="btn-again" class="secondary">再練一次</button><a href="../index.html" class="secondary link-btn">回學習大廳</a></div>
+      </article></div>
+    </section>
+  </main>
+  <script src="math-questions.js"></script>
+  <script src="math-script.js"></script>
+</body>
+</html>

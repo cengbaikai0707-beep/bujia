@@ -1,210 +1,44 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>部件偵探社：文字王國修復任務</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>永齡學習偵探社</title>
+  <link rel="stylesheet" href="hub.css">
 </head>
 <body>
+  <main class="hub">
+    <header class="hero">
+      <p class="eyebrow">永齡希望小學｜共學與個別加強</p>
+      <h1>學習偵探社</h1>
+      <p>先選擇今天要執行的任務。國文與數學的題庫、進度及成績會分開記錄。</p>
+    </header>
 
-<!-- ============ 上方狀態列（遊戲進行中才顯示） ============ -->
-<header id="topbar" class="topbar hidden">
-  <div class="topbar-left">
-    <span class="seal">偵</span>
-    <span id="bar-stage" class="bar-stage">第 1 關 · 部件認親</span>
-  </div>
-  <div class="topbar-right">
-    <span id="bar-mode" class="tag">闖關模式</span>
-    <span id="bar-progress" class="tag tag-quiet">1 / 5</span>
-    <button id="btn-quit" class="btn-text" type="button">回首頁</button>
-  </div>
-  <div class="progress-rail"><div id="progress-fill" class="progress-fill"></div></div>
-</header>
+    <section class="subject-grid" aria-label="選擇科目">
+      <a class="subject chinese" href="chinese/index.html">
+        <span class="stamp">文</span>
+        <span class="subject-copy">
+          <small>國文任務</small>
+          <strong>部件偵探社</strong>
+          <span>辨認部件、推測字義、修復句子</span>
+        </span>
+        <span class="go">進入國文館 →</span>
+      </a>
 
-<main>
+      <a class="subject math" href="math/index.html">
+        <span class="stamp">數</span>
+        <span class="subject-copy">
+          <small>數學任務</small>
+          <strong>數感偵探社</strong>
+          <span>四年級共學、個別補強、策略說明</span>
+        </span>
+        <span class="go">進入數學館 →</span>
+      </a>
+    </section>
 
-<!-- ============ 首頁 ============ -->
-<section id="screen-home" class="screen active">
-  <div class="home-wrap">
-
-    <div class="hero">
-      <div class="hero-grid" aria-hidden="true">
-        <div class="tian">
-          <span class="tian-char">部</span>
-        </div>
-        <div class="tian">
-          <span class="tian-char">件</span>
-        </div>
-      </div>
-      <p class="eyebrow">國語學院 · 部件識字大挑戰 練習包</p>
-      <h1>部件偵探社<span class="subtitle">文字王國修復任務</span></h1>
-      <p class="story">
-        文字王國的部件被打亂了。「氵」離開了河，「忄」離開了心，
-        許多字失去原本的意思，句子開始說錯話。<br>
-        現在需要一位偵探——你。找出部件留下的線索，把文字放回它該在的位置。
-      </p>
-      <p class="creed">先看部件，再猜意思，最後放回句子檢查。</p>
-    </div>
-
-    <div class="setup-card">
-      <div class="field">
-        <label class="field-label" for="input-name">偵探代號<span class="hint">（可以不填）</span></label>
-        <input id="input-name" type="text" maxlength="12" placeholder="輸入姓名或暱稱" autocomplete="off">
-      </div>
-
-      <div class="field">
-        <span class="field-label">選擇版本</span>
-        <div class="choice-row" role="radiogroup" aria-label="選擇版本">
-          <button class="choice" type="button" data-level="middle" role="radio" aria-checked="true">
-            <strong>中年級</strong><span>三、四年級</span>
-          </button>
-          <button class="choice" type="button" data-level="upper" role="radio" aria-checked="false">
-            <strong>高年級</strong><span>五、六年級</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="field">
-        <span class="field-label">選擇模式</span>
-        <div class="choice-grid" role="radiogroup" aria-label="選擇模式">
-          <button class="choice" type="button" data-mode="adventure" role="radio" aria-checked="true">
-            <strong>🗺️ 闖關模式</strong><span>五關完整任務</span>
-          </button>
-          <button class="choice" type="button" data-mode="quick" role="radio" aria-checked="false">
-            <strong>⚡ 快速練習</strong><span>隨機 10 題</span>
-          </button>
-          <button class="choice" type="button" data-mode="challenge" role="radio" aria-checked="false">
-            <strong>🔍 挑戰模式</strong><span>比賽前加強</span>
-          </button>
-          <button class="choice" type="button" data-mode="postTest" role="radio" aria-checked="false">
-            <strong>📋 後測模式</strong><span>正式檢核</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="home-actions">
-        <button id="btn-start" class="btn btn-primary" type="button">開始任務</button>
-        <button id="btn-howto" class="btn btn-ghost" type="button">遊戲說明</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 答題畫面 ============ -->
-<section id="screen-game" class="screen">
-  <div class="play-wrap">
-    <article class="card">
-      <div id="focus-box" class="focus-box hidden">
-        <div class="tian tian-lg"><span id="focus-char" class="tian-char"></span></div>
-        <p id="focus-label" class="focus-label">線索部件</p>
-      </div>
-
-      <p id="q-meta" class="q-meta"></p>
-      <h2 id="q-text" class="q-text"></h2>
-
-      <div id="options" class="options"></div>
-
-      <div id="feedback" class="feedback hidden">
-        <p id="fb-verdict" class="fb-verdict"></p>
-        <p id="fb-line" class="fb-line"></p>
-        <p id="fb-explain" class="fb-explain"></p>
-      </div>
-
-      <button id="btn-next" class="btn btn-primary btn-block hidden" type="button">下一題</button>
-    </article>
-  </div>
-</section>
-
-<!-- ============ 過關畫面 ============ -->
-<section id="screen-stage" class="screen">
-  <div class="narrow">
-    <article class="card center">
-      <div id="stage-icon" class="stage-icon">🗺️</div>
-      <h2 id="stage-title">第 1 關完成</h2>
-      <p id="stage-score" class="stage-score"></p>
-      <p id="stage-remind" class="stage-remind"></p>
-      <div id="passcode" class="passcode hidden">
-        <span class="passcode-label">通關密語</span>
-        <p id="passcode-text"></p>
-      </div>
-      <button id="btn-continue" class="btn btn-primary btn-block">前往下一關</button>
-    </article>
-  </div>
-</section>
-
-<!-- ============ 結果頁 ============ -->
-<section id="screen-result" class="screen">
-  <div class="narrow">
-    <article class="card report">
-      <p class="eyebrow">偵探結案報告</p>
-      <h2 id="r-name">部件偵探</h2>
-      <p id="r-context" class="r-context"></p>
-
-      <div class="score-hero">
-        <div class="tian tian-lg score-tian"><span id="r-accuracy" class="tian-char score-num">0%</span></div>
-        <div class="score-side">
-          <p id="r-rank" class="r-rank">—</p>
-          <p id="r-count" class="r-count">答對 0 題 / 共 0 題</p>
-        </div>
-      </div>
-
-      <section class="report-block">
-        <h3>四項能力</h3>
-        <div id="r-skills" class="skills"></div>
-      </section>
-
-      <section class="report-block">
-        <h3>常錯部件</h3>
-        <div id="r-mistakes" class="mistakes"></div>
-      </section>
-
-      <section class="report-block">
-        <h3>偵探講評</h3>
-        <p id="r-comment" class="r-comment"></p>
-      </section>
-
-      <section class="report-block">
-        <h3>下一步練習</h3>
-        <p id="r-next" class="r-next"></p>
-      </section>
-
-      <div class="result-actions">
-        <button id="btn-export" class="btn btn-primary">匯出結果 (.json)</button>
-        <button id="btn-again" class="btn btn-ghost">重新挑戰</button>
-        <button id="btn-home" class="btn btn-ghost">回首頁</button>
-      </div>
-    </article>
-  </div>
-</section>
-
-</main>
-
-<!-- ============ 遊戲說明 ============ -->
-<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div class="modal-card">
-    <h2 id="modal-title">怎麼玩</h2>
-    <ol class="howto">
-      <li>選好<strong>年級版本</strong>和<strong>模式</strong>，按下「開始任務」。</li>
-      <li>每題先看清楚<strong>部件</strong>，再看選項。</li>
-      <li>點選答案後會馬上告訴你對不對，並說明線索藏在哪個部件。</li>
-      <li>看完解析，按「下一題」繼續。</li>
-      <li>全部完成後會出現<strong>結案報告</strong>，可以匯出成檔案交給老師。</li>
-    </ol>
-    <h3>五關在練什麼</h3>
-    <ul class="howto">
-      <li><strong>第 1 關 部件認親</strong>：認出部件，知道它屬於哪一家。</li>
-      <li><strong>第 2 關 字義偵探</strong>：從一群同部件的字，歸納它們的共同意思。</li>
-      <li><strong>第 3 關 錯字修復</strong>：在句子裡選出正確的字。</li>
-      <li><strong>第 4 關 陌生字推理</strong>：看到不認識的字，先用部件猜方向。</li>
-      <li><strong>第 5 關 終極密碼</strong>：綜合應用，拿到通關密語。</li>
-    </ul>
-    <p class="note">提醒：部件的意思是「常見的線索」，不是絕對的規則。偵探要留意例外。</p>
-    <button id="btn-close-modal" class="btn btn-primary btn-block">知道了</button>
-  </div>
-</div>
-
-<script src="questions.js"></script>
-<script src="script.js"></script>
+    <aside class="note">
+      <strong>同學有愛：</strong>先問對方怎麼想，再給一個線索；不直接說答案。
+    </aside>
+  </main>
 </body>
 </html>

@@ -1,0 +1,338 @@
+/* =========================================================
+   部件偵探社 — style.css
+   設計主軸：講義藍紙 + 楷體 + 田字格。
+   顏色都寫在下面的變數，改一次就整站生效。
+   ========================================================= */
+
+:root{
+  --paper:#E8EEF1;        /* 背景：比賽講義的淡藍紙 */
+  --card:#FFFFFF;
+  --ink:#17212B;          /* 主文字 */
+  --ink-soft:#5A6B78;     /* 次要文字 */
+  --indigo:#26527A;       /* 主色：靛青 */
+  --indigo-soft:#E2EAF2;
+  --seal:#B7443C;         /* 印泥紅：答錯、印章 */
+  --seal-soft:#FBEAE8;
+  --jade:#1F7A5C;         /* 答對 */
+  --jade-soft:#E4F1EC;
+  --gold:#B98A2E;         /* 徽章 */
+  --line:#C9D6DF;
+
+  --r:14px;               /* 圓角 */
+  --shadow:0 2px 0 var(--line);
+
+  /* 楷體用在標題與單字；內文用系統無襯線體，確保清楚易讀 */
+  --kai:"標楷體","BiauKai","DFKai-SB","KaiTi","Kaiti TC","STKaiti",serif;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei","微軟正黑體","Heiti TC",sans-serif;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:17px;
+  line-height:1.7;
+  -webkit-text-size-adjust:100%;
+}
+.hidden{display:none !important;}
+
+/* ---------- 畫面切換 ---------- */
+.screen{display:none;}
+.screen.active{display:block;}
+
+.home-wrap,.play-wrap,.narrow{
+  max-width:820px;margin:0 auto;padding:24px 18px 64px;
+}
+.play-wrap{padding-top:104px;}
+.narrow{padding-top:32px;}
+
+/* ---------- 田字格：本站的識別元素 ---------- */
+.tian{
+  position:relative;
+  width:84px;height:84px;
+  background:var(--card);
+  border:2px solid var(--indigo);
+  border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;
+}
+.tian::before,.tian::after{
+  content:"";position:absolute;background:transparent;
+}
+.tian::before{
+  left:50%;top:6px;bottom:6px;width:0;
+  border-left:1px dashed var(--line);
+}
+.tian::after{
+  top:50%;left:6px;right:6px;height:0;
+  border-top:1px dashed var(--line);
+}
+.tian-char{
+  font-family:var(--kai);
+  font-size:52px;line-height:1;color:var(--ink);
+  position:relative;z-index:1;
+}
+.tian-lg{width:112px;height:112px;}
+.tian-lg .tian-char{font-size:70px;}
+
+/* ---------- 首頁 ---------- */
+.hero{text-align:center;padding:16px 0 28px;}
+.hero-grid{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
+
+.eyebrow{
+  font-size:13px;letter-spacing:.14em;color:var(--ink-soft);
+  margin:0 0 6px;
+}
+.hero h1{
+  font-family:var(--kai);
+  font-size:40px;line-height:1.25;margin:0 0 14px;color:var(--indigo);
+  letter-spacing:.04em;
+}
+.hero h1 .subtitle{
+  display:block;font-size:19px;color:var(--ink-soft);
+  letter-spacing:.22em;margin-top:8px;font-family:var(--sans);
+}
+.story{
+  max-width:34em;margin:0 auto 18px;color:var(--ink-soft);
+}
+.creed{
+  display:inline-block;
+  font-family:var(--kai);font-size:22px;
+  color:var(--seal);
+  border-top:2px solid var(--seal);
+  border-bottom:2px solid var(--seal);
+  padding:8px 18px;margin:0;
+  letter-spacing:.06em;
+}
+
+/* ---------- 設定卡 ---------- */
+.setup-card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:22px;box-shadow:var(--shadow);
+}
+.field{margin-bottom:22px;}
+.field-label{
+  display:block;font-weight:700;margin-bottom:10px;font-size:15px;
+}
+.field-label .hint{font-weight:400;color:var(--ink-soft);font-size:13px;}
+
+input[type=text]{
+  width:100%;padding:14px 16px;font-size:17px;font-family:var(--sans);
+  border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);
+}
+input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--indigo);}
+
+.choice-row{display:flex;gap:12px;}
+.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.choice{
+  flex:1;text-align:left;cursor:pointer;
+  background:#fff;border:2px solid var(--line);border-radius:12px;
+  padding:14px 16px;min-height:64px;font-family:var(--sans);color:var(--ink);
+}
+.choice strong{display:block;font-size:17px;}
+.choice span{display:block;font-size:13px;color:var(--ink-soft);}
+.choice[aria-checked="true"]{
+  border-color:var(--indigo);background:var(--indigo-soft);
+}
+.choice:focus-visible,button:focus-visible,input:focus-visible{
+  outline:3px solid var(--indigo);outline-offset:2px;
+}
+
+.home-actions{display:flex;gap:12px;}
+.lobby-link{display:block;text-align:center;margin-top:18px;color:var(--ink-soft);font-size:14px;text-decoration:none;}
+.lobby-link:hover{text-decoration:underline;color:var(--indigo);}
+
+/* ---------- 按鈕 ---------- */
+.btn{
+  font-family:var(--sans);font-size:18px;font-weight:700;
+  padding:16px 24px;border-radius:12px;border:2px solid transparent;
+  cursor:pointer;min-height:56px;
+}
+.btn-primary{background:var(--indigo);color:#fff;}
+.btn-primary:hover{background:#1D4265;}
+.btn-ghost{background:#fff;color:var(--indigo);border-color:var(--indigo);}
+.btn-ghost:hover{background:var(--indigo-soft);}
+.btn-block{width:100%;margin-top:18px;}
+.home-actions .btn{flex:1;}
+.btn-text{
+  background:none;border:none;color:var(--indigo);font-size:14px;
+  cursor:pointer;padding:6px;font-family:var(--sans);
+}
+
+/* ---------- 上方狀態列 ---------- */
+.topbar{
+  position:fixed;top:0;left:0;right:0;z-index:20;
+  background:var(--card);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px 14px;gap:12px;flex-wrap:wrap;
+}
+.topbar-left{display:flex;align-items:center;gap:10px;min-width:0;}
+.bar-stage{font-family:var(--kai);font-size:19px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.topbar-right{display:flex;align-items:center;gap:8px;}
+.seal{
+  width:32px;height:32px;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--seal);color:#fff;border-radius:4px;
+  font-family:var(--kai);font-size:19px;
+}
+.tag{
+  background:var(--indigo-soft);color:var(--indigo);
+  border-radius:99px;padding:4px 12px;font-size:13px;font-weight:700;
+  white-space:nowrap;
+}
+.tag-quiet{background:#F1F4F6;color:var(--ink-soft);}
+.progress-rail{
+  position:absolute;left:0;right:0;bottom:0;height:4px;background:var(--indigo-soft);
+}
+.progress-fill{height:100%;width:0;background:var(--indigo);transition:width .18s linear;}
+
+/* ---------- 題目卡 ---------- */
+.card{
+  background:var(--card);border:1px solid var(--line);
+  border-radius:var(--r);padding:26px 24px;box-shadow:var(--shadow);
+}
+.card.center{text-align:center;}
+
+.focus-box{display:flex;flex-direction:column;align-items:center;margin-bottom:20px;}
+.focus-label{font-size:13px;color:var(--ink-soft);margin:8px 0 0;letter-spacing:.1em;}
+
+.q-meta{font-size:13px;color:var(--ink-soft);margin:0 0 8px;letter-spacing:.06em;}
+.q-text{
+  font-size:23px;line-height:1.6;margin:0 0 22px;font-weight:700;
+}
+.q-text .blank{
+  color:var(--seal);font-family:var(--kai);letter-spacing:.1em;
+}
+
+.options{display:grid;gap:12px;}
+.opt{
+  text-align:left;font-family:var(--sans);font-size:18px;color:var(--ink);
+  background:#fff;border:2px solid var(--line);border-radius:12px;
+  padding:16px 18px;min-height:60px;cursor:pointer;display:flex;gap:12px;align-items:center;
+}
+.opt:hover:not(:disabled){border-color:var(--indigo);background:var(--indigo-soft);}
+.opt:disabled{cursor:default;}
+.opt-key{
+  width:28px;height:28px;flex:0 0 auto;border-radius:6px;
+  background:var(--indigo-soft);color:var(--indigo);
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;
+}
+.opt.is-correct{border-color:var(--jade);background:var(--jade-soft);}
+.opt.is-correct .opt-key{background:var(--jade);color:#fff;}
+.opt.is-wrong{border-color:var(--seal);background:var(--seal-soft);}
+.opt.is-wrong .opt-key{background:var(--seal);color:#fff;}
+
+/* 單字選項（如 晴／情／清）放大成楷體 */
+.opt.opt-char .opt-text{font-family:var(--kai);font-size:30px;line-height:1.2;}
+
+/* ---------- 回饋 ---------- */
+.feedback{
+  margin-top:20px;padding:16px 18px;border-radius:12px;
+  border-left:5px solid var(--line);background:#F7F9FA;
+}
+.feedback.good{border-left-color:var(--jade);background:var(--jade-soft);}
+.feedback.bad{border-left-color:var(--seal);background:var(--seal-soft);}
+.fb-verdict{margin:0 0 6px;font-weight:700;font-size:17px;}
+.feedback.good .fb-verdict{color:var(--jade);}
+.feedback.bad .fb-verdict{color:var(--seal);}
+.fb-line{margin:0 0 8px;}
+.fb-explain{margin:0;color:var(--ink-soft);font-size:15px;}
+
+/* ---------- 過關頁 ---------- */
+.stage-icon{font-size:46px;line-height:1;margin-bottom:8px;}
+.stage-score{font-size:22px;font-weight:700;margin:4px 0 12px;}
+.stage-remind{color:var(--ink-soft);margin:0 auto;max-width:30em;}
+.passcode{
+  margin-top:22px;padding:18px;border:2px dashed var(--gold);border-radius:12px;
+  background:#FDF8EC;
+}
+.passcode-label{font-size:12px;letter-spacing:.2em;color:var(--gold);}
+.passcode p{font-family:var(--kai);font-size:21px;margin:8px 0 0;line-height:1.6;}
+
+/* ---------- 結果頁 ---------- */
+.report h2{font-family:var(--kai);font-size:30px;margin:2px 0 4px;}
+.r-context{color:var(--ink-soft);margin:0 0 20px;font-size:15px;}
+.score-hero{
+  display:flex;align-items:center;gap:20px;
+  padding:18px;background:var(--indigo-soft);border-radius:12px;
+}
+.score-tian{border-color:var(--indigo);background:#fff;}
+.score-num{font-size:30px;font-family:var(--sans);font-weight:700;color:var(--indigo);}
+.r-rank{font-family:var(--kai);font-size:26px;margin:0;color:var(--indigo);}
+.r-count{margin:2px 0 0;color:var(--ink-soft);font-size:15px;}
+
+.report-block{margin-top:26px;}
+.report-block h3{
+  font-size:14px;letter-spacing:.14em;color:var(--ink-soft);
+  border-bottom:1px solid var(--line);padding-bottom:8px;margin:0 0 14px;font-weight:700;
+}
+.skill{margin-bottom:14px;}
+.skill-top{display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px;}
+.skill-name{font-weight:700;}
+.skill-num{color:var(--ink-soft);}
+.skill-rail{height:10px;background:#EEF2F4;border-radius:99px;overflow:hidden;}
+.skill-bar{height:100%;background:var(--indigo);border-radius:99px;}
+.skill-bar.low{background:var(--seal);}
+.skill-bar.mid{background:var(--gold);}
+.skill-bar.high{background:var(--jade);}
+.skill-none{color:var(--ink-soft);font-size:14px;}
+
+.mistakes{display:flex;flex-wrap:wrap;gap:10px;}
+.chip{
+  display:flex;align-items:center;gap:8px;
+  border:1px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff;
+}
+.chip .ch{font-family:var(--kai);font-size:26px;line-height:1;}
+.chip .ct{font-size:13px;color:var(--seal);}
+
+.r-comment,.r-next{margin:0;}
+.result-actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+.result-actions .btn{flex:1;min-width:150px;font-size:16px;}
+
+/* ---------- 說明視窗 ---------- */
+.modal{
+  position:fixed;inset:0;background:rgba(23,33,43,.55);z-index:40;
+  display:flex;align-items:center;justify-content:center;padding:18px;
+}
+.modal-card{
+  background:#fff;border-radius:var(--r);padding:26px;max-width:600px;
+  max-height:86vh;overflow:auto;
+}
+.modal-card h2{font-family:var(--kai);font-size:26px;margin:0 0 14px;}
+.modal-card h3{font-size:16px;margin:24px 0 8px;}
+.howto{padding-left:22px;margin:0;}
+.howto li{margin-bottom:8px;}
+.note{
+  margin-top:20px;padding:12px 14px;background:var(--indigo-soft);
+  border-radius:10px;font-size:14px;color:var(--indigo);
+}
+
+/* ---------- 手機 ---------- */
+@media (max-width:600px){
+  body{font-size:16px;}
+  .hero h1{font-size:30px;}
+  .creed{font-size:18px;padding:8px 12px;}
+  .q-text{font-size:20px;}
+  .choice-grid,.choice-row{grid-template-columns:1fr;display:grid;}
+  .home-actions{flex-direction:column;}
+  .score-hero{flex-direction:column;text-align:center;}
+  .tian{width:70px;height:70px;}
+  .tian-char{font-size:44px;}
+  .play-wrap{padding-top:112px;}
+  .card{padding:20px 16px;}
+}
+
+/* ---------- 平板可用寬度 ---------- */
+@media (min-width:720px){
+  .options{grid-template-columns:1fr 1fr;}
+  .options.one-col{grid-template-columns:1fr;}
+}
+
+/* ---------- 尊重使用者的減少動態設定 ---------- */
+@media (prefers-reduced-motion:reduce){
+  *{transition:none !important;}
+}
