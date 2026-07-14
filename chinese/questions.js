@@ -535,6 +535,96 @@ const QUESTION_BANK = [
 { id:"U-PT-032", level:"upper", stage:"postTest", mode:["postTest"], skillType:"分類", radical:"衤", difficulty:"挑戰", question:"「袖、裙、褲、補」共同部件提示哪類意思？", options:["衣服或布料", "山坡地勢", "頭臉部位", "酒類發酵"], answerIndex:0, explanation:"衤常和衣服、布料、穿著有關。", correctFeedback:"答對了。你有回到字形和部件線索判斷，不是只靠猜讀音。", wrongHint:"先停一下，請回到字形：看哪個部件在提示意思，再和題目的語境對照。" },
 
 { id:"U-PT-033", level:"upper", stage:"postTest", mode:["postTest"], skillType:"分類", radical:"礻", difficulty:"挑戰", question:"「神、祖、祝、禮」共同部件提示哪類意思？", options:["祭祀、神明或禮俗", "腳部動作", "水流清洗", "食物味道"], answerIndex:0, explanation:"礻常和祭祀、神明、禮俗相關。", correctFeedback:"答對了。你有回到字形和部件線索判斷，不是只靠猜讀音。", wrongHint:"先停一下，請回到字形：看哪個部件在提示意思，再和題目的語境對照。" }
+/* =========================================================
+   追加題庫：部首偏旁理解加深版
+   使用方式：貼在 const EXAM_BANK = [ 之前
+   目的：
+   1. 增加礻、衤、阝、頁、隹、疒、攵、欠、皿、穴、戈、艮等部件。
+   2. 題目不只問「哪個字有部件」，而是問「部件如何幫助判斷意思」。
+   3. 加入例外、聲旁陷阱、部件不等於絕對規則的判斷。
+   ========================================================= */
+
+QUESTION_BANK.push(
+
+{ id:"ADD-M-S2-001", level:"middle", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"礻", difficulty:"標準", question:"「神、福、禮」這幾個字都有「礻」。這個部件最常提示哪一類意思？", options:["祭祀、神明或禮俗", "衣服布料", "腳步移動", "金錢買賣"], answerIndex:0, explanation:"「礻」是「示」的變形，常和祭祀、神明、祝福、禮俗有關。注意它和「衤」長得像，但意思不同。", correctFeedback:"答對了。你有分清楚「礻」和「衤」，不是只看形狀相似。", wrongHint:"想想「神、福、禮」比較像宗教禮俗，還是衣服布料？" },
+
+{ id:"ADD-M-S2-002", level:"middle", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"衤", difficulty:"標準", question:"「被、裙、補」這幾個字都有「衤」。這個部件最常提示哪一類意思？", options:["衣服、布料或遮蓋", "祭祀、神明或禮俗", "疾病疼痛", "鳥類動物"], answerIndex:0, explanation:"「衤」是衣字旁，常和衣服、布料、穿著、遮蓋有關。它容易和「礻」混淆。", correctFeedback:"答對了。你抓到「衤」的衣物線索。", wrongHint:"「被、裙、補」都比較像穿戴或布料，和神明祭祀沒有直接關係。" },
+
+{ id:"ADD-M-S2-003", level:"middle", stage:2, mode:["adventure","challenge"], skillType:"分類", radical:"礻/衤", difficulty:"挑戰", question:"下列哪一組最能正確分辨「礻」和「衤」？", options:["神、福偏禮俗；被、裙偏衣物", "神、福偏衣物；被、裙偏禮俗", "兩者都只和說話有關", "兩者都只和天氣有關"], answerIndex:0, explanation:"「礻」多和祭祀禮俗有關；「衤」多和衣服布料有關。兩者外形相近，是很常見的偏旁陷阱。", correctFeedback:"答對了。你不是看到相似形狀就混在一起，而是回到部件意義。", wrongHint:"看例字：神、福、禮是一組；被、裙、補是另一組。" },
+
+{ id:"ADD-M-S3-001", level:"middle", stage:3, mode:["adventure","quick","challenge"], skillType:"應用", radical:"礻/衤", difficulty:"標準", charOptions:true, question:"過年時，大家互相祝＿＿，希望新年順利。", options:["福", "服", "複", "腹"], answerIndex:0, explanation:"祝福和禮俗、祈願有關，要用「礻」的「福」。", correctFeedback:"答對了。這題不是看讀音，而是看語境：祝福屬於禮俗祈願。", wrongHint:"如果和衣服有關才會考慮「服」或「衤」類線索。" },
+
+{ id:"ADD-M-S3-002", level:"middle", stage:3, mode:["adventure","quick","challenge"], skillType:"應用", radical:"衤", difficulty:"標準", charOptions:true, question:"天氣變冷了，媽媽幫弟弟蓋好棉＿＿。", options:["被", "神", "福", "社"], answerIndex:0, explanation:"棉被是布料、遮蓋身體的物品，所以用衣字旁「衤」的「被」。", correctFeedback:"答對了。你用「衣物、布料」的線索判斷出來。", wrongHint:"這裡不是宗教禮俗，而是蓋在身上的東西。" },
+
+{ id:"ADD-M-S2-004", level:"middle", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"頁", difficulty:"標準", question:"「頭、顏、額」這幾個字都有「頁」。這個部件常和哪一類意思有關？", options:["頭部、臉部或人的外貌", "水流清洗", "手部動作", "房屋室內"], answerIndex:0, explanation:"「頁」在許多字中和頭、臉、外貌有關，例如頭、顏、額、頰。", correctFeedback:"答對了。你抓到「頁」和頭臉部位的連結。", wrongHint:"把這幾個字放在身體上想一想：頭、顏、額在哪裡？" },
+
+{ id:"ADD-M-S3-003", level:"middle", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"頁", difficulty:"挑戰", charOptions:true, question:"他跑得滿＿＿大汗，臉都紅了。", options:["頭", "投", "偷", "透"], answerIndex:0, explanation:"「滿頭大汗」的頭是身體部位，和「頁」部件的頭臉線索有關。", correctFeedback:"答對了。你能把成語語境和部件線索接起來。", wrongHint:"這裡不是投球、偷東西，也不是透明，而是身體部位。" },
+
+{ id:"ADD-M-S2-005", level:"middle", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"疒", difficulty:"標準", question:"「病、痛、痕」這幾個字都有「疒」。這個部件常和哪一類意思有關？", options:["疾病、疼痛或身體不舒服", "衣服布料", "車輛交通", "金屬器具"], answerIndex:0, explanation:"「疒」常提示疾病、疼痛、傷痕或身體狀況。", correctFeedback:"答對了。看到「疒」可以先往身體不舒服的方向猜。", wrongHint:"想想病、痛、痕都和身體哪一種狀態有關。" },
+
+{ id:"ADD-M-S4-001", level:"middle", stage:4, mode:["adventure","quick","challenge"], skillType:"推理", radical:"疒", difficulty:"標準", focus:"痠", question:"看到「痠」這個字，即使不會讀，也可以先猜它可能和什麼有關？", options:["身體不舒服或疼痛感", "天氣放晴", "金錢價值", "說話禮貌"], answerIndex:0, explanation:"「痠」有「疒」，可以先猜和身體不舒服、疼痛、酸軟感有關。", correctFeedback:"答對了。陌生字先看部件，是很好的識字策略。", wrongHint:"不用急著知道讀音，先看外面的「疒」提示什麼。" },
+
+{ id:"ADD-M-S2-006", level:"middle", stage:2, mode:["adventure","challenge"], skillType:"分類", radical:"穴", difficulty:"標準", question:"「空、穿、窄」這幾個字都有「穴」。這個部件常和哪一類意思有關？", options:["洞穴、空間或內部通道", "金錢買賣", "心情感受", "鳥類飛行"], answerIndex:0, explanation:"「穴」原本和洞穴有關，後來常提示空間、孔洞、內部通道等意思。", correctFeedback:"答對了。你把「洞穴」的具體形象延伸到空間概念。", wrongHint:"空、穿、窄都可以想成和空間大小或通道有關。" },
+
+{ id:"ADD-M-S4-002", level:"middle", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"穴", difficulty:"挑戰", focus:"窺", question:"看到「窺」這個字，上面有「穴」，下面有「規」。最合理的初步推測是哪一個？", options:["從孔洞或縫隙中偷看", "用腳快速奔跑", "用火加熱食物", "祭祀神明"], answerIndex:0, explanation:"「窺」可由「穴」聯想到孔洞、縫隙，再連到從小空隙中看。這題重點是先抓語義方向。", correctFeedback:"答對了。你能把「穴」從洞穴延伸成縫隙、空間。", wrongHint:"先不要被下面的部件帶走，先看上方「穴」帶來的空間線索。" },
+
+{ id:"ADD-U-S2-001", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"隹", difficulty:"標準", question:"「雞、雅、集、雙」中常見的「隹」，本來和哪一類意象有關？", options:["短尾鳥或鳥類意象", "水流液體", "衣服布料", "疾病疼痛"], answerIndex:0, explanation:"「隹」本與短尾鳥有關，但在現代字中不一定都能直接解成鳥，也可能轉為構字部件或聲旁。", correctFeedback:"答對了。你知道「隹」的原始意象，也知道不能每個字都硬套。", wrongHint:"看到「隹」可以先想到鳥類，但也要小心有些字只是保留部件形體。" },
+
+{ id:"ADD-U-S2-002", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"推理", radical:"隹", difficulty:"挑戰", question:"下列哪一句最能正確理解「隹」？", options:["它本與短尾鳥有關，但在有些字中不一定直接表義", "它只要出現就一定代表水", "它只要出現就一定代表衣服", "它完全沒有任何構字意義"], answerIndex:0, explanation:"「隹」可以作為鳥類意象線索，但在「誰、推」等字中，未必能直接解成鳥，可能更接近聲旁或構字部件。", correctFeedback:"答對了。這就是進階識字：知道規則，也知道規則有限度。", wrongHint:"不要把部件規則當成百分之百公式。" },
+
+{ id:"ADD-U-S3-001", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"隹/言/扌", difficulty:"挑戰", charOptions:true, question:"「誰、推、堆、雖」都有相近部件或讀音。若要判斷「用手往前用力」應選哪個字？", options:["推", "誰", "堆", "雖"], answerIndex:0, explanation:"「推」左邊是「扌」，表示手的動作；右邊的「隹」在這裡不是主要意思線索。", correctFeedback:"答對了。你沒有被右邊相似部件騙走，而是抓到「扌」。", wrongHint:"想想這個動作是用哪個身體部位完成的。" },
+
+{ id:"ADD-U-S2-003", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"阝", difficulty:"標準", question:"「院、陸、階」這些字左邊都有「阝」。在這類字中，它常和哪一類意思有關？", options:["地形、地方或建築空間", "衣服布料", "心情感覺", "說話語言"], answerIndex:0, explanation:"左耳旁「阝」在許多字中和地方、地形、建築或區域有關，例如院、陸、階、陵。", correctFeedback:"答對了。你知道左邊的「阝」常帶地點或地形線索。", wrongHint:"院、陸、階都比較像地方或空間，不是說話或心情。" },
+
+{ id:"ADD-U-S2-004", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"分類", radical:"阝", difficulty:"挑戰", question:"「都、鄰、郊」右邊的「阝」常和哪一類意思有關？", options:["城邑、地名或區域", "疾病疼痛", "植物花草", "手部動作"], answerIndex:0, explanation:"右耳旁「阝」在許多字中和城邑、地方、區域有關。左阝和右阝來源不同，但現代教學可先抓空間地點線索。", correctFeedback:"答對了。你開始注意到「阝」在左右位置時的差異。", wrongHint:"都、鄰、郊都和地方、人群區域比較有關。" },
+
+{ id:"ADD-U-S2-005", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"推理", radical:"阝", difficulty:"挑戰", question:"下列哪一個說法最精準？", options:["阝在不同位置來源不同，但常可先作地點、地形、區域線索", "阝永遠都代表耳朵", "阝永遠都代表水流", "阝只出現在動物名稱中"], answerIndex:0, explanation:"左阝、右阝來源不同；但對國小識字策略來說，可以先粗略抓住地點、地形、區域等線索，再看語境修正。", correctFeedback:"答對了。這題考的是「不要把偏旁規則講死」。", wrongHint:"如果只說它永遠代表某一個意思，就太絕對了。" },
+
+{ id:"ADD-U-S2-006", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"攵", difficulty:"標準", question:"「放、收、改、救」常見的「攵」或「攴」意象，常和哪一類意思有關？", options:["動作、敲擊、使發生改變", "衣服布料", "天氣水氣", "金錢價值"], answerIndex:0, explanation:"「攵」常可作為動作、敲擊、改變的線索，但不同字裡的作用不完全一樣。", correctFeedback:"答對了。你抓到「攵」常提示動作或改變。", wrongHint:"想想放、收、改、救都不是靜態物品，而是某種動作或改變。" },
+
+{ id:"ADD-U-S4-001", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"攵", difficulty:"挑戰", focus:"敘", question:"看到「敘」這個字，右邊有「攵」。若只靠部件初步推測，哪個方向較合理？", options:["整理、表達或使事情有次序", "一種疾病", "一件衣服", "一種鳥"], answerIndex:0, explanation:"「敘」不是單純由「攵」直接決定意思，但「攵」可提示動作或處理；配合語詞「敘述」可往整理表達方向理解。", correctFeedback:"答對了。你有把部件線索和語詞脈絡一起使用。", wrongHint:"進階題不能只看一個部件，要把常見詞語也放進來檢查。" },
+
+{ id:"ADD-U-S2-007", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"欠", difficulty:"標準", question:"「吹、歌、歡、歎」中的「欠」常和哪一類動作意象有關？", options:["張口、出氣或聲音", "穿衣服", "走路移動", "房屋居住"], answerIndex:0, explanation:"「欠」本有張口、呵欠的意象，在一些字中可和出氣、聲音、情緒表現連結。", correctFeedback:"答對了。你抓到「欠」不是欠錢，而是張口出氣的形象。", wrongHint:"不要把現代常用的「欠錢」直接套到所有含欠的字。" },
+
+{ id:"ADD-U-S3-002", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"欠", difficulty:"挑戰", charOptions:true, question:"聽到這首歌，大家都忍不住＿＿呼起來。", options:["歡", "飲", "砍", "限"], answerIndex:0, explanation:"「歡呼」和聲音、情緒表現有關；「歡」中有「欠」，可聯想到張口表現。", correctFeedback:"答對了。你能把部件意象放回詞語中確認。", wrongHint:"這裡需要的是和呼喊、情緒表現有關的字。" },
+
+{ id:"ADD-U-S2-008", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"皿", difficulty:"標準", question:"「盆、盤、盃、盛」中的「皿」常和哪一類意思有關？", options:["容器、器皿或盛裝", "鳥類", "疾病", "天氣"], answerIndex:0, explanation:"「皿」本身就和器皿、容器有關，常提示盛裝東西的器具或狀態。", correctFeedback:"答對了。看到「皿」可以先往容器、盛裝方向猜。", wrongHint:"盆、盤、盃都可以拿來裝東西。" },
+
+{ id:"ADD-U-S4-002", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"皿", difficulty:"挑戰", focus:"盞", question:"看到「盞」這個字，下面有「皿」，最合理的初步推測是哪一個？", options:["可能和容器、器具或盛裝有關", "一定是鳥的名字", "一定和疾病有關", "一定代表下雨"], answerIndex:0, explanation:"「盞」有「皿」，可先往容器器具方向猜；但仍要靠語詞如「一盞燈」確認用法。", correctFeedback:"答對了。你用部件先猜方向，再用語境確認。", wrongHint:"「皿」的基本線索是器皿、容器。" },
+
+{ id:"ADD-U-S2-009", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"戈", difficulty:"標準", question:"「戰、戲、戒、戳」中常見的「戈」，原本和哪一類意象有關？", options:["兵器、攻擊或防備", "衣服布料", "水流清洗", "植物生長"], answerIndex:0, explanation:"「戈」是古代兵器意象，常可聯想到戰爭、攻擊、防備等方向。", correctFeedback:"答對了。你抓到「戈」的武器意象。", wrongHint:"戰、戒、戳都帶有衝突、防備或刺擊的感覺。" },
+
+{ id:"ADD-U-S4-003", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"戈", difficulty:"挑戰", focus:"戒", question:"看到「戒」這個字含有「戈」，若從構字意象推測，哪個方向較合理？", options:["警惕、防備、約束自己", "喝水解渴", "穿上衣服", "種植花草"], answerIndex:0, explanation:"「戒」含有兵器意象，可引申為警戒、防備，再到約束、避免犯錯。", correctFeedback:"答對了。你能從具體兵器意象推到抽象的警戒。", wrongHint:"試著從「拿著武器防備」聯想到心理或行為上的防備。" },
+
+{ id:"ADD-U-S2-010", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"艮", difficulty:"挑戰", question:"「根、跟、很、恨」都有「艮」或相近部件。判斷意思時，最可靠的方法是什麼？", options:["看左邊部件：木、足、彳、忄分別提示不同意思", "只看右邊艮，意思一定相同", "只看哪個字筆畫最多", "全部都當成樹根"], answerIndex:0, explanation:"「艮」在這組字中常作聲音線索；左邊的木、足、彳、忄才更能提示意思。", correctFeedback:"答對了。這是典型形聲字判斷：不要被聲旁騙走。", wrongHint:"根、跟、很、恨讀音相近，但意思差很多，表示右邊不一定主導意思。" },
+
+{ id:"ADD-U-S3-003", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"艮/足", difficulty:"挑戰", charOptions:true, question:"請你＿＿著老師的步驟，一步一步完成任務。", options:["跟", "根", "很", "恨"], answerIndex:0, explanation:"「跟著」和腳步、跟隨有關，用有「足」的「跟」。右邊「艮」比較像聲音線索。", correctFeedback:"答對了。你抓到「足」比「艮」更能判斷意思。", wrongHint:"這裡是跟隨腳步，不是樹根，也不是程度副詞。" },
+
+{ id:"ADD-U-S2-011", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"王/玉", difficulty:"標準", question:"「珠、環、球、理」常見的「王」在偏旁中常和哪一類意思有關？", options:["玉石、珍寶或圓形器物", "疾病疼痛", "說話語言", "行走移動"], answerIndex:0, explanation:"許多左邊像「王」的偏旁其實與「玉」有關，常提示玉石、珍寶、器物等意思。", correctFeedback:"答對了。你知道偏旁形狀和來源不一定完全一樣。", wrongHint:"想想珠、環、球都可以和玉石或圓形器物連在一起。" },
+
+{ id:"ADD-U-S4-004", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"王/玉", difficulty:"挑戰", focus:"瑕", question:"看到「瑕」這個字左邊有玉字旁，最合理的初步推測是哪一個？", options:["可能和玉石上的缺點或不完美有關", "一定和水流有關", "一定是疾病名稱", "一定是鳥類名稱"], answerIndex:0, explanation:"「瑕」常指玉上的斑點、缺陷，也可引申為缺點。玉字旁提供了玉石線索。", correctFeedback:"答對了。你能從具體玉石缺陷推到抽象缺點。", wrongHint:"先看左邊玉字旁，再想它可能和玉石的哪種狀態有關。" },
+
+{ id:"ADD-U-S2-012", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"米", difficulty:"標準", question:"「粉、粒、粥、糧」中的「米」常和哪一類意思有關？", options:["米穀、食物或細小顆粒", "神明祭祀", "行走移動", "頭部外貌"], answerIndex:0, explanation:"「米」常和米穀、食物、顆粒狀物有關，例如粉、粒、糧。", correctFeedback:"答對了。你抓到「米」的食物與顆粒線索。", wrongHint:"粉、粒、糧都和米穀或細小顆粒比較接近。" },
+
+{ id:"ADD-U-S3-004", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"米/目", difficulty:"挑戰", charOptions:true, question:"這道題很難，他想了很久，終於理解其中的＿＿妙。", options:["精", "睛", "晴", "情"], answerIndex:0, explanation:"「精妙」的「精」不是眼睛的睛，也不是天氣的晴。這題要從詞語搭配判斷，不能只靠單一部件。", correctFeedback:"答對了。你知道進階題要結合詞語，不是看到部件就硬套。", wrongHint:"這裡不是眼睛，也不是天氣，而是形容內容細緻巧妙。" },
+
+{ id:"ADD-U-S2-013", level:"upper", stage:2, mode:["adventure","quick","challenge"], skillType:"分類", radical:"羊", difficulty:"標準", question:"「美、善、群、羨」裡常見的「羊」意象，最適合怎麼理解？", options:["和羊的形象、祭品或美善價值有歷史連結", "永遠只代表生病", "永遠只代表水", "完全不能提供任何線索"], answerIndex:0, explanation:"「羊」在部分字中與古代祭品、美善觀念或羊的形象有關，但不能每個字都直接硬解。", correctFeedback:"答對了。你能接受部件提供的是方向，不是死公式。", wrongHint:"美、善裡的羊不是要你只背動物，而是看它如何引申出價值意義。" },
+
+{ id:"ADD-U-S4-005", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"羊", difficulty:"挑戰", focus:"善", question:"「善」含有「羊」等構字線索。較適合把它理解成哪一種延伸？", options:["美好、良好、值得肯定", "水流很急", "衣服很厚", "腳步很快"], answerIndex:0, explanation:"「善」可從古代美善、祭品等文化線索延伸為良好、友善、擅長等意思。此題重點是理解引申。", correctFeedback:"答對了。你不是只把羊當動物，而是能理解文化引申。", wrongHint:"想想「善良、友善、完善」共同指向什麼意思。" },
+
+{ id:"ADD-U-S2-014", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"推理", radical:"囗", difficulty:"標準", question:"「國、園、圍」外面都有「囗」。這個外框常提示哪一類意思？", options:["範圍、包圍或一個區域", "手部動作", "疾病疼痛", "聲音語言"], answerIndex:0, explanation:"「囗」常可理解為外框、範圍或包圍，和區域、界線有關。注意它不是「口」。", correctFeedback:"答對了。你分清楚大外框「囗」和小口「口」。", wrongHint:"國、園、圍都像有一個範圍把東西包起來。" },
+
+{ id:"ADD-U-S3-005", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"囗/口", difficulty:"挑戰", charOptions:true, question:"校＿＿裡有操場、教室和花圃。", options:["園", "員", "圓", "原"], answerIndex:0, explanation:"校園是一個區域，用外框「囗」的「園」。此題也要和「員、圓、原」區分。", correctFeedback:"答對了。你用「區域範圍」的線索判斷出校園。", wrongHint:"校園不是人員，也不是形狀圓，而是一個學校範圍。" },
+
+{ id:"ADD-U-S2-015", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"推理", radical:"彳", difficulty:"標準", question:"「往、待、徑、徐」左邊的「彳」常和哪一類意思有關？", options:["行走、道路或行動過程", "玉石珍寶", "祭祀禮俗", "器皿容器"], answerIndex:0, explanation:"「彳」常和行走、道路、行動過程有關，例如往、徑、徐。", correctFeedback:"答對了。你抓到雙人旁常和行動路徑有關。", wrongHint:"往、徑、徐都可以連到走路、方向、速度或路徑。" },
+
+{ id:"ADD-U-S4-006", level:"upper", stage:4, mode:["adventure","challenge"], skillType:"推理", radical:"彳/忄", difficulty:"挑戰", focus:"很恨", question:"「很」和「恨」右邊相同，但意思差很多。最關鍵的判斷線索是什麼？", options:["左邊部件不同：彳偏行動狀態，忄偏心理感受", "右邊相同，所以意思一定相同", "筆畫多的一定和心情有關", "讀音相近，所以可以互換"], answerIndex:0, explanation:"「很」和程度、狀態有關；「恨」是心理感受。左邊「彳／忄」能幫助分辨意思。", correctFeedback:"答對了。你沒有被相同聲旁騙走。", wrongHint:"看左邊：一個是彳，一個是忄。" },
+
+{ id:"ADD-U-S2-016", level:"upper", stage:2, mode:["adventure","challenge"], skillType:"分類", radical:"刂", difficulty:"標準", question:"「切、削、刻、判」常見的「刂」多和哪一類意思有關？", options:["刀具、切割或判分", "水流清洗", "衣服穿著", "鳥類飛行"], answerIndex:0, explanation:"「刂」是刀的變形，常和切割、刀具、分開、判斷等意思有關。", correctFeedback:"答對了。你抓到「刂」的刀具與分割線索。", wrongHint:"切、削、刻都和刀或切割動作很接近。" },
+
+{ id:"ADD-U-S3-006", level:"upper", stage:3, mode:["adventure","challenge"], skillType:"應用", radical:"刂/扌", difficulty:"挑戰", charOptions:true, question:"老師請大家＿＿斷這句話的意思是否合理。", options:["判", "拚", "盼", "伴"], answerIndex:0, explanation:"「判斷」有分辨、裁定的意思，用帶刀意象的「判」。這裡不是手部動作的「拚」。", correctFeedback:"答對了。你能從詞語功能判斷，不只看讀音。", wrongHint:"這裡要的是分辨對錯，不是用手拚命。" }
+
+);
 ];
 
 // 題庫統計：中年級與高年級皆含闖關、快速練習、挑戰、後測題。
