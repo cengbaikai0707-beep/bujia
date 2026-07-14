@@ -10,6 +10,7 @@ const GAME_CONFIG = {
 
   // 每次抽幾題。闖關模式是「每一關」的題數。
   counts: {
+    basic:     { middle: 10, upper: 10 },
     adventure: { middle: 5,  upper: 6  },   // 五關 → 中年級 25 題、高年級 30 題
     quick:     { middle: 10, upper: 10 },
     challenge: { middle: 15, upper: 15 },
@@ -18,9 +19,10 @@ const GAME_CONFIG = {
 
   // 難度配比（基礎／標準／挑戰）。加起來要等於 1。
   difficultyRatio: {
-    adventure: { 基礎: 0.40, 標準: 0.45, 挑戰: 0.15 },
+    basic:     { 基礎: 1.00, 標準: 0.00, 挑戰: 0.00 },   // 基礎補給站：全部基礎題
+    adventure: { 基礎: 0.25, 標準: 0.55, 挑戰: 0.20 },   // 主線：減少過度簡單，偏推理
     quick:     { 基礎: 0.50, 標準: 0.40, 挑戰: 0.10 },
-    challenge: { 基礎: 0.20, 標準: 0.50, 挑戰: 0.30 },
+    challenge: { 基礎: 0.10, 標準: 0.40, 挑戰: 0.50 },   // 挑戰：拉高挑戰比例
     postTest:  { 基礎: 0.30, 標準: 0.50, 挑戰: 0.20 }
   },
 
@@ -174,12 +176,14 @@ const state = {
   answers: [],       // 全部作答紀錄
   stageCorrect: 0,
   locked: false,
-  currentOptions: []
+  currentOptions: [],
+  examQueue: [],     // 考前快寫：這一輪抽到的部件
+  examIndex: 0
 };
 
 const MODE_LABEL = {
-  adventure: "闖關模式", quick: "快速練習",
-  challenge: "挑戰模式", postTest: "後測模式"
+  basic: "基礎補給站", adventure: "闖關模式", quick: "快速練習",
+  challenge: "挑戰模式", postTest: "後測模式", exam: "考前快寫"
 };
 const LEVEL_LABEL = { middle: "中年級", upper: "高年級" };
 
@@ -307,7 +311,10 @@ function answer(chosenIdx) {
     skillType: q.skillType,
     radical: q.radical,
     difficulty: q.difficulty,
+    question: q.question,
     chosen: chosen.text,
+    correctText: (state.currentOptions.find(o => o.correct) || {}).text || "",
+    explanation: q.explanation,
     correct: isCorrect
   });
 
@@ -438,6 +445,19 @@ function showResult() {
     ? `${st.rank.next}　特別留意這幾個部件：${mis.slice(0, 3).map(m => m[0]).join("、")}。`
     : st.rank.next;
 
+  // 錯題回顧：看到底錯在哪、正解與線索
+  const reviewBox = $("r-review");
+  const wrongs = state.answers.filter(a => !a.correct);
+  reviewBox.innerHTML = wrongs.length
+    ? wrongs.map((a, i) => `
+        <div class="review-item">
+          <p class="review-q"><span class="review-idx">${i + 1}</span>${escapeHTML(a.question)}</p>
+          <p class="review-line"><span class="review-tag is-wrong">你選了</span><span>${escapeHTML(a.chosen)}</span></p>
+          <p class="review-line"><span class="review-tag is-right">正解</span><span>${escapeHTML(a.correctText)}</span></p>
+          <p class="review-exp">${escapeHTML(a.explanation)}</p>
+        </div>`).join("")
+    : `<p class="skill-none">這一次沒有錯題，不需要回顧。</p>`;
+
   showScreen("screen-result");
 }
 
@@ -472,6 +492,80 @@ function exportResult() {
 }
 
 /* ---------------------------------------------------------
+   考前快寫 exam：無評分，看部件 → 自己寫 10 個字 → 對照答案庫
+   --------------------------------------------------------- */
+const EXAM_PER_SESSION = 6;
+
+function startExam() {
+  state.name = $("input-name").value.trim() || "無名偵探";
+  state.mode = "exam";
+  const bank = window.EXAM_BANK || [];
+  if (!bank.length) { alert("找不到考前快寫的答案庫，請檢查 questions.js。"); return; }
+  state.examQueue = shuffle(bank).slice(0, Math.min(EXAM_PER_SESSION, bank.length));
+  state.examIndex = 0;
+  renderExam();
+  showScreen("screen-exam");
+}
+
+function renderExam() {
+  const e = state.examQueue[state.examIndex];
+  $("exam-progress").textContent = `第 ${state.examIndex + 1} / ${state.examQueue.length} 個部件`;
+  $("exam-radical").textContent = e.radical;
+  $("exam-radical-name").textContent = e.radicalName || "";
+  $("exam-prompt").textContent = e.prompt;
+
+  const gbox = $("exam-groups");
+  gbox.innerHTML = "";
+  e.groups.forEach(g => {
+    const div = document.createElement("div");
+    div.className = "exam-group";
+    div.innerHTML = `<p class="exam-group-label">${escapeHTML(g.label)}</p>
+      <div class="exam-chars">${g.chars.map(c => `<span class="exam-char">${escapeHTML(c)}</span>`).join("")}</div>`;
+    gbox.appendChild(div);
+  });
+  $("exam-meaning").textContent = "意義方向：" + (e.meaningHint || "");
+  $("exam-caution").textContent = e.caution ? ("提醒：" + e.caution) : "";
+
+  $("exam-answers").classList.add("hidden");
+  $("btn-exam-reveal").classList.remove("hidden");
+  $("btn-exam-next").textContent =
+    (state.examIndex === state.examQueue.length - 1) ? "看練習回顧" : "下一個部件";
+}
+
+function revealExam() {
+  $("exam-answers").classList.remove("hidden");
+  $("btn-exam-reveal").classList.add("hidden");
+}
+
+function nextExam() {
+  if (state.examIndex < state.examQueue.length - 1) {
+    state.examIndex++;
+    renderExam();
+  } else {
+    showExamResult();
+  }
+}
+
+function showExamResult() {
+  $("xr-name").textContent = state.name;
+  $("xr-context").textContent =
+    `考前快寫　${state.examQueue.length} 個部件　${new Date().toLocaleDateString("zh-TW")}`;
+
+  const list = $("xr-list");
+  list.innerHTML = "";
+  state.examQueue.forEach(e => {
+    const div = document.createElement("div");
+    div.className = "exam-review-row";
+    div.innerHTML = `<span class="exam-review-rad">${escapeHTML(e.radical)}</span>
+      <span class="exam-review-hint">${escapeHTML(e.radicalName || "")}｜${escapeHTML(e.meaningHint || "")}</span>`;
+    list.appendChild(div);
+  });
+  $("xr-review").textContent =
+    "回家可以挑其中 2～3 個部件，各寫出 10 個字，並試著說出它們共同的意思方向。";
+  showScreen("screen-exam-result");
+}
+
+/* ---------------------------------------------------------
    事件綁定
    --------------------------------------------------------- */
 function bindChoiceGroup(selector, key) {
@@ -485,9 +579,22 @@ function bindChoiceGroup(selector, key) {
 }
 
 bindChoiceGroup("[data-level]", "level");
-bindChoiceGroup("[data-mode]", "mode");
 
-$("btn-start").addEventListener("click", startGame);
+// 四張模式卡片，各自啟動
+$("btn-basic").addEventListener("click", () => { state.mode = "basic"; startGame(); });
+$("btn-adventure").addEventListener("click", () => { state.mode = "adventure"; startGame(); });
+$("btn-challenge").addEventListener("click", () => { state.mode = "challenge"; startGame(); });
+$("btn-exam").addEventListener("click", startExam);
+
+// 考前快寫
+$("btn-exam-reveal").addEventListener("click", revealExam);
+$("btn-exam-next").addEventListener("click", nextExam);
+$("btn-exam-quit").addEventListener("click", () => {
+  if (confirm("現在離開，這次練習不會被保存。確定回首頁嗎？")) showScreen("screen-home");
+});
+$("btn-exam-again").addEventListener("click", startExam);
+$("btn-exam-home").addEventListener("click", () => showScreen("screen-home"));
+
 $("btn-next").addEventListener("click", nextQuestion);
 $("btn-export").addEventListener("click", exportResult);
 $("btn-again").addEventListener("click", startGame);

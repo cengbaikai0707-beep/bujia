@@ -67,24 +67,31 @@
 
       <div class="field">
         <span class="field-label">選擇模式</span>
-        <div class="choice-grid" role="radiogroup" aria-label="選擇模式">
-          <button class="choice" type="button" data-mode="adventure" role="radio" aria-checked="true">
-            <strong>🗺️ 闖關模式</strong><span>五關完整任務</span>
-          </button>
-          <button class="choice" type="button" data-mode="quick" role="radio" aria-checked="false">
-            <strong>⚡ 快速練習</strong><span>隨機 10 題</span>
-          </button>
-          <button class="choice" type="button" data-mode="challenge" role="radio" aria-checked="false">
-            <strong>🔍 挑戰模式</strong><span>比賽前加強</span>
-          </button>
-          <button class="choice" type="button" data-mode="postTest" role="radio" aria-checked="false">
-            <strong>📋 後測模式</strong><span>正式檢核</span>
-          </button>
+        <div class="mode-cards">
+          <article class="mode-card">
+            <div class="mode-head"><span class="mode-emoji">🧱</span><h3>基礎補給站</h3></div>
+            <p class="mode-sub">先認部件，累積基本字量。</p>
+            <button id="btn-basic" class="btn btn-primary btn-block" type="button">開始基礎練習</button>
+          </article>
+          <article class="mode-card">
+            <div class="mode-head"><span class="mode-emoji">🗺️</span><h3>部件偵探社</h3></div>
+            <p class="mode-sub">看部件、猜意思、放回句子檢查。</p>
+            <button id="btn-adventure" class="btn btn-primary btn-block" type="button">開始闖關</button>
+          </article>
+          <article class="mode-card">
+            <div class="mode-head"><span class="mode-emoji">✍️</span><h3>考前快寫</h3></div>
+            <p class="mode-sub">看到部件，練習寫出 10 個字。</p>
+            <button id="btn-exam" class="btn btn-primary btn-block" type="button">開始快寫</button>
+          </article>
+          <article class="mode-card">
+            <div class="mode-head"><span class="mode-emoji">🔍</span><h3>挑戰模式</h3></div>
+            <p class="mode-sub">破解聲旁陷阱、例外字與陌生字。</p>
+            <button id="btn-challenge" class="btn btn-primary btn-block" type="button">開始挑戰</button>
+          </article>
         </div>
       </div>
 
       <div class="home-actions">
-        <button id="btn-start" class="btn btn-primary" type="button">開始任務</button>
         <button id="btn-howto" class="btn btn-ghost" type="button">遊戲說明</button>
       </div>
       <a class="lobby-link" href="../index.html">← 回學習大廳切換科目</a>
@@ -161,6 +168,11 @@
       </section>
 
       <section class="report-block">
+        <h3>錯題回顧</h3>
+        <div id="r-review" class="review"></div>
+      </section>
+
+      <section class="report-block">
         <h3>偵探講評</h3>
         <p id="r-comment" class="r-comment"></p>
       </section>
@@ -179,6 +191,60 @@
   </div>
 </section>
 
+<!-- ============ 考前快寫：作答 ============ -->
+<section id="screen-exam" class="screen">
+  <div class="narrow">
+    <article class="card center exam-card">
+      <p id="exam-progress" class="exam-progress">第 1 / 6 個部件</p>
+      <div class="tian tian-lg"><span id="exam-radical" class="tian-char"></span></div>
+      <p id="exam-radical-name" class="exam-radical-name"></p>
+      <h2 id="exam-prompt" class="exam-prompt"></h2>
+      <p class="exam-selfnote">先在紙上或小白板寫出 10 個字，再按下面對照答案庫。這個模式不計分。</p>
+
+      <button id="btn-exam-reveal" class="btn btn-primary btn-block" type="button">顯示答案庫</button>
+
+      <div id="exam-answers" class="exam-answers hidden">
+        <div id="exam-groups" class="exam-groups"></div>
+        <div class="exam-hint-box">
+          <p id="exam-meaning" class="exam-meaning"></p>
+          <p id="exam-caution" class="exam-caution"></p>
+        </div>
+        <button id="btn-exam-next" class="btn btn-primary btn-block" type="button">下一個部件</button>
+      </div>
+
+      <button id="btn-exam-quit" class="btn btn-ghost btn-block" type="button">回首頁</button>
+    </article>
+  </div>
+</section>
+
+<!-- ============ 考前快寫：回顧（不計分） ============ -->
+<section id="screen-exam-result" class="screen">
+  <div class="narrow">
+    <article class="card report">
+      <p class="eyebrow">考前快寫 · 練習回顧</p>
+      <h2 id="xr-name">部件偵探</h2>
+      <p id="xr-context" class="r-context"></p>
+
+      <section class="report-block">
+        <h3>今天練習了這些部件</h3>
+        <div id="xr-list" class="exam-review"></div>
+      </section>
+
+      <section class="report-block">
+        <h3>建議再複習</h3>
+        <p id="xr-review" class="r-next"></p>
+      </section>
+
+      <p class="exam-creed">能寫出 10 個字是考試技巧；能說出它們共同的意義，才是真正的識字能力。</p>
+
+      <div class="result-actions">
+        <button id="btn-exam-again" class="btn btn-primary" type="button">再練一次</button>
+        <button id="btn-exam-home" class="btn btn-ghost" type="button">回首頁</button>
+      </div>
+    </article>
+  </div>
+</section>
+
 </main>
 
 <!-- ============ 遊戲說明 ============ -->
@@ -186,7 +252,9 @@
   <div class="modal-card">
     <h2 id="modal-title">怎麼玩</h2>
     <ol class="howto">
-      <li>選好<strong>年級版本</strong>和<strong>模式</strong>，按下「開始任務」。</li>
+      <li>先選<strong>年級版本</strong>，再從四張卡片挑一個<strong>模式</strong>開始。</li>
+      <li><strong>基礎補給站</strong>認部件、<strong>部件偵探社</strong>五關闖關、<strong>挑戰模式</strong>加強；這三種是選擇題。</li>
+      <li><strong>考前快寫</strong>不計分：看到部件先自己寫 10 個字，再對照答案庫與意義分組。</li>
       <li>每題先看清楚<strong>部件</strong>，再看選項。</li>
       <li>點選答案後會馬上告訴你對不對，並說明線索藏在哪個部件。</li>
       <li>看完解析，按「下一題」繼續。</li>

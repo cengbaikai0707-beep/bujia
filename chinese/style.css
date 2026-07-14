@@ -336,3 +336,127 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important;}
 }
+
+/* =========================================================
+   分層版新增：四張模式卡片 + 考前快寫畫面
+   沿用既有靛青／楷體／田字格風格
+   ========================================================= */
+
+/* ---------- 首頁四張模式卡片 ---------- */
+.mode-cards{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:14px;
+}
+.mode-card{
+  background:var(--card);
+  border:1.5px solid var(--line);
+  border-radius:var(--r);
+  padding:18px 18px 20px;
+  display:flex;flex-direction:column;gap:10px;
+  box-shadow:var(--shadow);
+}
+.mode-head{display:flex;align-items:center;gap:10px;}
+.mode-emoji{font-size:26px;line-height:1;}
+.mode-head h3{
+  margin:0;font-family:var(--kai);font-size:22px;color:var(--indigo);
+}
+.mode-sub{
+  margin:0;color:var(--ink-soft);font-size:15px;line-height:1.6;flex:1 0 auto;
+}
+.mode-card .btn{margin-top:4px;}
+
+@media (max-width:560px){
+  .mode-cards{grid-template-columns:1fr;}
+}
+
+/* ---------- 考前快寫：作答 ---------- */
+.exam-card{padding-top:28px;}
+.exam-progress{
+  color:var(--ink-soft);font-size:14px;letter-spacing:.08em;margin:0 0 12px;
+}
+.exam-radical-name{
+  margin:12px 0 4px;color:var(--indigo);font-family:var(--kai);font-size:20px;
+}
+.exam-prompt{
+  margin:6px 0 10px;font-family:var(--kai);font-size:24px;color:var(--ink);line-height:1.5;
+}
+.exam-selfnote{
+  color:var(--ink-soft);font-size:15px;margin:0 0 20px;
+}
+.exam-answers{margin-top:22px;text-align:left;}
+.exam-groups{display:flex;flex-direction:column;gap:16px;}
+.exam-group{
+  background:var(--indigo-soft);
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:12px 14px;
+}
+.exam-group-label{
+  margin:0 0 8px;font-weight:700;color:var(--indigo);font-size:15px;
+}
+.exam-chars{display:flex;flex-wrap:wrap;gap:8px;}
+.exam-char{
+  font-family:var(--kai);font-size:26px;line-height:1;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:8px 10px;color:var(--ink);
+}
+.exam-hint-box{
+  margin:16px 0 20px;padding:12px 14px;
+  background:var(--jade-soft);
+  border-left:4px solid var(--jade);
+  border-radius:8px;
+}
+.exam-meaning{margin:0;color:var(--ink);font-size:15px;}
+.exam-caution{margin:8px 0 0;color:var(--seal);font-size:14px;}
+
+/* ---------- 考前快寫：回顧 ---------- */
+.exam-review{display:flex;flex-direction:column;gap:10px;}
+.exam-review-row{
+  display:flex;align-items:center;gap:12px;
+  background:var(--indigo-soft);
+  border-radius:10px;padding:10px 12px;
+}
+.exam-review-rad{
+  font-family:var(--kai);font-size:30px;line-height:1;color:var(--indigo);
+  width:44px;text-align:center;flex:0 0 auto;
+}
+.exam-review-hint{color:var(--ink-soft);font-size:14px;line-height:1.5;}
+.exam-creed{
+  margin:20px 0;padding:14px 16px;text-align:center;
+  background:var(--seal-soft);
+  border-radius:12px;color:var(--seal);
+  font-family:var(--kai);font-size:18px;line-height:1.6;
+}
+
+/* ---------- 結果頁：錯題回顧 ---------- */
+.review{display:flex;flex-direction:column;gap:12px;}
+.review-item{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-left:4px solid var(--seal);
+  border-radius:10px;
+  padding:12px 14px;
+}
+.review-q{
+  margin:0 0 8px;font-weight:700;color:var(--ink);line-height:1.6;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.review-idx{
+  flex:0 0 auto;min-width:22px;height:22px;line-height:22px;text-align:center;
+  background:var(--seal);color:#fff;border-radius:50%;font-size:13px;font-weight:700;
+}
+.review-line{
+  margin:4px 0;display:flex;gap:8px;align-items:center;font-size:15px;line-height:1.6;color:var(--ink);
+}
+.review-tag{
+  flex:0 0 auto;font-size:12px;font-weight:700;border-radius:6px;padding:2px 8px;color:#fff;
+}
+.review-tag.is-wrong{background:var(--seal);}
+.review-tag.is-right{background:var(--jade);}
+.review-exp{
+  margin:8px 0 0;padding-top:8px;border-top:1px dashed var(--line);
+  color:var(--ink-soft);font-size:14px;line-height:1.7;
+}
