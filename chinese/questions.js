@@ -538,3 +538,7 @@ const QUESTION_BANK = [
 ];
 
 // 題庫統計：中年級與高年級皆含闖關、快速練習、挑戰、後測題。
+
+
+// 修正：讓 script.js 的 window.QUESTION_BANK 讀得到題庫（頂層 const 不會自動掛上 window）。
+if (typeof window !== "undefined") window.QUESTION_BANK = QUESTION_BANK;

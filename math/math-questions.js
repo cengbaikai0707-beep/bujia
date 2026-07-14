@@ -1,4 +1,6 @@
-/* 數感偵探社題庫：三條路徑各 30 題，共 90 題。 */
+/* 數感偵探社題庫：共 150 題。
+   基礎補強 42、四年級共學 60、進階延伸 48；每條路徑均含位值、加減、乘法、除法、估算、應用六類。
+   後半段為數感直覺擴充題，挑戰題比例已提高。 */
 (function(){
   const bank=[];
   const modes=["quick","practice","check"];
@@ -67,6 +69,59 @@
     add("extension","估算",i,"挑戰",`把${a}和${b}都估成最接近的整百，兩數的和約是多少？`,estimate,[estimate-100,estimate+100,a+b],`${a}約是${Math.round(a/100)*100}，${b}約是${Math.round(b/100)*100}，合計約${estimate}。`,"兩個數要分別估，再相加。");
     const buses=3+i,seats=32+i*2,students=buses*seats-7,left=7;
     add("extension","應用",i,"挑戰",`${buses}輛車每輛可坐${seats}人，安排${students}位學生後，總共還有幾個空位？`,left,[left+buses,seats-left,buses*seats],`總座位${buses}×${seats}＝${buses*seats}，再減${students}，剩${left}個。`,"先算全部座位，再和學生人數比較。","個");
+  }
+
+  /* ===== 數感直覺擴充題（id 由 06 起，避免與上方 01–05 撞號） =====
+     設計原則：用既有六單元承載「數感」——湊整、拆解、心算策略、
+     合理性判斷、逆推與多步驟。挑戰題比例刻意提高，同時強化計算。 */
+
+  // 基礎補強＋：湊整與心算的入門版（難度：標準）
+  for(let i=1;i<=2;i++){
+    const n=3508+i*1200, hundreds=Math.floor(n/100);
+    add("foundation","位值",i+5,"標準",`${zh(n)}裡面一共有幾個「百」？`,hundreds,[Math.floor(n/1000),hundreds*10,n%100],`${zh(n)}＝${hundreds}個百又${n%100}，所以有${hundreds}個百。`,"把百位以上的數字一起看成幾個百。");
+    const a=47+i*8, b=37+i*5, ans=a+b, near=Math.ceil(a/10)*10, addup=near-a;
+    add("foundation","加減",i+5,"標準",`用湊整算${a}＋${b}：先把${a}補成${near}，再算下去，答案是多少？`,ans,[ans-addup,ans+10,ans-10],`${a}＋${addup}＝${near}，再加剩下的${b-addup}，得到${ans}。`,"先補到整十，記得把多補的部分從另一個數扣回來。");
+    const k=8+i*4, prod=25*k;
+    add("foundation","乘法",i+5,"標準",`25×${k}＝？（提示：25×4＝100）`,prod,[prod-25,prod+25,25+k],`每4個25就是100，${k}裡有${k/4}個4，所以25×${k}＝100×${k/4}＝${prod}。`,"把25湊成整百：先數有幾組4。");
+    const per=25, people=4+i, total=per*people;
+    add("foundation","除法",i+5,"標準",`${total}元，每人分${per}元，可以分給幾人？`,people,[people-1,people+1,total-per],`${total}÷${per}＝${people}；每4人剛好用掉100元，比較好數。`,"用25湊整：每4個25是100，先看有幾個100。");
+    const price=39+i*10, qty=5, real=price*qty, est=Math.round(price/10)*10*qty;
+    add("foundation","估算",i+5,"標準",`一個${price}元，買${qty}個。先估算，大約要準備多少錢比較保險？`,est,[est-50,real,est+100],`${price}約${Math.round(price/10)*10}，×${qty}約${est}元（精算是${real}元）。`,"先把單價估成最接近的整十，再乘數量。","元");
+    const perBox=10, items=42+i*7, boxes=Math.ceil(items/perBox);
+    add("foundation","應用",i+5,"標準",`${items}顆蛋，每盒最多裝${perBox}顆，至少要幾個盒子才裝得下？`,boxes,[Math.floor(items/perBox),boxes+1,items-perBox],`${Math.floor(items/perBox)}盒只能裝${Math.floor(items/perBox)*perBox}顆，剩下的還要再一盒，所以要${boxes}盒。`,"裝不滿也要多準備一個盒子。","個");
+  }
+
+  // 四年級共學＋：數感核心（前2題標準、後3題挑戰）
+  for(let i=1;i<=5;i++){
+    const diff=i<=2?"標準":"挑戰";
+    const n=20000+i*3100+i*40, nearK=Math.round(n/1000)*1000;
+    add("common","位值",i+5,diff,`${zh(n)}最接近哪一個整千？`,nearK,[nearK-1000,nearK+1000,Math.round(n/100)*100],`看百位決定千位：${zh(n)}最接近${zh(nearK)}。`,"百位到達5百就進到下一個千。");
+    const a=1980+i*3, b=2568+i*40, ans=a+b, comp=2000-a;
+    add("common","加減",i+5,diff,`用湊整算${zh(a)}＋${zh(b)}：把${zh(a)}先當成2000來算，答案是多少？`,ans,[ans+comp,ans-comp,a+b-100],`${zh(a)}＝2000－${comp}，${zh(b)}＋2000＝${zh(b+2000)}，再減${comp}得${zh(ans)}。`,"接近整千的數先當整千算，最後補回差額。");
+    const x=91+i, y=6+i, prod=x*y, gap=100-x;
+    add("common","乘法",i+5,diff,`用拆解法算${x}×${y}：先算100×${y}再扣掉，${x}×${y}＝？`,prod,[100*y,prod-y,prod+y],`100×${y}＝${100*y}，再減${gap}×${y}＝${gap*y}，得${prod}。`,"接近整百的數，先用整百乘，再扣掉多算的部分。");
+    const divisor=6+i, quot=48+i*5, total=divisor*quot;
+    add("common","除法",i+5,diff,`${zh(total)}÷${divisor}＝？（可先估：${divisor}×50＝${divisor*50}）`,quot,[quot+10,quot-10,Math.round(total/(divisor+1))],`${divisor}×50＝${divisor*50}，再微調到${divisor}×${quot}＝${zh(total)}，所以商是${quot}。`,"先用整十估出商大概多少，再往上或往下調。");
+    const p=312+i*47, r=489+i*38, exact=p+r, est=Math.round(p/100)*100+Math.round(r/100)*100;
+    add("common","估算",i+5,diff,`不必精算，${p}＋${r}最接近下面哪一個數？`,est,[est-100,est+100,est-200],`${p}約${Math.round(p/100)*100}，${r}約${Math.round(r/100)*100}，和約${est}（精算是${exact}）。`,"把每個數都估成最接近的整百，再相加。");
+    const price=105+i*12, qty=5, total2=price*qty, paid=1000, change=paid-total2;
+    add("common","應用",i+5,diff,`一個${price}元，買${qty}個，付${zh(paid)}元，應找回多少元？`,change,[paid-price,total2,change-100],`共${price}×${qty}＝${total2}元，${zh(paid)}－${total2}＝${change}元。`,"先算總價，再用付的錢減總價。","元");
+  }
+
+  // 進階延伸＋：逆推、多步驟與心算策略（難度：挑戰）
+  for(let i=1;i<=3;i++){
+    const thousands=6+i, hundreds=thousands-3, n=thousands*1000+hundreds*100;
+    add("extension","位值",i+5,"挑戰",`一個四位數：千位是${thousands}，百位比千位少3，十位和個位都是0。這個數是多少？`,n,[thousands*1000+hundreds*10,thousands*1000,thousands*1000+hundreds*1000],`千位${thousands}是${zh(thousands*1000)}，百位${hundreds}是${hundreds*100}，合起來${zh(n)}。`,"一位一位定位，再把各位的值加起來。");
+    const start=3000+i*250, spent=680+i*40, got=350+i*20, end=start-spent+got;
+    add("extension","加減",i+5,"挑戰",`帳戶原有${zh(start)}元，先花掉${zh(spent)}元，又存入${zh(got)}元，現在有多少元？`,end,[start-spent-got,start+spent+got,end-100],`${zh(start)}－${zh(spent)}＝${zh(start-spent)}，再＋${zh(got)}＝${zh(end)}。`,"照順序做兩步：先減再加。","元");
+    const x=24+i*3, y=15+i, prod=x*y, doubled=prod*2;
+    add("extension","乘法",i+5,"挑戰",`${x}×${y}的積再乘2，等於多少？`,doubled,[prod,doubled-x,doubled+y],`先算${x}×${y}＝${prod}，再×2＝${doubled}；也可想成${x}×${y*2}。`,"兩步：先乘出積，第二步再乘2（或把其中一個數變兩倍）。");
+    const divisor=7+i, quot=23+i*4, rem=(i*2)%divisor+1, total=divisor*quot+rem;
+    add("extension","除法",i+5,"挑戰",`${zh(total)}顆糖每${divisor}顆裝一包，最多可以裝滿幾包？`,quot,[quot+1,quot-1,rem],`${zh(total)}÷${divisor}＝${quot}餘${rem}，餘下的${rem}顆不夠一包，所以裝滿${quot}包。`,"裝滿才算一包，餘數不足一包不能算進去。","包");
+    const per=213+i*15, qty=6+i, exact=per*qty, roundPer=Math.round(per/100)*100, est=roundPer*qty;
+    add("extension","估算",i+5,"挑戰",`一箱${per}元，買${qty}箱。用估算判斷大約要準備多少錢（先把單價估成整百）？`,est,[exact,est+qty*100,est-qty*100],`${per}約${roundPer}，${roundPer}×${qty}＝${est}元；這是估算值，精算是${exact}元。`,"先把單價估成最接近的整百再乘；估算不必等於精算。","元");
+    const boxes=6+i, per2=48+i*4, remain=30+i*10, sold=per2*boxes-remain;
+    add("extension","應用",i+5,"挑戰",`倉庫有${boxes}箱貨，每箱${per2}件。賣出一些後還剩${remain}件，請問賣出了幾件？`,sold,[per2*boxes,remain,sold-remain],`總共${per2}×${boxes}＝${per2*boxes}件，減去剩下的${remain}件，賣出${sold}件。`,"先算總數，再減掉剩下的，就是賣出的。","件");
   }
 
   if(typeof window!=="undefined") window.MATH_QUESTION_BANK=bank;
