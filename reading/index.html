@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>讀題偵探社｜應用題審題診斷</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="topbar" class="topbar hidden">
+    <div><span class="seal">讀</span><strong id="bar-title">審題任務</strong></div>
+    <div class="top-actions">
+      <span id="bar-progress" class="tag">1 / 10</span>
+      <button id="btn-quit" class="text-btn">回大廳</button>
+    </div>
+    <div class="rail"><div id="rail-fill"></div></div>
+  </header>
+
+  <main>
+    <section id="screen-home" class="screen active">
+      <div class="wrap">
+        <div class="hero">
+          <div class="icon-mark">🔍</div>
+          <p class="eyebrow">數學應用題 ｜ 審題偵查</p>
+          <h1>讀題偵探社</h1>
+          <p>不是練計算，而是練「讀懂題目」。選錯時，我們從答案反推你漏看了哪個關鍵。</p>
+        </div>
+
+        <div class="setup">
+          <label>偵探姓名
+            <input id="student-name" maxlength="12" placeholder="輸入姓名或代號">
+          </label>
+
+          <fieldset>
+            <legend>題目難度</legend>
+            <div class="choices three">
+              <button class="choice selected" data-diff="mixed"><strong>混合</strong><span>基礎＋標準＋挑戰</span></button>
+              <button class="choice" data-diff="basic"><strong>基礎</strong><span>一步任務、單步加減乘除</span></button>
+              <button class="choice" data-diff="standard"><strong>標準</strong><span>兩步驟、比較、分配</span></button>
+              <button class="choice" data-diff="challenge"><strong>挑戰</strong><span>至少最多、干擾條件</span></button>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>練習長度</legend>
+            <div class="choices three">
+              <button class="choice selected" data-count="8"><strong>短篇 8 題</strong><span>考前暖身</span></button>
+              <button class="choice" data-count="15"><strong>中篇 15 題</strong><span>完整偵查</span></button>
+              <button class="choice" data-count="20"><strong>長篇 20 題</strong><span>深度診斷</span></button>
+            </div>
+          </fieldset>
+
+          <button id="btn-start" class="primary">開始讀題</button>
+          <a class="lobby" href="../index.html">← 回學習大廳</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="screen-game" class="screen">
+      <div class="play-wrap">
+        <article class="card">
+          <p id="q-meta" class="meta"></p>
+          <h2 id="q-text"></h2>
+          <div id="options" class="options"></div>
+          <div id="feedback" class="feedback hidden">
+            <strong id="fb-title"></strong>
+            <p id="fb-message"></p>
+            <p id="fb-explain"></p>
+          </div>
+          <button id="btn-next" class="primary hidden">下一題</button>
+        </article>
+      </div>
+    </section>
+
+    <section id="screen-result" class="screen">
+      <div class="result-wrap">
+        <article class="card report">
+          <p class="eyebrow">審題偵查報告</p>
+          <h2 id="r-name"></h2>
+          <p id="r-context" class="muted"></p>
+          <div class="score"><strong id="r-score">0%</strong><span id="r-count"></span></div>
+
+          <h3>各類能力表現</h3>
+          <div id="r-skills"></div>
+
+          <h3>最常掉進的審題陷阱</h3>
+          <div id="r-traps"></div>
+
+          <h3>下一步建議</h3>
+          <p id="r-next"></p>
+
+          <div class="result-actions">
+            <button id="btn-export" class="primary">匯出結果</button>
+            <button id="btn-again" class="secondary">再練一次</button>
+            <a href="../index.html" class="secondary link-btn">回學習大廳</a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
