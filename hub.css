@@ -16,3 +16,6 @@ h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;marg
 .go{margin-top:auto;font-weight:800;padding-top:26px}.chinese .go{color:var(--red)}.math .go{color:var(--blue)}
 .note{margin:24px 0 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;color:var(--muted);line-height:1.7}.note strong{color:var(--ink)}
 @media(max-width:700px){.hub{padding-top:28px}.subject-grid{grid-template-columns:1fr}.subject{min-height:255px}h1{font-size:38px}}
+.reading .stamp { background: #D48B3C; }
+.reading:hover { border-color: #D48B3C; }
+.reading .go { color: #D48B3C; }
