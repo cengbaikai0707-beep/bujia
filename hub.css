@@ -1,44 +1,215 @@
-:root{
-  --ink:#18212b;--muted:#61707d;--paper:#f2f1eb;--card:#fff;
-  --blue:#285b84;--blue-soft:#e4eef5;--red:#a9483f;--red-soft:#f6e9e6;
-  --line:#d4d9dc;--sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
-  --kai:"標楷體","BiauKai","DFKai-SB","KaiTi",serif;
+:root {
+  --ink: #18212b;
+  --muted: #61707d;
+  --paper: #f2f1eb;
+  --card: #fff;
+
+  --blue: #285b84;
+  --blue-soft: #e4eef5;
+  --red: #a9483f;
+  --red-soft: #f6e9e6;
+  --orange: #D48B3C;
+  --brown: #7A4A2A;
+
+  --line: #d4d9dc;
+  --sans: "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+  --kai: "標楷體", "BiauKai", "DFKai-SB", "KaiTi", serif;
 }
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}
-.hub{width:min(980px,calc(100% - 32px));margin:auto;padding:54px 0 70px}
-.hero{text-align:center;max-width:680px;margin:0 auto 34px}.eyebrow{font-size:13px;letter-spacing:.14em;color:var(--muted)}
-h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;margin:5px 0 10px}.hero>p:last-child{color:var(--muted);line-height:1.8}
-.subject-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.subject{position:relative;min-height:310px;padding:30px;border-radius:20px;background:var(--card);border:2px solid var(--line);text-decoration:none;color:var(--ink);display:flex;flex-direction:column;transition:.15s ease;box-shadow:0 4px 0 rgba(24,33,43,.08)}
-.subject:hover,.subject:focus-visible{transform:translateY(-3px);outline:none}.subject.chinese:hover,.subject.chinese:focus-visible{border-color:var(--red)}.subject.math:hover,.subject.math:focus-visible{border-color:var(--blue)}
-.stamp{width:72px;height:72px;border-radius:13px;color:#fff;display:grid;place-items:center;font-family:var(--kai);font-size:40px;margin-bottom:22px}.chinese .stamp{background:var(--red)}.math .stamp{background:var(--blue)}
-.subject-copy small{display:block;color:var(--muted);letter-spacing:.12em;margin-bottom:4px}.subject-copy strong{display:block;font-family:var(--kai);font-size:32px;margin-bottom:9px}.subject-copy span{color:var(--muted);line-height:1.6}
-.go{margin-top:auto;font-weight:800;padding-top:26px}.chinese .go{color:var(--red)}.math .go{color:var(--blue)}
-.note{margin:24px 0 0;background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 20px;color:var(--muted);line-height:1.7}.note strong{color:var(--ink)}
-@media(max-width:700px){.hub{padding-top:28px}.subject-grid{grid-template-columns:1fr}.subject{min-height:255px}h1{font-size:38px}}
-.reading .stamp {
-  background: #D48B3C;
-  color: #fff;
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+}
+
+.hub {
+  width: min(980px, calc(100% - 32px));
+  margin: auto;
+  padding: 54px 0 70px;
+}
+
+.hero {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 34px;
+}
+
+.eyebrow {
+  font-size: 13px;
+  letter-spacing: .14em;
+  color: var(--muted);
+}
+
+h1 {
+  font-family: var(--kai);
+  font-size: 48px;
+  letter-spacing: .08em;
+  color: #25435d;
+  margin: 5px 0 10px;
+}
+
+.hero > p:last-child {
+  color: var(--muted);
+  line-height: 1.8;
+}
+
+.subject-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+
+.subject {
+  position: relative;
+  min-height: 310px;
+  padding: 30px;
+  border-radius: 20px;
+  background: var(--card);
+  border: 2px solid var(--line);
+  text-decoration: none;
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  transition: .15s ease;
+  box-shadow: 0 4px 0 rgba(24, 33, 43, .08);
+}
+
+.subject:hover,
+.subject:focus-visible {
+  transform: translateY(-3px);
+  outline: none;
+}
+
+/* 四張卡片的大字章 */
+.stamp {
   width: 76px;
   height: 76px;
   border-radius: 18px;
+  color: #fff;
   display: grid;
   place-items: center;
-  font-size: 34px;
-  font-family: var(--kai, "標楷體", "BiauKai", "DFKai-SB", serif);
+  font-family: var(--kai);
+  font-size: 36px;
   font-weight: 700;
   margin-bottom: 28px;
 }
 
-.reading:hover {
-  border-color: #D48B3C;
+/* 各館顏色 */
+.chinese .stamp {
+  background: var(--red);
+}
+
+.math .stamp {
+  background: var(--blue);
+}
+
+.reading .stamp {
+  background: var(--orange);
+}
+
+.party .stamp {
+  background: var(--brown);
+}
+
+/* hover 邊框 */
+.subject.chinese:hover,
+.subject.chinese:focus-visible {
+  border-color: var(--red);
+}
+
+.subject.math:hover,
+.subject.math:focus-visible {
+  border-color: var(--blue);
+}
+
+.subject.reading:hover,
+.subject.reading:focus-visible {
+  border-color: var(--orange);
+}
+
+.subject.party:hover,
+.subject.party:focus-visible {
+  border-color: var(--brown);
+}
+
+/* 卡片文字 */
+.subject-copy small {
+  display: block;
+  color: var(--muted);
+  letter-spacing: .12em;
+  margin-bottom: 4px;
+}
+
+.subject-copy strong {
+  display: block;
+  font-family: var(--kai);
+  font-size: 32px;
+  margin-bottom: 9px;
+}
+
+.subject-copy span {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* 進入按鈕 */
+.go {
+  margin-top: auto;
+  font-weight: 800;
+  padding-top: 26px;
+}
+
+.chinese .go {
+  color: var(--red);
+}
+
+.math .go {
+  color: var(--blue);
 }
 
 .reading .go {
-  color: #D48B3C;
+  color: var(--orange);
 }
 
-/* 第四張卡片：同樂會零食大盜 */
-.party .stamp{background:#d9822b}
-.subject.party:hover,.subject.party:focus-visible{border-color:#d9822b}
-.party .go{color:#c06f1f}
+.party .go {
+  color: var(--brown);
+}
+
+/* 底部提醒 */
+.note {
+  margin: 24px 0 0;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 16px 20px;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.note strong {
+  color: var(--ink);
+}
+
+/* 手機版 */
+@media (max-width: 700px) {
+  .hub {
+    padding-top: 28px;
+  }
+
+  .subject-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .subject {
+    min-height: 255px;
+  }
+
+  h1 {
+    font-size: 38px;
+  }
+}
