@@ -37,3 +37,8 @@ h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;marg
 .reading .go {
   color: #D48B3C;
 }
+
+/* 第四張卡片：同樂會零食大盜 */
+.party .stamp{background:#d9822b}
+.subject.party:hover,.subject.party:focus-visible{border-color:#d9822b}
+.party .go{color:#c06f1f}

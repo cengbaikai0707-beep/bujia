@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>同樂會零食大盜｜學習偵探社</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="p-wrap">
+
+  <!-- ========== 首頁 ========== -->
+  <section id="p-home" class="p-screen active">
+    <div class="p-card">
+      <p class="p-eyebrow">同樂會任務</p>
+      <h1 class="p-title">零食大盜</h1>
+      <p class="p-sub">國文 × 數學 × 讀題　合作破案</p>
+      <p id="p-intro-text" class="p-intro"></p>
+
+      <h2 class="p-h2">選擇模式</h2>
+      <div class="p-mode-row">
+        <button id="p-mode-solo" class="p-mode" type="button"><b>🎬 單機故事模式</b><span>一台平板，自己破案</span></button>
+        <button id="p-mode-coop" class="p-mode" type="button"><b>🤝 四線協作模式</b><span>四台平板，各走一條線</span></button>
+      </div>
+
+      <div id="p-routes" class="p-routes hidden">
+        <h2 class="p-h2">選擇你的路線</h2>
+        <div class="p-route-grid">
+          <button class="p-route" data-route="leader" type="button">👑 班長線<span>人物・決策・判斷</span></button>
+          <button class="p-route" data-route="academic" type="button">📝 學藝線<span>文字・紙條・證詞</span></button>
+          <button class="p-route" data-route="discipline" type="button">🛡️ 風紀線<span>時間・順序・矛盾</span></button>
+          <button class="p-route" data-route="sports" type="button">🏃 體育康樂線<span>現場・路線・物品</span></button>
+        </div>
+        <p class="p-note">四台平板不需連網：各自選一條線，線索靠現實交換。</p>
+      </div>
+
+      <button id="p-start" class="p-btn p-primary p-block" type="button" disabled>開始任務</button>
+      <a class="p-link" href="../index.html">← 回學習大廳</a>
+    </div>
+  </section>
+
+  <!-- ========== 問答（章節題／補救題／Boss 共用） ========== -->
+  <section id="p-game" class="p-screen">
+    <div class="p-card">
+      <div class="p-head">
+        <span id="p-chapter-title" class="p-chapter"></span>
+        <span class="p-head-right">
+          <span id="p-mode-label" class="p-tag"></span>
+          <span id="p-timer" class="p-timer hidden"></span>
+          <span id="p-hp" class="p-hp"></span>
+        </span>
+      </div>
+      <p id="p-chapter-intro" class="p-chapter-intro"></p>
+      <p id="p-progress" class="p-progress"></p>
+      <h2 id="p-question" class="p-question"></h2>
+      <div id="p-options" class="p-options"></div>
+      <p id="p-feedback" class="p-feedback"></p>
+      <div id="p-evidence" class="p-evidence"></div>
+      <button id="p-next" class="p-btn p-primary p-block hidden" type="button">下一題 →</button>
+      <button class="p-btn p-ghost p-block p-quit" type="button">中止回首頁</button>
+    </div>
+  </section>
+
+  <!-- ========== 密語碎片（協作） ========== -->
+  <section id="p-fragment" class="p-screen">
+    <div class="p-card p-center">
+      <p class="p-eyebrow">本章任務完成</p>
+      <p id="p-frag-route" class="p-frag-route"></p>
+      <p class="p-frag-label">你的密語碎片是</p>
+      <div class="p-frag-secret" id="p-frag-secret"></div>
+      <ol class="p-steps">
+        <li>把這個字大聲告訴隊友。</li>
+        <li>聽其他三位隊友的字。</li>
+        <li>四個字合成 4 字通關碼。</li>
+        <li>由班長線（或主控平板）輸入通關碼。</li>
+      </ol>
+      <button id="p-frag-go" class="p-btn p-primary p-block" type="button">去輸入通關碼</button>
+      <button class="p-btn p-ghost p-block p-quit" type="button">中止回首頁</button>
+    </div>
+  </section>
+
+  <!-- ========== 通關碼輸入（協作） ========== -->
+  <section id="p-passcode" class="p-screen">
+    <div class="p-card p-center">
+      <p class="p-eyebrow">輸入通關碼</p>
+      <p id="p-pass-chapter" class="p-chapter"></p>
+      <p class="p-frag-label">合成四位隊友的密語碎片（空白會自動忽略）</p>
+      <input id="p-pass-input" class="p-input" type="text" inputmode="text" autocomplete="off" placeholder="例如：鑰匙開門">
+      <button id="p-pass-submit" class="p-btn p-primary p-block" type="button">確認通關碼</button>
+      <p id="p-pass-hint" class="p-hint"></p>
+      <button class="p-btn p-ghost p-block p-quit" type="button">中止回首頁</button>
+    </div>
+  </section>
+
+  <!-- ========== 章末推理 ========== -->
+  <section id="p-final" class="p-screen">
+    <div class="p-card">
+      <p id="p-final-title" class="p-eyebrow"></p>
+      <div id="p-final-clue" class="p-clue hidden"></div>
+      <h2 id="p-final-q" class="p-question"></h2>
+      <div id="p-final-options" class="p-options"></div>
+      <p id="p-final-feedback" class="p-feedback"></p>
+      <button id="p-final-next" class="p-btn p-primary p-block hidden" type="button">繼續 →</button>
+      <button class="p-btn p-ghost p-block p-quit" type="button">中止回首頁</button>
+    </div>
+  </section>
+
+  <!-- ========== 冷靜重查 ========== -->
+  <section id="p-cooldown" class="p-screen">
+    <div class="p-card p-center">
+      <p class="p-eyebrow">冷靜重查</p>
+      <p id="p-cool-reason" class="p-cool-reason"></p>
+      <p class="p-note">先完成 2 題補救題，回到證據再判斷一次。</p>
+      <button id="p-cool-go" class="p-btn p-primary p-block" type="button">開始補救題</button>
+    </div>
+  </section>
+
+  <!-- ========== 結局 ========== -->
+  <section id="p-ending" class="p-screen">
+    <div class="p-card p-center">
+      <p class="p-eyebrow">案件結束</p>
+      <h1 id="p-ending-name" class="p-title"></h1>
+      <p id="p-ending-text" class="p-ending-text"></p>
+      <p id="p-ending-reveal" class="p-reveal"></p>
+      <p id="p-ending-score" class="p-note"></p>
+      <button id="p-again" class="p-btn p-primary p-block" type="button">再玩一次</button>
+      <a class="p-link" href="../index.html">← 回學習大廳</a>
+    </div>
+  </section>
+
+  <!-- ========== 錯誤 ========== -->
+  <section id="p-error" class="p-screen">
+    <div class="p-card p-center">
+      <p class="p-eyebrow">無法開始</p>
+      <p id="p-error-msg" class="p-cool-reason"></p>
+      <button id="p-error-home" class="p-btn p-ghost p-block" type="button">回首頁</button>
+    </div>
+  </section>
+
+</main>
+
+<!-- 載入順序：故事檔 → 三個題庫（沿用舊檔，設定 window.*_QUESTION_BANK）→ 引擎 -->
+<script src="story-config.js"></script>
+<script src="../chinese/questions.js"></script>
+<script src="../math/math-questions.js"></script>
+<script src="../reading/questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

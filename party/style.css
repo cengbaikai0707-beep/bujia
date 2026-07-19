@@ -1,0 +1,103 @@
+:root{
+  --ink:#2b2018; --muted:#7a6a5c; --paper:#f5ece0; --card:#fffdf9;
+  --brown:#8a5a34; --brown-soft:#f0e2d1; --orange:#d9822b; --orange-soft:#fbe9d4;
+  --blue:#2b4a6f; --blue-soft:#e3ebf3; --green:#3f8a5b; --red:#b04a3c;
+  --line:#e0d3c2; --r:16px;
+  --sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.6;
+  -webkit-text-size-adjust:100%;}
+.p-wrap{max-width:680px;margin:0 auto;padding:20px 16px 48px;}
+.p-screen{display:none;}
+.p-screen.active{display:block;}
+.p-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:22px 20px;box-shadow:0 6px 20px rgba(120,80,40,.08);}
+.p-center{text-align:center;}
+.p-eyebrow{color:var(--orange);font-weight:700;letter-spacing:.1em;margin:0 0 4px;font-size:14px;}
+.p-title{font-size:34px;margin:2px 0 6px;color:var(--brown);letter-spacing:.04em;}
+.p-sub{margin:0 0 14px;color:var(--muted);font-size:16px;}
+.p-intro{background:var(--brown-soft);border-radius:12px;padding:12px 14px;margin:0 0 18px;font-size:15px;}
+.p-h2{font-size:17px;margin:18px 0 10px;color:var(--blue);}
+
+/* 模式與路線 */
+.p-mode-row{display:grid;gap:12px;}
+.p-mode{display:flex;flex-direction:column;gap:2px;text-align:left;background:var(--card);
+  border:2px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;font-size:15px;}
+.p-mode b{font-size:18px;}
+.p-mode span{color:var(--muted);font-size:14px;}
+.p-mode.sel{border-color:var(--orange);background:var(--orange-soft);}
+.p-routes{margin-top:8px;}
+.p-route-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.p-route{display:flex;flex-direction:column;gap:2px;background:var(--card);border:2px solid var(--line);
+  border-radius:12px;padding:12px;cursor:pointer;font-weight:700;font-size:16px;}
+.p-route span{color:var(--muted);font-weight:400;font-size:13px;}
+.p-route.sel{border-color:var(--blue);background:var(--blue-soft);}
+.p-note{color:var(--muted);font-size:13px;margin:10px 0 0;}
+
+/* 按鈕 */
+.p-btn{font-family:inherit;font-size:17px;font-weight:700;border-radius:12px;border:1px solid transparent;
+  padding:14px 18px;cursor:pointer;}
+.p-block{display:block;width:100%;margin-top:14px;}
+.p-primary{background:var(--orange);color:#fff;}
+.p-primary:disabled{background:#d8ccbe;cursor:not-allowed;}
+.p-ghost{background:transparent;color:var(--muted);border-color:var(--line);}
+.p-link{display:inline-block;margin-top:16px;color:var(--blue);text-decoration:none;font-weight:600;}
+
+/* 遊戲頭 */
+.p-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;}
+.p-chapter{font-weight:800;color:var(--brown);font-size:18px;}
+.p-head-right{display:flex;align-items:center;gap:8px;}
+.p-tag{background:var(--blue-soft);color:var(--blue);border-radius:20px;padding:3px 10px;font-size:13px;font-weight:700;}
+.p-timer{background:var(--red);color:#fff;border-radius:20px;padding:3px 10px;font-size:13px;font-weight:700;}
+.p-hp{font-size:16px;letter-spacing:1px;}
+.p-chapter-intro{background:var(--brown-soft);border-radius:12px;padding:10px 12px;font-size:14px;margin:12px 0;}
+.p-progress{color:var(--muted);font-size:13px;margin:4px 0;}
+.p-question{font-size:20px;line-height:1.6;margin:6px 0 14px;}
+
+/* 選項 */
+.p-options{display:grid;gap:10px;}
+.p-opt{font-family:inherit;font-size:17px;text-align:left;background:var(--card);border:2px solid var(--line);
+  border-radius:12px;padding:14px 16px;cursor:pointer;}
+.p-opt:disabled{cursor:default;}
+.p-opt.ok{border-color:var(--green);background:#e7f3ec;}
+.p-opt.no{border-color:var(--red);background:#f7e7e4;}
+
+.p-feedback{margin:12px 0 0;font-size:15px;border-radius:10px;}
+.p-feedback.good{background:#e7f3ec;color:var(--green);padding:10px 12px;}
+.p-feedback.bad{background:#f7e7e4;color:var(--red);padding:10px 12px;}
+
+/* 證據卡 */
+.p-evidence{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.ev-card{display:flex;gap:8px;align-items:flex-start;background:var(--orange-soft);
+  border-left:4px solid var(--orange);border-radius:8px;padding:10px 12px;font-size:14px;}
+.ev-dot{color:var(--orange);font-weight:800;}
+
+/* 密語 */
+.p-frag-route{font-weight:800;color:var(--blue);font-size:18px;margin:6px 0;}
+.p-frag-label{color:var(--muted);margin:14px 0 6px;}
+.p-frag-secret{font-size:72px;font-weight:800;color:var(--brown);line-height:1.1;margin:4px 0 8px;}
+.p-steps{text-align:left;max-width:340px;margin:8px auto 4px;padding-left:22px;font-size:15px;}
+.p-steps li{margin:6px 0;}
+
+/* 通關碼 */
+.p-input{width:100%;font-size:24px;text-align:center;padding:14px;border:2px solid var(--line);
+  border-radius:12px;font-family:inherit;letter-spacing:.3em;}
+.p-input:focus{outline:none;border-color:var(--orange);}
+.p-hint{color:var(--red);font-size:14px;margin:10px 0 0;min-height:20px;}
+
+/* 章末推理線索 */
+.p-clue{background:var(--blue-soft);border-radius:12px;padding:12px 14px;margin:0 0 14px;font-size:14px;}
+.clue-row{margin:6px 0;}
+
+/* 冷靜重查／結局 */
+.p-cool-reason{background:var(--brown-soft);border-radius:12px;padding:12px 14px;font-size:16px;margin:10px 0;}
+.p-ending-text{font-size:16px;margin:12px 0;}
+.p-reveal{background:var(--orange-soft);border-left:4px solid var(--orange);border-radius:8px;
+  padding:12px 14px;text-align:left;font-size:15px;margin:14px 0;}
+
+@media(max-width:480px){
+  .p-title{font-size:28px;}
+  .p-route-grid{grid-template-columns:1fr;}
+  .p-frag-secret{font-size:60px;}
+}
