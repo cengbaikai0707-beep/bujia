@@ -25,6 +25,7 @@ function normQ(r) {
     options: r.options || r.opts,
     answerIndex: r.answerIndex != null ? r.answerIndex : r.ans,
     skillType: r.skillType || r.skill || r.type,
+    difficulty: r.difficulty,
     explanation: r.explanation || r.exp,
     correctFeedback: r.correctFeedback,
     wrongHint: r.wrongHint || r.hint
@@ -34,10 +35,17 @@ function valid(q) { return q && Array.isArray(q.options) && q.options.length >= 
 function pickQuestions(name, preferred, count) {
   const bank = bankOf(name).map(normQ).filter(valid);
   if (!bank.length) return [];
-  const pref = shuffle(bank.filter(q => preferred && preferred.length && preferred.includes(q.skillType)));
-  const rest = shuffle(bank.filter(q => pref.indexOf(q) < 0));
+  const skillOK = q => preferred && preferred.length && preferred.includes(q.skillType);
+  const hard = q => q.difficulty && q.difficulty !== "基礎"; // 中偏難優先，不硬塞基礎題
+  // 四層優先序：技能符合且偏難 → 技能符合 → 偏難 → 其他（各層洗牌）
+  const tiers = [
+    shuffle(bank.filter(q => skillOK(q) && hard(q))),
+    shuffle(bank.filter(q => skillOK(q) && !hard(q))),
+    shuffle(bank.filter(q => !skillOK(q) && hard(q))),
+    shuffle(bank.filter(q => !skillOK(q) && !hard(q)))
+  ];
   const out = [], seen = new Set();
-  for (const q of pref.concat(rest)) { if (out.length >= count) break; if (!seen.has(q.id)) { seen.add(q.id); out.push(q); } }
+  for (const q of [].concat(...tiers)) { if (out.length >= count) break; if (!seen.has(q.id)) { seen.add(q.id); out.push(q); } }
   return out;
 }
 function pickMixed(count) {
@@ -64,9 +72,14 @@ function runQuiz(questions, opts) {
   renderQ();
   showScreen("p-game");
 }
+function updateProgress() {
+  const Q = state.quiz; if (!Q) return;
+  const ev = $("p-evidence").children.length;
+  $("p-progress").textContent = `第 ${Q.i + 1} / ${Q.qs.length} 題　·　已取得證據卡 ${ev} 張`;
+}
 function renderQ() {
   const Q = state.quiz, q = Q.qs[Q.i];
-  $("p-progress").textContent = `第 ${Q.i + 1} / ${Q.qs.length} 題`;
+  updateProgress();
   $("p-question").textContent = q.question;
   Q.shuffled = shuffle(q.options.map((t, idx) => ({ t, correct: idx === q.answerIndex })));
   const box = $("p-options"); box.innerHTML = "";
@@ -100,6 +113,7 @@ function addEvidence(text) {
   const d = document.createElement("div"); d.className = "ev-card";
   d.innerHTML = `<span class="ev-dot">✔</span><span>${esc(text)}</span>`;
   box.appendChild(d);
+  updateProgress();
 }
 
 /* ---------- 章節流程 ---------- */
@@ -117,11 +131,11 @@ function startChapter() {
   setHeader();
   if (state.mode === "coop") {
     const rm = STORY.routeMeta[state.route];
-    const qs = pickQuestions(rm.bank, rm.preferredSkills, 3);
+    const qs = pickQuestions(rm.bank, rm.preferredSkills, 6);
     if (!qs.length) return bankError();
     runQuiz(qs, { evidenceList: ch.routes[state.route].evidence, onDone: showFragment });
   } else {
-    const qs = pickMixed(5);
+    const qs = pickMixed(8);
     if (!qs.length) return bankError();
     runQuiz(qs, { onDone: soloAfterChapter });
   }
@@ -143,8 +157,8 @@ function submitPasscode() {
   else $("p-pass-hint").textContent = "通關碼不對。再問問隊友，每條路線各拿到哪一個字？";
 }
 function soloAfterChapter(correct) {
-  if (correct >= 4) showFinal();
-  else cooldown("這一章答對不到 4 題，先冷靜重查，再看完整線索。", showFinal);
+  if (correct >= 6) showFinal();
+  else cooldown("這一章答對不到 6 題，先冷靜重查，再看完整線索。", showFinal);
 }
 function allEvidenceHTML(ch) {
   return STORY.routes.map(r => {
@@ -199,8 +213,8 @@ function cooldown(reason, done) {
   showScreen("p-cooldown");
   $("p-cool-go").onclick = () => {
     let qs;
-    if (state.mode === "coop") { const rm = STORY.routeMeta[state.route]; qs = pickQuestions(rm.bank, rm.preferredSkills, 2); }
-    else qs = pickMixed(2);
+    if (state.mode === "coop") { const rm = STORY.routeMeta[state.route]; qs = pickQuestions(rm.bank, rm.preferredSkills, 3); }
+    else qs = pickMixed(3);
     if (!qs.length) { done(); return; }
     runQuiz(qs, { onDone: () => done() });
   };
