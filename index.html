@@ -1,219 +1,62 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>讀題偵探社：部首字族失竊案</title>
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>國語學院｜學習大廳</title>
+  <link rel="stylesheet" href="hub.css">
 </head>
 <body>
+  <main class="hub">
+    <header class="hero">
+      <p class="eyebrow">國語學院 · 學習任務中心</p>
+      <h1>學習大廳</h1>
+      <p>選擇今天要進行的任務。國文、數學與讀題可以單獨練習，也能進入同樂會合作破案。</p>
+    </header>
 
-<!-- ============ 上方狀態列（遊戲進行中才顯示） ============ -->
-<header id="topbar" class="topbar hidden">
-  <div class="topbar-left">
-    <span class="seal">偵</span>
-    <span id="bar-stage" class="bar-stage">第 1 關 · 部首情報室</span>
-  </div>
-  <div class="topbar-right">
-    <span id="bar-mode" class="tag">闖關模式</span>
-    <span id="bar-progress" class="tag tag-quiet">1 / 5</span>
-    <button id="btn-quit" class="btn-text" type="button">回案件入口</button>
-  </div>
-  <div class="progress-rail"><div id="progress-fill" class="progress-fill"></div></div>
-</header>
+    <section class="subject-grid" aria-label="選擇學習任務">
+      <a class="subject chinese" href="chinese/index.html">
+        <span class="stamp">文</span>
+        <span class="subject-copy">
+          <small>文字任務</small>
+          <strong>國文偵探社</strong>
+          <span>部件辨認 × 字義推理 × 考前快寫</span>
+        </span>
+        <span class="go">進入國文館 →</span>
+      </a>
 
-<main>
+      <a class="subject math" href="math/index.html">
+        <span class="stamp">數</span>
+        <span class="subject-copy">
+          <small>數學任務</small>
+          <strong>數學偵探社</strong>
+          <span>四年級共學 × 個別補強 × 教師指定</span>
+        </span>
+        <span class="go">進入數學館 →</span>
+      </a>
 
-<!-- ============ 首頁 ============ -->
-<section id="screen-home" class="screen active">
-  <div class="home-wrap">
+      <a class="subject reading" href="reading/index.html">
+        <span class="stamp">讀</span>
+        <span class="subject-copy">
+          <small>讀題任務</small>
+          <strong>讀題偵探社</strong>
+          <span>應用題審題 × 部首字義 × 字族延伸</span>
+        </span>
+        <span class="go">進入偵探社 →</span>
+      </a>
 
-    <div class="hero">
-      <div class="hero-grid" aria-hidden="true">
-        <div class="tian">
-          <span class="tian-char">偵</span>
-        </div>
-        <div class="tian">
-          <span class="tian-char">字</span>
-        </div>
-      </div>
-      <a class="agency-link" href="../reading/index.html">← 回讀題偵探社</a>
-      <p class="eyebrow">讀題偵探社 · 中年級文字案件</p>
-      <h1>部首字族失竊案<span class="subtitle">從字義線索追出一整個字族</span></h1>
-      <p class="story">
-        偵探社收到一批被拆散的文字證物：「氵」留下水的痕跡，「扌」藏著手的動作，
-        「青」卻同時出現在清、情、晴、睛、請裡。<br>
-        你的任務是分清楚誰提示字義、誰幫忙延伸字族，最後修復失竊的文字檔案。
-      </p>
-      <p class="creed">先看部首猜字義，再沿共同部件追字族。</p>
-    </div>
+      <a class="subject party" href="party/index.html">
+        <span class="stamp">會</span>
+        <span class="subject-copy">
+          <small>合作任務</small>
+          <strong>同樂會零食大盜</strong>
+          <span>國文 × 數學 × 讀題　四線合作破案</span>
+        </span>
+        <span class="go">進入同樂會 →</span>
+      </a>
+    </section>
 
-    <div class="setup-card">
-      <div class="field">
-        <label class="field-label" for="input-name">偵探代號<span class="hint">（可以不填）</span></label>
-        <input id="input-name" type="text" maxlength="12" placeholder="輸入姓名或暱稱" autocomplete="off">
-      </div>
-
-      <div class="case-badge"><strong>本案難度：中年級</strong><span>三、四年級｜理解部首字義 × 延伸字族</span></div>
-
-      <div class="field">
-        <span class="field-label">選擇模式</span>
-        <div class="choice-grid" role="radiogroup" aria-label="選擇模式">
-          <button class="choice" type="button" data-mode="adventure" role="radio" aria-checked="true">
-            <strong>🗺️ 完整辦案</strong><span>五關共 30 題，含輸入任務</span>
-          </button>
-          <button class="choice" type="button" data-mode="quick" role="radio" aria-checked="false">
-            <strong>⚡ 快速偵查</strong><span>隨機 12 題</span>
-          </button>
-          <button class="choice" type="button" data-mode="challenge" role="radio" aria-checked="false">
-            <strong>🔍 字量追緝</strong><span>加強字族延伸與主動提取</span>
-          </button>
-          <button class="choice" type="button" data-mode="postTest" role="radio" aria-checked="false">
-            <strong>📋 結案檢核</strong><span>隨機 20 題正式檢核</span>
-          </button>
-        </div>
-      </div>
-
-      <div class="home-actions">
-        <button id="btn-start" class="btn btn-primary" type="button">開始任務</button>
-        <button id="btn-howto" class="btn btn-ghost" type="button">任務說明</button>
-      </div>
-      <button id="btn-dossier" class="btn btn-paper btn-block" type="button">翻閱案件資料庫（43組）</button>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 答題畫面 ============ -->
-<section id="screen-game" class="screen">
-  <div class="play-wrap">
-    <article class="card">
-      <div id="focus-box" class="focus-box hidden">
-        <div class="tian tian-lg"><span id="focus-char" class="tian-char"></span></div>
-        <p id="focus-label" class="focus-label">線索部件</p>
-      </div>
-
-      <p id="q-meta" class="q-meta"></p>
-      <h2 id="q-text" class="q-text"></h2>
-
-      <div id="options" class="options"></div>
-
-      <div id="recall-box" class="recall-box hidden">
-        <label for="recall-input">請輸入想到的單字，可用空格或頓號分開：</label>
-        <textarea id="recall-input" rows="3" placeholder="例如：河、海、湖"></textarea>
-        <p id="recall-count" class="recall-count">已輸入 0 個不同的字</p>
-        <button id="btn-submit-recall" class="btn btn-primary btn-block" type="button">送出文字證物</button>
-      </div>
-
-      <div id="feedback" class="feedback hidden">
-        <p id="fb-verdict" class="fb-verdict"></p>
-        <p id="fb-line" class="fb-line"></p>
-        <p id="fb-explain" class="fb-explain"></p>
-      </div>
-
-      <button id="btn-next" class="btn btn-primary btn-block hidden" type="button">下一題</button>
-    </article>
-  </div>
-</section>
-
-<!-- ============ 過關畫面 ============ -->
-<section id="screen-stage" class="screen">
-  <div class="narrow">
-    <article class="card center">
-      <div id="stage-icon" class="stage-icon">🗺️</div>
-      <h2 id="stage-title">第 1 關完成</h2>
-      <p id="stage-score" class="stage-score"></p>
-      <p id="stage-remind" class="stage-remind"></p>
-      <div id="passcode" class="passcode hidden">
-        <span class="passcode-label">通關密語</span>
-        <p id="passcode-text"></p>
-      </div>
-      <button id="btn-continue" class="btn btn-primary btn-block">前往下一關</button>
-    </article>
-  </div>
-</section>
-
-<!-- ============ 結果頁 ============ -->
-<section id="screen-result" class="screen">
-  <div class="narrow">
-    <article class="card report">
-      <p class="eyebrow">讀題偵探社 · 結案報告</p>
-      <h2 id="r-name">部件偵探</h2>
-      <p id="r-context" class="r-context"></p>
-
-      <div class="score-hero">
-        <div class="tian tian-lg score-tian"><span id="r-accuracy" class="tian-char score-num">0%</span></div>
-        <div class="score-side">
-          <p id="r-rank" class="r-rank">—</p>
-          <p id="r-count" class="r-count">答對 0 題 / 共 0 題</p>
-        </div>
-      </div>
-
-      <section class="report-block">
-        <h3>五項辦案能力</h3>
-        <div id="r-skills" class="skills"></div>
-      </section>
-
-      <section class="report-block">
-        <h3>待複習線索</h3>
-        <div id="r-mistakes" class="mistakes"></div>
-      </section>
-
-      <section class="report-block">
-        <h3>偵探講評</h3>
-        <p id="r-comment" class="r-comment"></p>
-      </section>
-
-      <section class="report-block">
-        <h3>下一步練習</h3>
-        <p id="r-next" class="r-next"></p>
-      </section>
-
-      <div class="result-actions">
-        <button id="btn-export" class="btn btn-primary">匯出結果 (.json)</button>
-        <button id="btn-again" class="btn btn-ghost">重新挑戰</button>
-        <button id="btn-home" class="btn btn-ghost">回案件入口</button>
-      </div>
-    </article>
-  </div>
-</section>
-
-</main>
-
-<!-- ============ 遊戲說明 ============ -->
-<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-  <div class="modal-card">
-    <h2 id="modal-title">辦案方法</h2>
-    <ol class="howto">
-      <li>輸入偵探代號、選擇模式，按下「開始任務」。</li>
-      <li>先看左邊或外圍的<strong>部首</strong>，判斷它可能提示的意思。</li>
-      <li>再找青、包、交、艮等<strong>共同部件</strong>，追出同一字族。</li>
-      <li>遇到字量搜索時，至少輸入三個真正含有指定部件的字。</li>
-      <li>看完解析，按「下一題」繼續。</li>
-      <li>全部完成後會出現結案報告，可匯出交給老師。</li>
-    </ol>
-    <h3>五關在練什麼</h3>
-    <ul class="howto">
-      <li><strong>第 1 關 部首情報室</strong>：理解部首常提示的意義範圍。</li>
-      <li><strong>第 2 關 字族追蹤室</strong>：同一部件換上不同部首，追出一族字。</li>
-      <li><strong>第 3 關 情境鑑識室</strong>：根據句意選出部首合理的字。</li>
-      <li><strong>第 4 關 字量搜索區</strong>：主動寫出含有指定部件的字。</li>
-      <li><strong>第 5 關 核心檔案庫</strong>：綜合部首、字族與情境完成結案。</li>
-    </ul>
-    <p class="note">提醒：部件的意思是「常見的線索」，不是絕對的規則。偵探要留意例外。</p>
-    <button id="btn-close-modal" class="btn btn-primary btn-block">知道了</button>
-  </div>
-</div>
-
-<div id="dossier-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dossier-title">
-  <div class="modal-card dossier-card">
-    <h2 id="dossier-title">中年級案件資料庫</h2>
-    <p class="note">有些是能提示意義的部首，有些只是方便延伸字形的共同部件，兩者不必硬說成一樣。</p>
-    <div id="dossier-grid" class="dossier-grid"></div>
-    <button id="btn-close-dossier" class="btn btn-primary btn-block">收起資料庫</button>
-  </div>
-</div>
-
-<script src="questions.js"></script>
-<script src="script.js"></script>
+    <p class="note"><strong>使用提醒：</strong>各館的作答紀錄只保留在目前頁面；完成後可依各遊戲提供的按鈕匯出結果。</p>
+  </main>
 </body>
 </html>

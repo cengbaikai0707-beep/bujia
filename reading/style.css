@@ -25,6 +25,33 @@ body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sa
 .hero h1 { font-family:var(--kai); font-size:42px; color:var(--orange); margin:0; }
 .hero p:last-child { color:var(--muted); }
 
+.case-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:14px; margin:0 0 20px;
+}
+.case-card {
+  min-height:210px; display:flex; flex-direction:column;
+  padding:20px; border:2px solid var(--line); border-radius:16px;
+  background:#fff; color:var(--ink); text-decoration:none;
+  box-shadow:0 3px 0 rgba(44,36,28,.08); transition:.15s ease;
+}
+.case-card:hover,.case-card:focus-visible {
+  transform:translateY(-2px); border-color:var(--orange); outline:none;
+}
+.case-icon {
+  width:52px; height:52px; display:grid; place-items:center;
+  border-radius:12px; background:var(--orange-soft); font-size:28px; margin-bottom:13px;
+}
+.case-char { font-family:var(--kai); color:#285B84; background:#E4EEF5; font-weight:800; }
+.case-copy small,.case-copy strong,.case-copy span { display:block; }
+.case-copy small { color:var(--muted); letter-spacing:.1em; font-size:12px; }
+.case-copy strong { font-family:var(--kai); font-size:24px; margin:3px 0 6px; }
+.case-copy span { color:var(--muted); font-size:14px; line-height:1.55; }
+.case-card b { margin-top:auto; padding-top:16px; color:var(--orange); font-size:14px; }
+.radical-case:hover,.radical-case:focus-visible { border-color:#285B84; }
+.radical-case b { color:#285B84; }
+.setup-title { margin:0 0 18px; font-family:var(--kai); font-size:23px; color:var(--orange); }
+#reading-setup { scroll-margin-top:18px; }
+
 .setup, .card {
   background:var(--card); border:1px solid var(--line); border-radius:16px;
   padding:24px; box-shadow:0 3px 0 rgba(44,36,28,.08);
@@ -122,7 +149,7 @@ fieldset { border:0; padding:0; margin:22px 0; }
 .result-actions .primary { width:auto; }
 
 @media(max-width:760px) {
-  .choices.three, .options { grid-template-columns:1fr; }
+  .choices.three, .options, .case-grid { grid-template-columns:1fr; }
   .hero h1 { font-size:34px; }
   .play-wrap { padding-top:110px; }
   .card, .setup { padding:18px; }
