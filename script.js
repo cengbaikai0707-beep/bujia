@@ -10,19 +10,17 @@ const GAME_CONFIG = {
 
   // 每次抽幾題。闖關模式是「每一關」的題數。
   counts: {
-    basic:     { middle: 10, upper: 10 },
-    adventure: { middle: 5,  upper: 6  },   // 五關 → 中年級 25 題、高年級 30 題
-    quick:     { middle: 10, upper: 10 },
-    challenge: { middle: 15, upper: 15 },
-    postTest:  { middle: 15, upper: 20 }
+    adventure: { middle: 6 },
+    quick:     { middle: 12 },
+    challenge: { middle: 20 },
+    postTest:  { middle: 20 }
   },
 
   // 難度配比（基礎／標準／挑戰）。加起來要等於 1。
   difficultyRatio: {
-    basic:     { 基礎: 1.00, 標準: 0.00, 挑戰: 0.00 },   // 基礎補給站：全部基礎題
-    adventure: { 基礎: 0.25, 標準: 0.55, 挑戰: 0.20 },   // 主線：減少過度簡單，偏推理
+    adventure: { 基礎: 0.40, 標準: 0.45, 挑戰: 0.15 },
     quick:     { 基礎: 0.50, 標準: 0.40, 挑戰: 0.10 },
-    challenge: { 基礎: 0.10, 標準: 0.40, 挑戰: 0.50 },   // 挑戰：拉高挑戰比例
+    challenge: { 基礎: 0.20, 標準: 0.50, 挑戰: 0.30 },
     postTest:  { 基礎: 0.30, 標準: 0.50, 挑戰: 0.20 }
   },
 
@@ -30,21 +28,21 @@ const GAME_CONFIG = {
   maxSameRadicalInARow: 2,
 
   stages: {
-    1: { name: "部件認親", icon: "🔎",
-         remind: "你已經學會辨認部件的長相。下一關要從一群字裡，找出它們共同的意思。",
-         passcode: "同一個部件，常常帶著同一種意思。" },
-    2: { name: "字義偵探", icon: "🧩",
-         remind: "歸納是偵探最重要的本領。接下來，把線索用在真正的句子裡。",
-         passcode: "把一群字排在一起，共同的部分就是線索。" },
-    3: { name: "錯字修復", icon: "🛠️",
-         remind: "你修好了好幾個句子。下一關會出現你沒學過的字，別怕。",
-         passcode: "選字之前，先問這個字在講什麼。" },
-    4: { name: "陌生字推理", icon: "🧭",
-         remind: "遇到不認識的字也能推理，這是最關鍵的能力。最後一關，綜合出擊。",
-         passcode: "不認識的字，先看部件，再猜方向。" },
-    5: { name: "終極密碼", icon: "🏅",
-         remind: "文字王國恢復秩序了。",
-         passcode: "先看部件，再猜意思，最後放回句子檢查。" }
+    1: { name: "部首情報室", icon: "🔎",
+         remind: "你已掌握部首常提示的意義範圍。下一關要追蹤同一部件形成的字族。",
+         passcode: "部首給方向，整個字才是答案。" },
+    2: { name: "字族追蹤室", icon: "🧩",
+         remind: "同一部件換上不同部首，字義也跟著改變。接著把線索放進句子驗證。",
+         passcode: "共同部件連字族，不同部首辨字義。" },
+    3: { name: "情境鑑識室", icon: "🛠️",
+         remind: "你已能用句意檢查部首線索。下一關必須自己叫出字來。",
+         passcode: "選完字，再放回句子讀一次。" },
+    4: { name: "字量搜索區", icon: "⌨️",
+         remind: "主動寫出字比看選項更難。最後一關要整合字義、字族與例外。",
+         passcode: "能自己叫出的字，才真正進入記憶。" },
+    5: { name: "核心檔案庫", icon: "🏅",
+         remind: "失竊的文字核心已修復。",
+         passcode: "先看部首猜字義，再沿共同部件追字族。" }
   },
 
   // 評語級距（下限分數 → 稱號與講評方向）
@@ -54,13 +52,13 @@ const GAME_CONFIG = {
       next: "挑戰模式全對之後，試著自己出題考同學：找三個同部件的字，再找一個「部件不表意」的例外。" },
     { min: 71, title: "資深部件偵探",
       comment: "大方向抓得很準，錯的多半是形近字的細節。你的判斷是對的，只是最後一步沒有回到句子裡檢查。",
-      next: "答題時養成習慣：選好字之後，把它放回句子念一次，看看意思順不順。" },
+      next: "答題時養成習慣：先說部首提示，再把字放回句子念一次。" },
     { min: 41, title: "見習部件偵探",
       comment: "你已經知道要看部件了，但有時候會被右邊的聲旁吸引，或是把讀音相同的字混在一起。這很正常，代表你正在建立新的習慣。",
-      next: "先集中練第 1、2 關。把「氵、忄、扌、言、貝、足」這六個部件的意思背熟，答題速度會明顯變快。" },
+      next: "先集中練第 1、2 關。把「氵、扌、言、貝、足、食」的提示範圍說熟，再練青、包、交、艮字族。" },
     { min: 0, title: "初入文字王國",
       comment: "現在還在靠印象猜字，這不是能力問題，而是還沒養成「先看部件」的習慣。每一題的解析都告訴你線索在哪裡，慢慢看完，不要急著跳過。",
-      next: "從快速練習開始，一次十題就好。每答完一題，把那個部件念出來、說一次它代表什麼。" }
+      next: "從快速偵查開始。每答完一題，把部首念出來，再說一次它可能提示什麼。" }
   ]
 };
 
@@ -110,7 +108,7 @@ function drawQuestions(level, mode, stage) {
 
   const picked = [];
   const used = new Set();
-  const skillCount = { 辨認: 0, 分類: 0, 應用: 0, 推理: 0 };
+  const skillCount = { 字義: 0, 字族: 0, 應用: 0, 提取: 0, 推理: 0 };
 
   // 從候選中挑一題：優先挑「目前出現最少的能力類型」
   function takeFrom(candidates) {
@@ -176,16 +174,14 @@ const state = {
   answers: [],       // 全部作答紀錄
   stageCorrect: 0,
   locked: false,
-  currentOptions: [],
-  examQueue: [],     // 考前快寫：這一輪抽到的部件
-  examIndex: 0
+  currentOptions: []
 };
 
 const MODE_LABEL = {
-  basic: "基礎補給站", adventure: "闖關模式", quick: "快速練習",
-  challenge: "挑戰模式", postTest: "後測模式", exam: "考前快寫"
+  adventure: "完整辦案", quick: "快速偵查",
+  challenge: "字量追緝", postTest: "結案檢核"
 };
-const LEVEL_LABEL = { middle: "中年級", upper: "高年級" };
+const LEVEL_LABEL = { middle: "中年級" };
 
 /* ---------------------------------------------------------
    畫面切換
@@ -264,14 +260,28 @@ function renderQuestion() {
   $("q-meta").textContent = `${q.skillType}　難度：${q.difficulty}`;
   $("q-text").innerHTML = escapeHTML(q.question).replace(/＿＿/g, '<span class="blank">＿＿</span>');
 
-  // 選項：打亂順序，但記住哪一個是正解
+  const box = $("options");
+  box.innerHTML = "";
+  $("recall-box").classList.add("hidden");
+  $("recall-input").value = "";
+  $("recall-input").disabled = false;
+  $("btn-submit-recall").disabled = false;
+  $("recall-count").textContent = "已輸入 0 個不同的字";
+
+  if (q.type === "input") {
+    state.currentOptions = [];
+    box.className = "options hidden";
+    $("recall-box").classList.remove("hidden");
+    $("recall-input").focus();
+    $("feedback").className = "feedback hidden";
+    $("btn-next").classList.add("hidden");
+    return;
+  }
+
+  box.className = "options" + (q.charOptions ? "" : " one-col");
   state.currentOptions = shuffle(
     q.options.map((text, i) => ({ text, correct: i === q.answerIndex }))
   );
-
-  const box = $("options");
-  box.className = "options" + (q.charOptions ? "" : " one-col");
-  box.innerHTML = "";
   const keys = ["A", "B", "C", "D", "E", "F"];
   state.currentOptions.forEach((opt, i) => {
     const btn = document.createElement("button");
@@ -335,6 +345,45 @@ function answer(chosenIdx) {
   $("btn-next").classList.remove("hidden");
 }
 
+function extractRecallChars(text) {
+  return [...new Set(Array.from(text).filter(ch => /[\u3400-\u9FFF\uF900-\uFAFF]/u.test(ch)))];
+}
+
+function submitRecall() {
+  if (state.locked) return;
+  const q = state.queue[state.qIndex];
+  if (!q || q.type !== "input") return;
+
+  const chars = extractRecallChars($("recall-input").value);
+  const accepted = new Set(q.accepted || []);
+  const valid = chars.filter(ch => accepted.has(ch));
+  const invalid = chars.filter(ch => !accepted.has(ch));
+  const isCorrect = valid.length >= (q.minAnswers || 3);
+  state.locked = true;
+  if (isCorrect) state.stageCorrect++;
+
+  state.answers.push({
+    id:q.id, stage:q.stage, skillType:q.skillType, radical:q.radical,
+    difficulty:q.difficulty, chosen:chars.join("、"), correct:isCorrect,
+    validRecall:valid, unverifiedRecall:invalid
+  });
+
+  $("recall-input").disabled = true;
+  $("btn-submit-recall").disabled = true;
+  const fb = $("feedback");
+  fb.className = "feedback " + (isCorrect ? "good" : "bad");
+  $("fb-verdict").textContent = isCorrect ? "◎ 搜索完成" : "✗ 證物還不夠";
+  $("fb-line").textContent = isCorrect
+    ? `已確認 ${valid.length} 個：${valid.join("、")}`
+    : `目前確認 ${valid.length} 個，至少需要 ${q.minAnswers || 3} 個。`;
+  $("fb-explain").textContent = invalid.length
+    ? `${q.explanation}　你輸入的「${invalid.join("、")}」不在本題答案庫，請交由老師確認。`
+    : q.explanation;
+  $("bar-progress").textContent = `${answeredCount()} / ${totalQuestions()}`;
+  $("progress-fill").style.width = (answeredCount() / totalQuestions() * 100) + "%";
+  $("btn-next").classList.remove("hidden");
+}
+
 function nextQuestion() {
   if (state.qIndex < state.queue.length - 1) {
     state.qIndex++;
@@ -384,7 +433,7 @@ function buildStats() {
   const accuracy = total ? Math.round(correct / total * 100) : 0;
 
   const skillStats = {};
-  ["辨認", "分類", "應用", "推理"].forEach(s => (skillStats[s] = { total: 0, correct: 0 }));
+  ["字義", "字族", "應用", "提取", "推理"].forEach(s => (skillStats[s] = { total: 0, correct: 0 }));
   const radicalMistakes = {};
 
   state.answers.forEach(a => {
@@ -408,7 +457,7 @@ function showResult() {
   $("r-rank").textContent = st.rank.title;
   $("r-count").textContent = `答對 ${st.correct} 題 / 共 ${st.total} 題`;
 
-  // 四項能力
+  // 五項能力
   const skillBox = $("r-skills");
   skillBox.innerHTML = "";
   Object.entries(st.skillStats).forEach(([name, s]) => {
@@ -468,85 +517,11 @@ function exportResult() {
   const a = document.createElement("a");
   const stamp = new Date().toISOString().slice(0, 10);
   a.href = url;
-  a.download = `部件偵探社_${state.name}_${stamp}.json`;
+    a.download = `部首字族失竊案_${state.name}_${stamp}.json`;
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-
-/* ---------------------------------------------------------
-   考前快寫 exam：無評分，看部件 → 自己寫 10 個字 → 對照答案庫
-   --------------------------------------------------------- */
-const EXAM_PER_SESSION = 6;
-
-function startExam() {
-  state.name = $("input-name").value.trim() || "無名偵探";
-  state.mode = "exam";
-  const bank = window.EXAM_BANK || [];
-  if (!bank.length) { alert("找不到考前快寫的答案庫，請檢查 questions.js。"); return; }
-  state.examQueue = shuffle(bank).slice(0, Math.min(EXAM_PER_SESSION, bank.length));
-  state.examIndex = 0;
-  renderExam();
-  showScreen("screen-exam");
-}
-
-function renderExam() {
-  const e = state.examQueue[state.examIndex];
-  $("exam-progress").textContent = `第 ${state.examIndex + 1} / ${state.examQueue.length} 個部件`;
-  $("exam-radical").textContent = e.radical;
-  $("exam-radical-name").textContent = e.radicalName || "";
-  $("exam-prompt").textContent = e.prompt;
-
-  const gbox = $("exam-groups");
-  gbox.innerHTML = "";
-  e.groups.forEach(g => {
-    const div = document.createElement("div");
-    div.className = "exam-group";
-    div.innerHTML = `<p class="exam-group-label">${escapeHTML(g.label)}</p>
-      <div class="exam-chars">${g.chars.map(c => `<span class="exam-char">${escapeHTML(c)}</span>`).join("")}</div>`;
-    gbox.appendChild(div);
-  });
-  $("exam-meaning").textContent = "意義方向：" + (e.meaningHint || "");
-  $("exam-caution").textContent = e.caution ? ("提醒：" + e.caution) : "";
-
-  $("exam-answers").classList.add("hidden");
-  $("btn-exam-reveal").classList.remove("hidden");
-  $("btn-exam-next").textContent =
-    (state.examIndex === state.examQueue.length - 1) ? "看練習回顧" : "下一個部件";
-}
-
-function revealExam() {
-  $("exam-answers").classList.remove("hidden");
-  $("btn-exam-reveal").classList.add("hidden");
-}
-
-function nextExam() {
-  if (state.examIndex < state.examQueue.length - 1) {
-    state.examIndex++;
-    renderExam();
-  } else {
-    showExamResult();
-  }
-}
-
-function showExamResult() {
-  $("xr-name").textContent = state.name;
-  $("xr-context").textContent =
-    `考前快寫　${state.examQueue.length} 個部件　${new Date().toLocaleDateString("zh-TW")}`;
-
-  const list = $("xr-list");
-  list.innerHTML = "";
-  state.examQueue.forEach(e => {
-    const div = document.createElement("div");
-    div.className = "exam-review-row";
-    div.innerHTML = `<span class="exam-review-rad">${escapeHTML(e.radical)}</span>
-      <span class="exam-review-hint">${escapeHTML(e.radicalName || "")}｜${escapeHTML(e.meaningHint || "")}</span>`;
-    list.appendChild(div);
-  });
-  $("xr-review").textContent =
-    "回家可以挑其中 2～3 個部件，各寫出 10 個字，並試著說出它們共同的意思方向。";
-  showScreen("screen-exam-result");
 }
 
 /* ---------------------------------------------------------
@@ -562,24 +537,15 @@ function bindChoiceGroup(selector, key) {
   });
 }
 
-bindChoiceGroup("[data-level]", "level");
+bindChoiceGroup("[data-mode]", "mode");
 
-// 四張模式卡片，各自啟動
-$("btn-basic").addEventListener("click", () => { state.mode = "basic"; startGame(); });
-$("btn-adventure").addEventListener("click", () => { state.mode = "adventure"; startGame(); });
-$("btn-challenge").addEventListener("click", () => { state.mode = "challenge"; startGame(); });
-$("btn-exam").addEventListener("click", startExam);
-
-// 考前快寫
-$("btn-exam-reveal").addEventListener("click", revealExam);
-$("btn-exam-next").addEventListener("click", nextExam);
-$("btn-exam-quit").addEventListener("click", () => {
-  if (confirm("現在離開，這次練習不會被保存。確定回首頁嗎？")) showScreen("screen-home");
-});
-$("btn-exam-again").addEventListener("click", startExam);
-$("btn-exam-home").addEventListener("click", () => showScreen("screen-home"));
-
+$("btn-start").addEventListener("click", startGame);
 $("btn-next").addEventListener("click", nextQuestion);
+$("btn-submit-recall").addEventListener("click", submitRecall);
+$("recall-input").addEventListener("input", () => {
+  const n = extractRecallChars($("recall-input").value).length;
+  $("recall-count").textContent = `已輸入 ${n} 個不同的字`;
+});
 $("btn-export").addEventListener("click", exportResult);
 $("btn-again").addEventListener("click", startGame);
 $("btn-home").addEventListener("click", () => showScreen("screen-home"));
@@ -592,6 +558,25 @@ $("btn-close-modal").addEventListener("click", () => $("modal").classList.add("h
 $("modal").addEventListener("click", e => {
   if (e.target === $("modal")) $("modal").classList.add("hidden");
 });
+
+function renderDossier() {
+  const box = $("dossier-grid");
+  box.innerHTML = (window.RADICAL_DOSSIER || []).map(d => `
+    <article class="dossier-item">
+      <div class="dossier-head"><span class="dossier-char">${escapeHTML(d.key)}</span><span>${escapeHTML(d.kind)}</span></div>
+      <p>${escapeHTML(d.meaning)}</p>
+      <div class="dossier-examples">${d.examples.map(escapeHTML).join("　")}</div>
+    </article>`).join("");
+}
+renderDossier();
+$("btn-dossier").addEventListener("click", () => $("dossier-modal").classList.remove("hidden"));
+$("btn-close-dossier").addEventListener("click", () => $("dossier-modal").classList.add("hidden"));
+$("dossier-modal").addEventListener("click", e => {
+  if (e.target === $("dossier-modal")) $("dossier-modal").classList.add("hidden");
+});
 document.addEventListener("keydown", e => {
-  if (e.key === "Escape") $("modal").classList.add("hidden");
+  if (e.key === "Escape") {
+    $("modal").classList.add("hidden");
+    $("dossier-modal").classList.add("hidden");
+  }
 });

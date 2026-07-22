@@ -79,6 +79,11 @@ body{
 
 /* ---------- 首頁 ---------- */
 .hero{text-align:center;padding:16px 0 28px;}
+.agency-link{
+  display:inline-block;margin-bottom:14px;color:var(--indigo);font-size:14px;
+  font-weight:700;text-decoration:none;
+}
+.agency-link:hover{text-decoration:underline;}
 .hero-grid{display:flex;gap:10px;justify-content:center;margin-bottom:20px;}
 
 .eyebrow{
@@ -113,6 +118,13 @@ body{
   border-radius:var(--r);padding:22px;box-shadow:var(--shadow);
 }
 .field{margin-bottom:22px;}
+.case-badge{
+  display:flex;justify-content:space-between;gap:14px;align-items:center;
+  margin-bottom:22px;padding:13px 15px;border-radius:10px;
+  background:var(--indigo-soft);color:var(--indigo);
+}
+.case-badge strong{font-size:16px;}
+.case-badge span{font-size:13px;color:var(--ink-soft);text-align:right;}
 .field-label{
   display:block;font-weight:700;margin-bottom:10px;font-size:15px;
 }
@@ -141,8 +153,6 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
 }
 
 .home-actions{display:flex;gap:12px;}
-.lobby-link{display:block;text-align:center;margin-top:18px;color:var(--ink-soft);font-size:14px;text-decoration:none;}
-.lobby-link:hover{text-decoration:underline;color:var(--indigo);}
 
 /* ---------- 按鈕 ---------- */
 .btn{
@@ -154,6 +164,8 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
 .btn-primary:hover{background:#1D4265;}
 .btn-ghost{background:#fff;color:var(--indigo);border-color:var(--indigo);}
 .btn-ghost:hover{background:var(--indigo-soft);}
+.btn-paper{background:#F7F9FA;color:var(--ink);border-color:var(--line);}
+.btn-paper:hover{background:var(--indigo-soft);border-color:var(--indigo);}
 .btn-block{width:100%;margin-top:18px;}
 .home-actions .btn{flex:1;}
 .btn-text{
@@ -229,6 +241,20 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
 /* 單字選項（如 晴／情／清）放大成楷體 */
 .opt.opt-char .opt-text{font-family:var(--kai);font-size:30px;line-height:1.2;}
 
+/* ---------- 主動提取 ---------- */
+.recall-box{
+  margin-top:4px;padding:18px;border:2px dashed var(--indigo);
+  border-radius:12px;background:#F7FAFC;
+}
+.recall-box label{display:block;font-weight:700;margin-bottom:10px;}
+.recall-box textarea{
+  width:100%;resize:vertical;min-height:94px;padding:14px 16px;
+  border:2px solid var(--line);border-radius:10px;background:#fff;
+  color:var(--ink);font-family:var(--kai);font-size:28px;line-height:1.5;
+}
+.recall-box textarea:focus{outline:3px solid var(--indigo-soft);border-color:var(--indigo);}
+.recall-count{margin:6px 0 0;color:var(--ink-soft);font-size:14px;}
+
 /* ---------- 回饋 ---------- */
 .feedback{
   margin-top:20px;padding:16px 18px;border-radius:12px;
@@ -302,6 +328,19 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
   background:#fff;border-radius:var(--r);padding:26px;max-width:600px;
   max-height:86vh;overflow:auto;
 }
+.dossier-card{max-width:900px;}
+.dossier-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+.dossier-item{
+  border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;
+}
+.dossier-head{display:flex;align-items:center;gap:10px;color:var(--ink-soft);font-size:13px;}
+.dossier-char{
+  width:48px;height:48px;display:flex;align-items:center;justify-content:center;
+  border:2px solid var(--indigo);border-radius:5px;color:var(--indigo);
+  font-family:var(--kai);font-size:30px;background:var(--indigo-soft);
+}
+.dossier-item p{margin:8px 0;color:var(--ink-soft);font-size:14px;}
+.dossier-examples{font-family:var(--kai);font-size:20px;line-height:1.8;color:var(--ink);}
 .modal-card h2{font-family:var(--kai);font-size:26px;margin:0 0 14px;}
 .modal-card h3{font-size:16px;margin:24px 0 8px;}
 .howto{padding-left:22px;margin:0;}
@@ -319,6 +358,9 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
   .q-text{font-size:20px;}
   .choice-grid,.choice-row{grid-template-columns:1fr;display:grid;}
   .home-actions{flex-direction:column;}
+  .case-badge{align-items:flex-start;flex-direction:column;}
+  .case-badge span{text-align:left;}
+  .dossier-grid{grid-template-columns:1fr;}
   .score-hero{flex-direction:column;text-align:center;}
   .tian{width:70px;height:70px;}
   .tian-char{font-size:44px;}
@@ -335,98 +377,4 @@ input[type=text]:focus{outline:3px solid var(--indigo-soft);border-color:var(--i
 /* ---------- 尊重使用者的減少動態設定 ---------- */
 @media (prefers-reduced-motion:reduce){
   *{transition:none !important;}
-}
-
-/* =========================================================
-   分層版新增：四張模式卡片 + 考前快寫畫面
-   沿用既有靛青／楷體／田字格風格
-   ========================================================= */
-
-/* ---------- 首頁四張模式卡片 ---------- */
-.mode-cards{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:14px;
-}
-.mode-card{
-  background:var(--card);
-  border:1.5px solid var(--line);
-  border-radius:var(--r);
-  padding:18px 18px 20px;
-  display:flex;flex-direction:column;gap:10px;
-  box-shadow:var(--shadow);
-}
-.mode-head{display:flex;align-items:center;gap:10px;}
-.mode-emoji{font-size:26px;line-height:1;}
-.mode-head h3{
-  margin:0;font-family:var(--kai);font-size:22px;color:var(--indigo);
-}
-.mode-sub{
-  margin:0;color:var(--ink-soft);font-size:15px;line-height:1.6;flex:1 0 auto;
-}
-.mode-card .btn{margin-top:4px;}
-
-@media (max-width:560px){
-  .mode-cards{grid-template-columns:1fr;}
-}
-
-/* ---------- 考前快寫：作答 ---------- */
-.exam-card{padding-top:28px;}
-.exam-progress{
-  color:var(--ink-soft);font-size:14px;letter-spacing:.08em;margin:0 0 12px;
-}
-.exam-radical-name{
-  margin:12px 0 4px;color:var(--indigo);font-family:var(--kai);font-size:20px;
-}
-.exam-prompt{
-  margin:6px 0 10px;font-family:var(--kai);font-size:24px;color:var(--ink);line-height:1.5;
-}
-.exam-selfnote{
-  color:var(--ink-soft);font-size:15px;margin:0 0 20px;
-}
-.exam-answers{margin-top:22px;text-align:left;}
-.exam-groups{display:flex;flex-direction:column;gap:16px;}
-.exam-group{
-  background:var(--indigo-soft);
-  border:1px solid var(--line);
-  border-radius:12px;
-  padding:12px 14px;
-}
-.exam-group-label{
-  margin:0 0 8px;font-weight:700;color:var(--indigo);font-size:15px;
-}
-.exam-chars{display:flex;flex-wrap:wrap;gap:8px;}
-.exam-char{
-  font-family:var(--kai);font-size:26px;line-height:1;
-  background:var(--card);
-  border:1px solid var(--line);
-  border-radius:8px;
-  padding:8px 10px;color:var(--ink);
-}
-.exam-hint-box{
-  margin:16px 0 20px;padding:12px 14px;
-  background:var(--jade-soft);
-  border-left:4px solid var(--jade);
-  border-radius:8px;
-}
-.exam-meaning{margin:0;color:var(--ink);font-size:15px;}
-.exam-caution{margin:8px 0 0;color:var(--seal);font-size:14px;}
-
-/* ---------- 考前快寫：回顧 ---------- */
-.exam-review{display:flex;flex-direction:column;gap:10px;}
-.exam-review-row{
-  display:flex;align-items:center;gap:12px;
-  background:var(--indigo-soft);
-  border-radius:10px;padding:10px 12px;
-}
-.exam-review-rad{
-  font-family:var(--kai);font-size:30px;line-height:1;color:var(--indigo);
-  width:44px;text-align:center;flex:0 0 auto;
-}
-.exam-review-hint{color:var(--ink-soft);font-size:14px;line-height:1.5;}
-.exam-creed{
-  margin:20px 0;padding:14px 16px;text-align:center;
-  background:var(--seal-soft);
-  border-radius:12px;color:var(--seal);
-  font-family:var(--kai);font-size:18px;line-height:1.6;
 }
