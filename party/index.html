@@ -47,6 +47,7 @@
         <span class="p-head-right">
           <span id="p-mode-label" class="p-tag"></span>
           <span id="p-timer" class="p-timer hidden"></span>
+          <span id="p-coins" class="p-coins">🪙 0</span>
           <span id="p-hp" class="p-hp"></span>
         </span>
       </div>
@@ -56,6 +57,12 @@
       <div id="p-options" class="p-options"></div>
       <p id="p-feedback" class="p-feedback"></p>
       <div id="p-evidence" class="p-evidence"></div>
+      <div id="p-clue-wrap" class="p-clue-wrap hidden">
+        <h3 class="p-h3">🎒 證物袋<small>點兩個碎片試著合成線索報告</small></h3>
+        <div id="p-clue-bag" class="p-clue-bag"></div>
+        <p id="p-combo-msg" class="p-combo-msg"></p>
+        <div id="p-notes" class="p-notes"></div>
+      </div>
       <button id="p-next" class="p-btn p-primary p-block hidden" type="button">下一題 →</button>
       <button class="p-btn p-ghost p-block p-quit" type="button">中止回首頁</button>
     </div>
@@ -107,6 +114,22 @@
   </section>
 
   <!-- ========== 冷靜重查 ========== -->
+  <section id="p-confront" class="p-screen">
+    <div class="p-card">
+      <p id="p-cf-title" class="p-eyebrow"></p>
+      <div class="p-suspect"><span id="p-cf-emoji" class="p-suspect-emoji"></span><strong id="p-cf-name"></strong></div>
+      <p id="p-cf-intro" class="p-chapter-intro"></p>
+      <p id="p-cf-step" class="p-progress"></p>
+      <div id="p-cf-statements" class="p-statements"></div>
+      <div id="p-cf-evidence" class="p-clue-wrap">
+        <h3 class="p-h3">🎒 選一個碎片舉證</h3>
+        <div id="p-cf-bag" class="p-clue-bag"></div>
+      </div>
+      <p id="p-cf-feedback" class="p-feedback"></p>
+      <button id="p-cf-next" class="p-btn p-primary p-block hidden" type="button">繼續 →</button>
+    </div>
+  </section>
+
   <section id="p-cooldown" class="p-screen">
     <div class="p-card p-center">
       <p class="p-eyebrow">冷靜重查</p>
@@ -141,7 +164,8 @@
 </main>
 
 <!-- 載入順序：故事檔 → 三個題庫（沿用舊檔，設定 window.*_QUESTION_BANK）→ 引擎 -->
-<script src="story-config.js"></script>
+<script src="../detective-system.js"></script>
+  <script src="story-config.js"></script>
 <script src="../chinese/questions.js"></script>
 <script src="../math/math-questions.js"></script>
 <script src="../reading/questions.js"></script>

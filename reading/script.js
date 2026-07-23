@@ -262,6 +262,25 @@ function updateDetectiveUI(){
 function setBet(mode){
   state.bet = mode;
   document.querySelectorAll("[data-bet]").forEach(b=>b.classList.toggle("selected", b.dataset.bet === mode));
+  // 押注儀式感：選了孤注一擲，整張作答區轉為警戒紅
+  const card = $("options").closest(".card");
+  if(card) card.classList.toggle("gamble-on", mode === "gamble");
+  const lead = $("bet-lead");
+  if(lead) lead.textContent = mode === "gamble" ? "🔥 孤注一擲：答對加倍，答錯 −8。確定要賭嗎？"
+    : mode === "insurance" ? "🛡️ 購買保險：先付 5 枚，答錯不扣幣。"
+    : "🎯 這一題你有多少把握？";
+}
+function renderToolHelp(){
+  const box = $("tool-help");
+  box.textContent = "";
+  Object.keys(DS.items).forEach(id=>{
+    const it = DS.items[id];
+    const row = document.createElement("p");
+    row.textContent = `${it.emoji} ${it.name}：${it.desc}`;
+    box.appendChild(row);
+    const btn = $("use-" + id);
+    if(btn) btn.title = `${it.name}：${it.desc}`;
+  });
 }
 function flashShop(msg){
   const box = $("shop-msg");
@@ -433,29 +452,34 @@ function startRevenge(monsterId){
 }
 
 /* ---- 綁定 ---- */
-$("btn-shop").addEventListener("click", toggleShop);
-$("btn-shop-close").addEventListener("click", toggleShop);
-$("use-magnifier").addEventListener("click", useMagnifier);
-$("use-calmCard").addEventListener("click", useCalmCard);
-$("use-detectiveNote").addEventListener("click", useNote);
-document.querySelectorAll("[data-bet]").forEach(b=>b.addEventListener("click", function(){ setBet(this.dataset.bet); }));
-$("btn-bestiary").addEventListener("click", ()=>{
-  const box = $("bestiary");
-  if(box.classList.contains("hidden")) renderBestiary();
-  box.classList.toggle("hidden");
-});
+function bootDetective(){
+  $("btn-shop").addEventListener("click", toggleShop);
+  $("btn-shop-close").addEventListener("click", toggleShop);
+  $("use-magnifier").addEventListener("click", useMagnifier);
+  $("use-calmCard").addEventListener("click", useCalmCard);
+  $("use-detectiveNote").addEventListener("click", useNote);
+  document.querySelectorAll("[data-bet]").forEach(b=>b.addEventListener("click", function(){ setBet(this.dataset.bet); }));
+  $("btn-bestiary").addEventListener("click", ()=>{
+    const box = $("bestiary");
+    if(box.classList.contains("hidden")) renderBestiary();
+    box.classList.toggle("hidden");
+  });
+  $("btn-tool-help").addEventListener("click", ()=>$("tool-help").classList.toggle("hidden"));
+  renderToolHelp();
+  renderDailyEvent();
+  renderTitles();
+  updateDetectiveUI();
 
-renderDailyEvent();
-renderTitles();
-updateDetectiveUI();
-
-$("btn-start").addEventListener("click",startGame);
-$("btn-next").addEventListener("click",nextQuestion);
-$("btn-export").addEventListener("click",exportResult);
-$("btn-again").addEventListener("click",startGame);
-$("btn-quit").addEventListener("click",()=>{
-  if(confirm("作答尚未匯出，確定離開？")) location.href="../hub.html";
-});
+  $("btn-start").addEventListener("click",startGame);
+  $("btn-next").addEventListener("click",nextQuestion);
+  $("btn-export").addEventListener("click",exportResult);
+  $("btn-again").addEventListener("click",startGame);
+  $("btn-quit").addEventListener("click",()=>{
+    if(confirm("作答尚未匯出，確定離開？")) location.href="../hub.html";
+  });
+}
+if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootDetective);
+else bootDetective();
 
 // 供自動化測試取用（不影響遊玩）
 window.__reading = { get state(){ return state; }, DS };

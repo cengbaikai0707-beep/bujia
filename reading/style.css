@@ -205,3 +205,14 @@ fieldset { border:0; padding:0; margin:22px 0; }
   .detective-bar { position:static; }
   .shop-btn { margin-left:0; }
 }
+
+/* 道具說明與押注儀式感 */
+.help-btn { font:inherit; cursor:pointer; width:40px; min-height:40px; border-radius:50%;
+  border:1px solid var(--line); background:#fff; color:var(--muted); }
+.help-btn:hover { border-color:var(--orange); color:var(--orange); }
+.tool-help { background:var(--orange-soft); border:1px solid var(--line); border-radius:12px;
+  padding:11px 14px; margin-bottom:13px; font-size:14px; }
+.tool-help p { margin:3px 0; }
+.card.gamble-on { border-color:var(--danger); box-shadow:0 3px 0 rgba(170,72,63,.18); }
+.card.gamble-on .bet-lead { color:var(--danger); font-weight:700; }
+.card.gamble-on .option { border-color:var(--danger); }

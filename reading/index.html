@@ -76,9 +76,12 @@
             <button id="use-magnifier" class="tool-btn">🔍 放大鏡 <span id="count-magnifier">0</span></button>
             <button id="use-calmCard" class="tool-btn">🛡️ 冷靜卡 <span id="count-calmCard">0</span></button>
             <button id="use-detectiveNote" class="tool-btn">📜 筆記 <span id="count-detectiveNote">0</span></button>
+            <button id="btn-tool-help" class="help-btn" type="button" aria-label="道具說明">？</button>
           </div>
           <button id="btn-shop" class="shop-btn">🛒 商店</button>
         </div>
+
+        <div id="tool-help" class="tool-help hidden"></div>
 
         <div id="shop-modal" class="shop-modal hidden">
           <h3>🛒 偵探道具商店</h3>
@@ -93,7 +96,7 @@
           <h2 id="q-text"></h2>
 
           <div id="betting-zone" class="betting-zone">
-            <p class="bet-lead">🎯 這一題你有多少把握？</p>
+            <p id="bet-lead" class="bet-lead">🎯 這一題你有多少把握？</p>
             <div class="bet-choices">
               <button class="bet selected" data-bet="steady"><strong>穩健調查</strong><span>答對正常得幣／答錯 −3</span></button>
               <button class="bet" data-bet="gamble"><strong>孤注一擲</strong><span>答對加倍／答錯 −8</span></button>
@@ -144,7 +147,7 @@
   </main>
 
   <script src="questions.js"></script>
-  <script src="detective-system.js"></script>
+  <script src="../detective-system.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

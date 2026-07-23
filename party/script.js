@@ -5,7 +5,8 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
 const esc = s => String(s == null ? "" : s).replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
 const normalize = s => String(s || "").replace(/[\s\u3000]/g, "");
 
-const state = { mode: null, route: null, ci: 0, hp: 5, firstTryCount: 0, chapterHadWrong: false, bossCorrect: 0, quiz: null };
+const state = { mode: null, route: null, ci: 0, hp: 5, firstTryCount: 0, chapterHadWrong: false, bossCorrect: 0, quiz: null,
+                clues: [], picked: [], combosDone: [], cfSolved: [], cfTarget: null };
 
 function showScreen(id) {
   document.querySelectorAll(".p-screen").forEach(s => s.classList.toggle("active", s.id === id));
@@ -96,6 +97,8 @@ function pick(idx) {
     $("p-feedback").textContent = q.correctFeedback || "答對了！這條線索到手。";
     $("p-feedback").className = "p-feedback good";
     if (Q.opts.evidenceList && Q.opts.evidenceList[Q.i]) addEvidence(Q.opts.evidenceList[Q.i]);
+    if (Q.opts.collectClue) grantClue();
+    if (window.DetectiveSystem) window.DetectiveSystem.addCoins(5), updateWallet();
   } else {
     btns[idx].classList.add("no");
     $("p-feedback").textContent = q.explanation || q.wrongHint || "再想想看，回到題目重讀一次。";
@@ -116,6 +119,161 @@ function addEvidence(text) {
   updateProgress();
 }
 
+/* ---------- 線索碎片・合成・全站錢包 ---------- */
+function chapterClues() { return STORY.chapters[state.ci].clues || []; }
+function updateWallet() {
+  const el = $("p-coins");
+  if (el && window.DetectiveSystem) el.textContent = "🪙 " + window.DetectiveSystem.state.coins;
+}
+function grantClue() {
+  const all = chapterClues();
+  if (state.clues.length >= all.length) return;
+  const got = all[state.clues.length];
+  state.clues.push(got.id);
+  renderClueBag($("p-clue-bag"), "combine");
+  const msg = $("p-combo-msg");
+  msg.textContent = `${got.icon} 取得線索碎片：${got.name}`;
+  msg.className = "p-combo-msg good";
+}
+function clueById(id) { return chapterClues().find(c => c.id === id); }
+function renderClueBag(box, mode) {
+  if (!box) return;
+  box.textContent = "";
+  const wrap = $("p-clue-wrap");
+  if (wrap && mode === "combine") wrap.classList.toggle("hidden", state.clues.length === 0);
+  state.clues.forEach(id => {
+    const c = clueById(id); if (!c) return;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "p-clue" + (state.picked.includes(id) ? " picked" : "");
+    b.title = c.desc;
+    const ic = document.createElement("span"); ic.className = "p-clue-ic"; ic.textContent = c.icon;
+    const nm = document.createElement("span"); nm.className = "p-clue-nm"; nm.textContent = c.name;
+    const ds = document.createElement("small"); ds.textContent = c.desc;
+    b.appendChild(ic); b.appendChild(nm); b.appendChild(ds);
+    b.onclick = () => (mode === "combine" ? toggleCombine(id) : accuse(id));
+    box.appendChild(b);
+  });
+}
+function toggleCombine(id) {
+  const i = state.picked.indexOf(id);
+  if (i >= 0) state.picked.splice(i, 1); else state.picked.push(id);
+  const msg = $("p-combo-msg");
+  if (state.picked.length === 2) {
+    const [a, b] = state.picked;
+    const combos = STORY.chapters[state.ci].combos || [];
+    const hit = combos.find(c => (c.a === a && c.b === b) || (c.a === b && c.b === a));
+    if (hit && !state.combosDone.includes(hit.name)) {
+      state.combosDone.push(hit.name);
+      const note = document.createElement("div");
+      note.className = "p-note-card";
+      const h = document.createElement("strong"); h.textContent = "📋 " + hit.name;
+      const p = document.createElement("p"); p.textContent = hit.result;
+      note.appendChild(h); note.appendChild(p);
+      $("p-notes").appendChild(note);
+      msg.textContent = "合成成功！線索報告已存進偵探筆記。";
+      msg.className = "p-combo-msg good";
+      if (window.DetectiveSystem) window.DetectiveSystem.addCoins(10), updateWallet();
+    } else if (hit) {
+      msg.textContent = "這份報告已經寫過了。"; msg.className = "p-combo-msg";
+    } else {
+      msg.textContent = "這兩個碎片湊不出結論，換一組看看。"; msg.className = "p-combo-msg bad";
+    }
+    state.picked = [];
+  } else {
+    msg.textContent = state.picked.length ? "再選一個碎片試著合成。" : "";
+    msg.className = "p-combo-msg";
+  }
+  renderClueBag($("p-clue-bag"), "combine");
+}
+
+/* ---------- 舉證對質 ---------- */
+function startConfront() {
+  const ch = STORY.chapters[state.ci], cf = ch.confrontation;
+  if (!cf) return showFinal();                    // 沒有對質資料就走原本的章末選擇題
+  const all = chapterClues();
+  let topped = false;
+  while (state.clues.length < all.length) { state.clues.push(all[state.clues.length].id); topped = true; }
+  state.picked = [];
+  state.cfSolved = [];
+  state.cfTarget = null;
+  $("p-cf-title").textContent = ch.title + "・舉證對質";
+  $("p-cf-emoji").textContent = cf.emoji;
+  $("p-cf-name").textContent = cf.suspect;
+  $("p-cf-intro").textContent = cf.intro + (topped ? "（隊友把你漏掉的碎片補上了。）" : "");
+  $("p-cf-feedback").textContent = ""; $("p-cf-feedback").className = "p-feedback";
+  $("p-cf-next").classList.add("hidden");
+  renderConfront();
+  showScreen("p-confront");
+}
+function lieCount() { return (STORY.chapters[state.ci].confrontation.statements || []).filter(s => s.lie).length; }
+function renderConfront() {
+  const cf = STORY.chapters[state.ci].confrontation;
+  $("p-cf-step").textContent = state.cfTarget == null
+    ? `找出站不住腳的供詞（已破解 ${state.cfSolved.length} / ${lieCount()}）`
+    : "選一個線索碎片舉證，戳破這句話。";
+  const box = $("p-cf-statements"); box.textContent = "";
+  cf.statements.forEach((st, i) => {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "p-statement" + (state.cfSolved.includes(i) ? " broken" : "") + (state.cfTarget === i ? " target" : "");
+    b.textContent = (state.cfSolved.includes(i) ? "✔ " : "「") + st.text + (state.cfSolved.includes(i) ? "" : "」");
+    b.disabled = state.cfSolved.includes(i) || state.cfTarget != null;
+    b.onclick = () => pickStatement(i);
+    box.appendChild(b);
+  });
+  $("p-cf-evidence").classList.toggle("hidden", state.cfTarget == null);
+  if (state.cfTarget != null) renderClueBag($("p-cf-bag"), "accuse");
+}
+function pickStatement(i) {
+  const st = STORY.chapters[state.ci].confrontation.statements[i];
+  const fb = $("p-cf-feedback");
+  if (!st.lie) {
+    fb.textContent = "這句和你的證據並不衝突——" + st.reply + " 再找找哪一句對不上。";
+    fb.className = "p-feedback bad";
+    return;
+  }
+  state.cfTarget = i;
+  fb.textContent = "抓到破綻了！現在從證物袋選出能戳破它的碎片。";
+  fb.className = "p-feedback good";
+  renderConfront();
+}
+function accuse(clueId) {
+  const cf = STORY.chapters[state.ci].confrontation;
+  const st = cf.statements[state.cfTarget];
+  const fb = $("p-cf-feedback");
+  if (clueId === st.counter) {
+    state.cfSolved.push(state.cfTarget);
+    state.cfTarget = null;
+    fb.textContent = st.reply;
+    fb.className = "p-feedback good";
+    if (window.DetectiveSystem) window.DetectiveSystem.addCoins(15), updateWallet();
+    renderConfront();
+    if (state.cfSolved.length >= lieCount()) confrontWin(st.reply);
+  } else {
+    const c = clueById(clueId);
+    fb.textContent = `「${c ? c.name : "這個碎片"}」戳不破這句話，再看看哪一份證據直接和它衝突。`;
+    fb.className = "p-feedback bad";
+    state.chapterHadWrong = true;
+    loseHp();
+    if (state.hp <= 0) {
+      const nx = $("p-cf-next");
+      nx.textContent = "看結局"; nx.classList.remove("hidden"); nx.onclick = endGame;
+    }
+  }
+}
+function confrontWin(lastReply) {
+  if (!state.chapterHadWrong) state.firstTryCount++;
+  const fb = $("p-cf-feedback");
+  // 保留最後一次的舉證說明，別讓過關訊息蓋掉推理回饋
+  fb.textContent = (lastReply ? lastReply + " " : "") + "全部破綻都被你的證據戳破了，這一章的真相成立！";
+  fb.className = "p-feedback good";
+  const nx = $("p-cf-next");
+  nx.textContent = state.ci < STORY.chapters.length - 1 ? "前往下一章 →" : "進入 Boss 戰 →";
+  nx.classList.remove("hidden");
+  nx.onclick = advanceChapter;
+}
+
 /* ---------- 章節流程 ---------- */
 function setHeader() {
   $("p-hp").textContent = "❤".repeat(Math.max(0, state.hp)) + "♡".repeat(Math.max(0, STORY.hp - state.hp));
@@ -125,19 +283,23 @@ function setHeader() {
 function startChapter() {
   const ch = STORY.chapters[state.ci];
   state.chapterHadWrong = false;
+  state.clues = []; state.picked = []; state.combosDone = [];
   $("p-chapter-title").textContent = ch.title;
   $("p-chapter-intro").textContent = ch.intro;
   $("p-evidence").innerHTML = "";
+  $("p-clue-bag").textContent = ""; $("p-notes").textContent = ""; $("p-combo-msg").textContent = "";
+  $("p-clue-wrap").classList.add("hidden");
+  updateWallet();
   setHeader();
   if (state.mode === "coop") {
     const rm = STORY.routeMeta[state.route];
     const qs = pickQuestions(rm.bank, rm.preferredSkills, 6);
     if (!qs.length) return bankError();
-    runQuiz(qs, { evidenceList: ch.routes[state.route].evidence, onDone: showFragment });
+    runQuiz(qs, { evidenceList: ch.routes[state.route].evidence, collectClue: true, onDone: showFragment });
   } else {
     const qs = pickMixed(8);
     if (!qs.length) return bankError();
-    runQuiz(qs, { onDone: soloAfterChapter });
+    runQuiz(qs, { collectClue: true, onDone: soloAfterChapter });
   }
 }
 function showFragment() {
@@ -153,12 +315,12 @@ function showPasscode() {
 }
 function submitPasscode() {
   const ch = STORY.chapters[state.ci];
-  if (normalize($("p-pass-input").value) === normalize(ch.passcode)) showFinal();
+  if (normalize($("p-pass-input").value) === normalize(ch.passcode)) startConfront();
   else $("p-pass-hint").textContent = "通關碼不對。再問問隊友，每條路線各拿到哪一個字？";
 }
 function soloAfterChapter(correct) {
-  if (correct >= 6) showFinal();
-  else cooldown("這一章答對不到 6 題，先冷靜重查，再看完整線索。", showFinal);
+  if (correct >= 6) startConfront();
+  else cooldown("這一章答對不到 6 題，先冷靜重查，再進行對質。", startConfront);
 }
 function allEvidenceHTML(ch) {
   return STORY.routes.map(r => {
@@ -289,3 +451,6 @@ function bind() {
   refreshStart();
 }
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind); else bind();
+
+// 供自動化測試取用（不影響遊玩）
+window.__party = { get state(){ return state; }, startConfront, grantClue, toggleCombine };
