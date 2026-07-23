@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>讀題偵探社｜應用題審題診斷</title>
+  <title>讀題偵探社｜應用題閱讀練習</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header id="topbar" class="topbar hidden">
-    <div><span class="seal">讀</span><strong id="bar-title">審題任務</strong></div>
+    <div><span class="seal">讀</span><strong id="bar-title">讀題任務</strong></div>
     <div class="top-actions">
-      <span id="bar-progress" class="tag">1 / 10</span>
+      <span id="bar-progress" class="tag">1 / 12</span>
       <button id="btn-quit" class="text-btn">回大廳</button>
     </div>
     <div class="rail"><div id="rail-fill"></div></div>
@@ -21,36 +21,67 @@
       <div class="wrap">
         <div class="hero">
           <div class="icon-mark">🔍</div>
-          <p class="eyebrow">數學應用題 ｜ 審題偵查</p>
+          <p class="eyebrow">數學應用題 × 閱讀理解</p>
           <h1>讀題偵探社</h1>
-          <p>不是練計算，而是練「讀懂題目」。選錯時，我們從答案反推你漏看了哪個關鍵。</p>
+          <p>先找證據、再列算式。把「沒讀懂」和「不會算」分開看，孩子才知道下一步怎麼進步。</p>
         </div>
 
         <div class="setup">
-          <label>偵探姓名
+          <label>偵探姓名（可不填）
             <input id="student-name" maxlength="12" placeholder="輸入姓名或代號">
           </label>
 
           <fieldset>
-            <legend>題目難度</legend>
-            <div class="choices three">
-              <button class="choice selected" data-diff="mixed"><strong>混合</strong><span>基礎＋標準＋挑戰</span></button>
-              <button class="choice" data-diff="basic"><strong>基礎</strong><span>一步任務、單步加減乘除</span></button>
-              <button class="choice" data-diff="standard"><strong>標準</strong><span>兩步驟、比較、分配</span></button>
-              <button class="choice" data-diff="challenge"><strong>挑戰</strong><span>至少最多、干擾條件</span></button>
+            <legend>選擇任務</legend>
+            <div class="choices two">
+              <button class="choice selected" data-mode="diagnostic">
+                <strong>🧭 完整診斷</strong>
+                <span>12 題、每題兩關；六項能力各測 2 次</span>
+              </button>
+              <button class="choice" data-mode="practice">
+                <strong>✏️ 自由練習</strong>
+                <span>沿用原有 96 題，依難度和題數抽題</span>
+              </button>
             </div>
           </fieldset>
 
           <fieldset>
-            <legend>練習長度</legend>
-            <div class="choices three">
-              <button class="choice selected" data-count="8"><strong>短篇 8 題</strong><span>考前暖身</span></button>
-              <button class="choice" data-count="15"><strong>中篇 15 題</strong><span>完整偵查</span></button>
-              <button class="choice" data-count="20"><strong>長篇 20 題</strong><span>深度診斷</span></button>
+            <legend>年級帶</legend>
+            <div class="choices two">
+              <button class="choice selected" data-band="middle">
+                <strong>中年級</strong><span>三、四年級｜整數、時間、生活情境</span>
+              </button>
+              <button class="choice" data-band="upper">
+                <strong>高年級</strong><span>五、六年級｜分數、比例、優惠與多步驟</span>
+              </button>
             </div>
           </fieldset>
 
-          <button id="btn-start" class="primary">開始讀題</button>
+          <div id="practice-settings" class="practice-settings hidden">
+            <fieldset>
+              <legend>練習難度</legend>
+              <div class="choices four">
+                <button class="choice selected" data-diff="mixed"><strong>混合</strong></button>
+                <button class="choice" data-diff="basic"><strong>基礎</strong></button>
+                <button class="choice" data-diff="standard"><strong>標準</strong></button>
+                <button class="choice" data-diff="challenge"><strong>挑戰</strong></button>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>練習長度</legend>
+              <div class="choices three">
+                <button class="choice selected" data-count="8"><strong>8 題</strong></button>
+                <button class="choice" data-count="12"><strong>12 題</strong></button>
+                <button class="choice" data-count="20"><strong>20 題</strong></button>
+              </div>
+            </fieldset>
+          </div>
+
+          <div class="notice">
+            <strong id="mode-summary">完整診斷會測六項能力：</strong>
+            <span id="mode-detail">問句定位、條件篩選、關係辨認、步驟排序、限制判斷、單位與表徵。</span>
+          </div>
+          <button id="btn-start" class="primary">開始完整診斷</button>
           <a class="lobby" href="../hub.html">← 回學習大廳</a>
         </div>
       </div>
@@ -59,15 +90,21 @@
     <section id="screen-game" class="screen">
       <div class="play-wrap">
         <article class="card">
-          <p id="q-meta" class="meta"></p>
+          <div class="question-head">
+            <p id="q-meta" class="meta"></p>
+            <span id="stage-badge" class="stage-badge"></span>
+          </div>
+          <div id="stimulus" class="stimulus hidden"></div>
           <h2 id="q-text"></h2>
+          <button id="btn-hint" class="hint-btn">💡 看一點線索</button>
+          <p id="hint-box" class="hint-box hidden"></p>
           <div id="options" class="options"></div>
           <div id="feedback" class="feedback hidden">
             <strong id="fb-title"></strong>
             <p id="fb-message"></p>
             <p id="fb-explain"></p>
           </div>
-          <button id="btn-next" class="primary hidden">下一題</button>
+          <button id="btn-next" class="primary hidden">下一關</button>
         </article>
       </div>
     </section>
@@ -75,23 +112,31 @@
     <section id="screen-result" class="screen">
       <div class="result-wrap">
         <article class="card report">
-          <p class="eyebrow">審題偵查報告</p>
+          <p class="eyebrow">讀題偵查報告</p>
           <h2 id="r-name"></h2>
           <p id="r-context" class="muted"></p>
-          <div class="score"><strong id="r-score">0%</strong><span id="r-count"></span></div>
 
-          <h3>各類能力表現</h3>
+          <div id="diagnostic-scores" class="dual-score">
+            <div><span>讀懂題意</span><strong id="r-reading">0%</strong><small id="r-reading-count"></small></div>
+            <div><span>正確計算</span><strong id="r-calc">0%</strong><small id="r-calc-count"></small></div>
+          </div>
+          <div id="practice-score" class="score hidden">
+            <strong id="r-score">0%</strong><span id="r-count"></span>
+          </div>
+
+          <h3 id="skills-title">六項讀題能力</h3>
           <div id="r-skills"></div>
 
-          <h3>最常掉進的審題陷阱</h3>
+          <h3>本次容易掉進的陷阱</h3>
           <div id="r-traps"></div>
 
           <h3>下一步建議</h3>
           <p id="r-next"></p>
+          <p id="r-note" class="report-note"></p>
 
           <div class="result-actions">
             <button id="btn-export" class="primary">匯出結果</button>
-            <button id="btn-again" class="secondary">再練一次</button>
+            <button id="btn-again" class="secondary">再做一次</button>
             <a href="../hub.html" class="secondary link-btn">回學習大廳</a>
           </div>
         </article>
@@ -100,6 +145,7 @@
   </main>
 
   <script src="questions.js"></script>
+  <script src="diagnostic-questions.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
