@@ -69,7 +69,7 @@ const FAMILY_DATA = [
 const CONTEXT_DATA = [
   { sentence: "操場積了水，走路要小心地面很＿。", options: ["滑", "猾", "劃", "畫"], ans: 0,
     clue: "地面有水會「滑」，用「氵」的『滑』。" },
-  { sentence: "天氣好熱，我想去游＿池玩水。", options: ["泳", "詠", "永", "咏"], ans: 0,
+  { sentence: "天氣好熱，我想去游＿池玩水。", options: ["泳", "詠", "永", "勇"], ans: 0,
     clue: "游泳在水裡，用「氵」的『泳』。" },
   { sentence: "下課鐘一響，大家都＿出教室。", options: ["跑", "泡", "抱", "飽"], ans: 0,
     clue: "用腳快走是「足」的『跑』。" },

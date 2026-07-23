@@ -196,5 +196,5 @@ $("btn-next").addEventListener("click",nextQuestion);
 $("btn-export").addEventListener("click",exportResult);
 $("btn-again").addEventListener("click",startGame);
 $("btn-quit").addEventListener("click",()=>{
-  if(confirm("作答尚未匯出，確定離開？")) location.href="../index.html";
+  if(confirm("作答尚未匯出，確定離開？")) location.href="../hub.html";
 });
