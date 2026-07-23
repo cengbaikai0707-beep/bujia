@@ -89,6 +89,29 @@ body{
 .b-fb.bad{background:rgba(224,87,75,.14);border:1px solid var(--red)}
 .b-stage2,.b-chain{margin-top:6px}
 
+/* 技能卡 */
+.b-skills{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:12px}
+.b-skill-lead{font-size:.78rem;color:var(--dim)}
+.b-skill-empty{font-size:.78rem;color:var(--dim);opacity:.7}
+.b-skill{display:flex;align-items:center;gap:6px;font-family:var(--font);
+  background:#332a4d;border:1px solid var(--purple);color:var(--ink);
+  border-radius:20px;padding:6px 12px 6px 8px;cursor:pointer;min-height:40px}
+.b-skill:hover{border-color:var(--gold)}
+.b-skill-comp{display:inline-flex;align-items:center;justify-content:center;
+  width:26px;height:26px;border-radius:50%;background:var(--purple);color:#fff;font-size:1rem}
+.b-skill-name{font-size:.85rem;font-weight:700}
+.b-opt.washed{opacity:.3;text-decoration:line-through}
+
+/* 冒牌字：點字 */
+.b-charpick{display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  background:#241d38;border-left:4px solid var(--purple);border-radius:8px;padding:12px 14px;margin:0 0 12px}
+.b-char{font-family:var(--font);font-size:1.5rem;line-height:1;min-width:44px;min-height:48px;
+  border:1px solid var(--line);background:#2f2748;color:var(--ink);border-radius:10px;cursor:pointer}
+.b-char:hover:not(:disabled){border-color:var(--gold)}
+.b-char.found{background:rgba(95,206,143,.28);border-color:var(--green)}
+.b-char.miss{background:rgba(224,87,75,.22);border-color:var(--red)}
+.b-punct{font-size:1.3rem;color:var(--dim);padding:0 2px}
+
 /* Boss */
 .b-boss-card{border-color:var(--boss)}
 .b-boss-scene{text-align:center;font-size:3.2rem;margin:6px 0 10px;filter:drop-shadow(0 0 14px var(--boss))}

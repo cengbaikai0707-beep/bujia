@@ -74,19 +74,16 @@
 
   // ================= 一般關卡 =================
   const state = {};
-  function buildTasks(lv) {
+  function newTaskOf(type, lv) {
     const comps = BANK.filter(c => c.level === lv);
-    const fam = FAM;
-    const tasks = [];
-    const recog = () => ({ type: "recognize", comp: pick(comps) });
-    const mean = () => ({ type: "meaning", comp: pick(comps) });
-    tasks.push(recog());
-    tasks.push({ type: "repair", fam: pick(fam) });
-    tasks.push(mean());
-    tasks.push({ type: "context", item: pick(CTX) });
-    tasks.push({ type: "chain", fam: pick(fam) });
-    tasks.push({ type: "imposter", item: pick(IMP) });
-    tasks.push(recog());
+    if (type === "recognize" || type === "meaning") return { type, comp: pick(comps) };
+    if (type === "repair" || type === "chain") return { type, fam: pick(FAM) };
+    if (type === "context") return { type, item: pick(CTX) };
+    return { type: "imposter", item: pick(IMP) };
+  }
+  function buildTasks(lv) {
+    const order = ["recognize", "repair", "meaning", "context", "chain", "imposter", "recognize"];
+    const tasks = order.map(t => newTaskOf(t, lv));
     shuffle(tasks.map((_, i) => i)).slice(0, Math.ceil(tasks.length / 3)).forEach(i => tasks[i].evidence = true);
     return tasks;
   }
@@ -95,6 +92,7 @@
     state.tasks = buildTasks(node.lv);
     state.stat = { shape: [0, 0], meaning: [0, 0], context: [0, 0] };
     state.correct = 0; state.combo = 0; state.newComps = new Set();
+    dealSkills();
     $("b-play-title").textContent = `${AREA[node.lv]}`;
     $("b-play-sub").textContent = `本區 ${BANK.filter(c => c.level === node.lv).length} 個部件 ｜ 本次任務 ${state.tasks.length} 題`;
     renderTask();
@@ -106,6 +104,8 @@
   function renderTask() {
     const box = $("b-task"); box.textContent = ""; progressText();
     const t = state.tasks[state.ti];
+    cur.hint = hintFor(t); cur.example = exampleFor(t);
+    renderSkills();
     ({ recognize: tRecognize, meaning: tMeaning, repair: tRepair, chain: tChain, context: tContext, imposter: tImposter }[t.type])(t, box);
   }
   let lastAns = -1;
@@ -130,7 +130,9 @@
     $("b-scene").className = "b-scene " + (ok ? "win" : "hit");
   }
   function afterAnswer(box, ok, statKey, evidence) {
-    if (ok) { state.correct++; state.combo++; } else state.combo = 0;
+    if (ok) { state.correct++; state.combo++; }
+    else if (state.shield) { state.shield = false; renderSkills(); }
+    else state.combo = 0;
     if (Array.isArray(statKey)) statKey.forEach(k => addStat(k, ok)); else addStat(statKey, ok);
     const next = el("button", "b-btn b-primary b-block", "下一步 →");
     next.onclick = () => { if (evidence && ok) askEvidence(); else advance(); };
@@ -149,6 +151,67 @@
     });
   }
   function advance() { state.ti++; if (state.ti < state.tasks.length) renderTask(); else levelResult(); }
+
+  // ---------- 部件技能卡 ----------
+  const SKILLS = {
+    wash: { comp: "氵", name: "沖洗線索", desc: "刪掉一個錯的選項" },
+    observe: { comp: "目", name: "仔細觀察", desc: "看一次提示" },
+    witness: { comp: "言", name: "詢問證人", desc: "看例字或提示句" },
+    reroll: { comp: "辶", name: "換一條路", desc: "換一題同類型的" },
+    calm: { comp: "忄", name: "保持冷靜", desc: "下一次答錯保留連擊" }
+  };
+  const cur = { hint: "", example: "" };
+  function dealSkills() { state.skills = sample(Object.keys(SKILLS), 2); state.shield = false; }
+  function renderSkills() {
+    const bar = $("b-skills"); if (!bar) return; bar.textContent = "";
+    bar.appendChild(el("span", "b-skill-lead", (state.shield ? "🛡 護盾中 · " : "") + "技能卡"));
+    if (!state.skills || !state.skills.length) { bar.appendChild(el("span", "b-skill-empty", "已用完")); return; }
+    state.skills.forEach(id => {
+      const s = SKILLS[id];
+      const b = el("button", "b-skill"); b.type = "button"; b.title = s.desc;
+      b.appendChild(el("span", "b-skill-comp", s.comp));
+      b.appendChild(el("span", "b-skill-name", s.name));
+      b.onclick = () => applySkill(id);
+      bar.appendChild(b);
+    });
+  }
+  function useSkill(id) { state.skills = state.skills.filter(x => x !== id); renderSkills(); }
+  function skillNote(msg, good) { $("b-task").appendChild(el("div", "b-fb " + (good === false ? "bad" : "good"), "🃏 " + msg)); }
+  function applySkill(id) {
+    const liveWrap = [...$("b-task").querySelectorAll(".b-options")].find(w => !w.dataset.done);
+    if (id === "wash") {
+      if (!liveWrap) return skillNote("這一題沒有可以刪的選項，卡片先留著。", false);
+      const wrongs = [...liveWrap.children].filter((c, i) => i !== lastAns && !c.disabled);
+      if (!wrongs.length) return skillNote("已經沒有可刪的錯選項了。", false);
+      const v = pick(wrongs); v.disabled = true; v.classList.add("washed");
+      useSkill("wash"); skillNote("沖掉了一個錯選項！");
+    } else if (id === "observe") {
+      if (!cur.hint) return skillNote("這一題暫時沒有更多提示。", false);
+      useSkill("observe"); skillNote("提示：" + cur.hint);
+    } else if (id === "witness") {
+      if (!cur.example) return skillNote("這一題沒有可問的例句。", false);
+      useSkill("witness"); skillNote("證人說：" + cur.example);
+    } else if (id === "reroll") {
+      const t = state.tasks[state.ti];
+      state.tasks[state.ti] = Object.assign(newTaskOf(t.type, state.lv), { evidence: t.evidence });
+      useSkill("reroll"); renderTask();
+    } else if (id === "calm") {
+      state.shield = true; useSkill("calm"); skillNote("保持冷靜：下一次答錯會保留連擊。");
+    }
+  }
+  function hintFor(t) {
+    if (t.type === "recognize" || t.type === "meaning") return t.comp.note || `「${t.comp.comp}」和「${t.comp.meaning}」有關`;
+    if (t.type === "repair") return `聲旁「${t.fam.sheng}」只提示讀音，先想要表達的意思，再選形旁`;
+    if (t.type === "chain") return `每個字的聲旁都是「${t.fam.sheng}」，看提示的『部件』來配`;
+    if (t.type === "context") return t.item.clue;
+    return "句子裡有一個字，部件雖然像、意思卻和句子不合";
+  }
+  function exampleFor(t) {
+    if (t.type === "recognize" || t.type === "meaning") return `「${t.comp.comp}」的字：${t.comp.examples.slice(0, 6).join("、")}`;
+    if (t.type === "repair" || t.type === "chain") return `「${t.fam.sheng}」族：${t.fam.members.map(m => m.char).join("、")}`;
+    if (t.type === "context") return "把每個選項輪流讀進句子，看哪個意思最通順";
+    return "逐字檢查：哪個字的部件和句子要說的意思不合？";
+  }
 
   // 辨認 → 字形
   function tRecognize(t, box) {
@@ -231,15 +294,43 @@
     }, true);
   }
   // 冒牌字 → 語境+字義
+  // 冒牌字：先點出用錯的字（位置）→ 再改對 → 語境+字義
+  const PUNCT = "，。、？！；：「」";
   function tImposter(t, box) {
-    const it = t.item;
-    box.appendChild(el("h2", "b-q", "冒牌字鑑識：這句話裡有一個字用錯了，正確的字應該是？"));
-    box.appendChild(el("p", "b-sentence", it.sentence));
+    const it = t.item, wrongIdx = it.sentence.indexOf(it.wrong);
+    box.appendChild(el("h2", "b-q", "冒牌字鑑識：這句話裡有一個字用錯了，點出用錯的那個字。"));
+    const line = el("p", "b-charpick");
+    [...it.sentence].forEach((ch, i) => {
+      if (PUNCT.includes(ch)) { line.appendChild(el("span", "b-punct", ch)); return; }
+      const s = el("button", "b-char", ch); s.type = "button";
+      s.onclick = () => {
+        if (line.dataset.done) return;
+        if (i === wrongIdx) {
+          line.dataset.done = "1";
+          line.querySelectorAll(".b-char").forEach(x => x.disabled = true);
+          s.classList.add("found");
+          feedback(box, true, `找到了！「${it.wrong}」在這裡用錯了。`);
+          imposterFix(t, box);
+        } else {
+          s.classList.add("miss"); s.disabled = true;
+          let fb = box.querySelector(".b-charpick-fb");
+          if (!fb) { fb = el("div", "b-fb bad b-charpick-fb"); box.appendChild(fb); }
+          fb.textContent = "✗ 這個字沒問題，再找找看。";
+        }
+      };
+      line.appendChild(s);
+    });
+    box.appendChild(line);
+  }
+  function imposterFix(t, box) {
+    const it = t.item, st2 = el("div", "b-stage2");
+    st2.appendChild(el("p", "b-q2", `應該把「${it.wrong}」改成哪個字？`));
+    box.appendChild(st2);
     const distract = uniq(BANK.flatMap(c => c.examples)).filter(ch => ch !== it.right && ch !== it.wrong);
-    const opts = shuffle([it.right, it.wrong, ...sample(distract, 2)]);
-    optButtons(box, opts, opts.indexOf(it.right), ok => {
-      feedback(box, ok, ok ? `對！應把「${it.wrong}」改成「${it.right}」。${it.why}` : `應改成「${it.right}」。${it.why}`);
-      afterAnswer(box, ok, ["context", "meaning"], t.evidence);
+    const opts = shuffle([it.right, ...sample(distract, 3)]);
+    optButtons(st2, opts, opts.indexOf(it.right), ok => {
+      feedback(st2, ok, ok ? `對！改成「${it.right}」就通順了。${it.why}` : `正解是「${it.right}」。${it.why}`);
+      afterAnswer(st2, ok, ["context", "meaning"], t.evidence);
     }, true);
   }
 
@@ -371,5 +462,5 @@
   if (!BANK.length) { document.addEventListener("DOMContentLoaded", () => { const i = $("b-intro"); if (i) i.textContent = "找不到部件資料。"; }); }
   else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind); else bind();
 
-  window.__battle = { startLevel, startBoss, renderAtlas, NODES, get state() { return state; }, get lastAns() { return lastAns; }, save };
+  window.__battle = { startLevel, startBoss, renderAtlas, renderTask, NODES, applySkill, get state() { return state; }, get skills() { return state.skills; }, get lastAns() { return lastAns; }, save };
 })();
