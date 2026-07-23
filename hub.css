@@ -47,8 +47,3 @@ h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;marg
 .battle .stamp{background:#7a5bb0}
 .subject.battle:hover,.subject.battle:focus-visible{border-color:#7a5bb0}
 .battle .go{color:#6a4ba0}
-
-/* 部首字族失竊案 accent */
-.radical .stamp{background:#3f7f74}
-.subject.radical:hover,.subject.radical:focus-visible{border-color:#3f7f74}
-.radical .go{color:#326b62}

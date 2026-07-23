@@ -264,21 +264,20 @@
     const f = t.fam, members = shuffle(f.members).slice(0, Math.min(4, f.members.length));
     box.appendChild(el("h2", "b-q", `字族連鎖！同一個聲旁「${f.sheng}」配上不同部件，依提示點出正確的字：`));
     const stepBox = el("div", "b-chain"); box.appendChild(stepBox);
-    let idx = 0, correctSteps = 0;
+    let idx = 0;
     const others = uniq(FAM.flatMap(x => x.members).map(x => x.char));
     function step() {
       stepBox.textContent = "";
       if (idx >= members.length) {
-        const passed = correctSteps >= Math.ceil(members.length * 0.75);
-        feedback(box, passed, `${passed ? "字族連鎖完成" : "字族還需要再修復"}！答對 ${correctSteps}/${members.length}。「${f.sheng}」族：${members.map(x => x.char).join("、")}。`);
-        afterAnswer(box, passed, "shape", t.evidence); return;
+        feedback(box, true, `字族連鎖完成！「${f.sheng}」族：${members.map(x => x.char).join("、")}。`);
+        afterAnswer(box, true, "shape", t.evidence); return;
       }
       const m = members[idx];
       stepBox.appendChild(el("p", "b-q2", `第 ${idx + 1}/${members.length} 個：表示「${m.mean}」（部件「${m.part}」）`));
       const distract = sample(others.filter(ch => ch !== m.char && !members.some(mm => mm.char === ch)), 3);
       const opts = shuffle([m.char, ...distract]);
       optButtons(stepBox, opts, opts.indexOf(m.char), ok => {
-        if (ok) { correctSteps++; state.combo++; progressText(); idx++; setTimeout(step, 450); }
+        if (ok) { state.combo++; progressText(); idx++; setTimeout(step, 450); }
         else { stepBox.appendChild(el("div", "b-fb bad", `這個是「${m.char}」才對（${m.mean}）。`)); setTimeout(() => { idx++; step(); }, 850); }
       }, true);
     }
@@ -339,15 +338,14 @@
 
   // 關卡結算：三能力值
   function levelResult() {
+    save.cleared[state.node.id] = true; persist();
     const total = state.tasks.length, pct = Math.round(state.correct / total * 100);
-    const passed = pct >= 60;
-    if (passed) { save.cleared[state.node.id] = true; persist(); }
     const stat = state.stat;
     const rate = k => stat[k][1] ? Math.round(stat[k][0] / stat[k][1] * 100) : null;
     const labels = { shape: "字形完整度", meaning: "字義穩定度", context: "語境清晰度" };
     const vals = Object.keys(labels).map(k => ({ k, v: rate(k) })).filter(x => x.v != null);
     const best = vals.slice().sort((a, b) => b.v - a.v)[0], weak = vals.slice().sort((a, b) => a.v - b.v)[0];
-    $("b-result-title").textContent = pct >= 80 ? "🏆 這一區的文字修復完成！" : passed ? "🛡️ 通過任務，再加強一下！" : "👾 尚未通過，再挑戰一次！";
+    $("b-result-title").textContent = pct >= 80 ? "🏆 這一區的文字修復完成！" : pct >= 50 ? "🛡️ 大致修復，再加強一下！" : "👾 還要再練一次！";
     $("b-result-detail").textContent = `${AREA[state.lv]} ｜ 正確率 ${pct}%（${state.correct}/${total}）`;
     const bars = $("b-result-bars"); bars.textContent = "";
     vals.forEach(({ k, v }) => {
@@ -362,15 +360,8 @@
     if (weak && weak.v < 100) note.appendChild(el("p", "b-weak-line", `最需補強：${labels[weak.k]}`));
     const newC = [...state.newComps]; if (newC.length) note.appendChild(el("p", null, "本次練到的部件：" + newC.join("、")));
     const nxt = NODES[nodeIndex(state.node.id) + 1];
-    if (!passed) {
-      $("b-next-node").style.display = "";
-      $("b-next-node").textContent = "重新挑戰 →";
-      $("b-next-node").onclick = () => startLevel(state.node);
-    } else {
-      $("b-next-node").style.display = nxt && unlocked(nxt.id) ? "" : "none";
-      $("b-next-node").textContent = "下一關 →";
-      if (nxt) $("b-next-node").onclick = () => nxt.type === "level" ? startLevel(nxt) : startBoss(nxt);
-    }
+    $("b-next-node").style.display = nxt && unlocked(nxt.id) ? "" : "none";
+    if (nxt) $("b-next-node").onclick = () => nxt.type === "level" ? startLevel(nxt) : startBoss(nxt);
     showScreen("b-result");
     renderHome();
   }
