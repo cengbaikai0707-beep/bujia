@@ -42,3 +42,8 @@ h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;marg
 .party .stamp{background:#d9822b}
 .subject.party:hover,.subject.party:focus-visible{border-color:#d9822b}
 .party .go{color:#c06f1f}
+
+/* 部件大亂鬥 accent */
+.battle .stamp{background:#7a5bb0}
+.subject.battle:hover,.subject.battle:focus-visible{border-color:#7a5bb0}
+.battle .go{color:#6a4ba0}

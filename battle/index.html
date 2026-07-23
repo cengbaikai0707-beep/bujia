@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>部件大亂鬥・文字勇者</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="b-wrap">
+
+  <!-- 首頁：關卡地圖 -->
+  <section id="b-home" class="b-screen active">
+    <div class="b-card">
+      <p class="b-eyebrow">部件延伸練習</p>
+      <h1 class="b-title">部件大亂鬥<span>・文字勇者</span></h1>
+      <div class="b-scene-mini"><span>🧙‍♂️</span><span class="b-vs">VS</span><span>👾</span></div>
+      <p id="b-intro" class="b-intro"></p>
+      <div class="b-map-head">
+        <h2 class="b-h2">關卡地圖</h2>
+        <label class="b-teacher-toggle"><input type="checkbox" id="b-teacher"> 教師自由模式</label>
+      </div>
+      <div id="b-nodes" class="b-nodes"></div>
+      <button id="b-atlas-btn" class="b-btn b-ghost b-block" type="button">📖 部件圖鑑（訓練室）</button>
+      <a class="b-link" href="../hub.html">← 回學習大廳</a>
+    </div>
+  </section>
+
+  <!-- 一般關卡 -->
+  <section id="b-play" class="b-screen">
+    <div class="b-card">
+      <div class="b-play-head">
+        <div><span id="b-play-title" class="b-level-title"></span><small id="b-play-sub" class="b-play-sub"></small></div>
+        <button class="b-btn b-mini b-quit" type="button">中止</button>
+      </div>
+      <div id="b-scene" class="b-scene">
+        <div class="b-actor hero"><span class="b-emoji">🧙‍♂️</span></div>
+        <p id="b-task-progress" class="b-progress"></p>
+        <div class="b-actor villain"><span class="b-emoji">👾</span></div>
+      </div>
+      <div id="b-task" class="b-task"></div>
+    </div>
+  </section>
+
+  <!-- Boss 戰 -->
+  <section id="b-boss" class="b-screen">
+    <div class="b-card b-boss-card">
+      <div class="b-play-head">
+        <div><span id="b-boss-title" class="b-level-title"></span><small id="b-boss-desc" class="b-play-sub"></small></div>
+        <button class="b-btn b-mini b-quit" type="button">中止</button>
+      </div>
+      <div class="b-boss-scene"><span class="b-boss-emoji">👾</span></div>
+      <div class="b-bal"><div id="b-boss-bar-fill" class="b-boss-bar-fill"></div></div>
+      <p id="b-boss-bar-text" class="b-bal-text"></p>
+      <div id="b-boss-task" class="b-task"></div>
+    </div>
+  </section>
+
+  <!-- 結算 -->
+  <section id="b-result" class="b-screen">
+    <div class="b-card b-center">
+      <h1 id="b-result-title" class="b-title sm"></h1>
+      <p id="b-result-detail" class="b-result-detail"></p>
+      <div id="b-result-bars" class="b-result-bars"></div>
+      <div id="b-result-note" class="b-result-note"></div>
+      <button id="b-next-node" class="b-btn b-primary b-block" type="button">下一關 →</button>
+      <button class="b-btn b-ghost b-block b-home-btn" type="button">回關卡地圖</button>
+    </div>
+  </section>
+
+  <!-- 圖鑑 -->
+  <section id="b-atlas" class="b-screen">
+    <div class="b-card">
+      <p class="b-eyebrow">部件圖鑑・訓練室</p>
+      <h2 class="b-h2">部件的本形、變形、意義與例字</h2>
+      <div id="b-atlas-content" class="b-atlas"></div>
+      <button class="b-btn b-ghost b-block b-home-btn" type="button">← 回首頁</button>
+    </div>
+  </section>
+
+</main>
+<script src="component-data.js"></script>
+<script src="question-data.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
