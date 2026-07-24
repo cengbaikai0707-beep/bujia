@@ -47,3 +47,35 @@ h1{font-family:var(--kai);font-size:48px;letter-spacing:.08em;color:#25435d;marg
 .battle .stamp{background:#7a5bb0}
 .subject.battle:hover,.subject.battle:focus-visible{border-color:#7a5bb0}
 .battle .go{color:#6a4ba0}
+
+/* 夏日英雄大會師 accent */
+.summer .stamp{background:#f5a623}
+.subject.summer:hover,.subject.summer:focus-visible{border-color:#f5a623}
+.summer .go{color:#d1861a}
+
+/* 夏季主線：在常設分館之前形成明確的大入口 */
+.subject.featured{
+  grid-column:1/-1;min-height:210px;
+  display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:28px;
+  background:linear-gradient(135deg,#fff8df 0%,#fff 62%,#e9f7fb 100%);
+  border-color:#efc15f;
+}
+.featured .stamp{width:90px;height:90px;margin:0;border-radius:22px;font-size:46px}
+.featured .subject-copy strong{font-size:38px}
+.featured .go{margin:0;padding:14px 18px;border-radius:999px;background:#fff3c9;white-space:nowrap}
+.event-badge{
+  display:inline-block !important;width:max-content;padding:4px 10px;margin-bottom:8px !important;
+  border-radius:999px;background:#f5a623;color:#3a2900 !important;
+  font-size:12px;font-weight:800;letter-spacing:.08em !important;
+}
+
+.radical .stamp{background:#4f7a67}
+.subject.radical:hover,.subject.radical:focus-visible{border-color:#4f7a67}
+.radical .go{color:#3e6855}
+
+@media(max-width:700px){
+  .subject.featured{display:flex;min-height:285px;align-items:flex-start;gap:0}
+  .featured .stamp{width:76px;height:76px;margin-bottom:20px;font-size:38px}
+  .featured .subject-copy strong{font-size:32px}
+  .featured .go{margin-top:auto;padding:18px 0 0;background:transparent}
+}

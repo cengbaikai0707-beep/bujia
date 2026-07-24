@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>夏日英雄大會師｜數學總複習</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="s-wrap">
+
+  <!-- 首頁 -->
+  <section id="s-home" class="s-screen active">
+    <div class="s-card">
+      <p class="s-eyebrow">國小二～四年級 ｜ 數學核心總複習</p>
+      <h1 class="s-title">夏日英雄<span>大會師</span></h1>
+      <p class="s-lead">六座試煉場，考的不是算得多快，而是「你真的懂意思嗎」。<br>很多題答對之後還會追問一句：<b>為什麼？</b></p>
+      <div class="s-sun-row"><span>🌞</span><span>🌊</span><span>🏖️</span><span>🍉</span><span>🐚</span></div>
+
+      <h2 class="s-h2">選一位英雄</h2>
+      <div id="s-heroes" class="s-heroes"></div>
+      <p id="s-hero-guide" class="s-hero-guide">請先選擇英雄，再進入試煉場。</p>
+
+      <h2 class="s-h2">試煉場地圖<small id="s-progress-line"></small></h2>
+      <div id="s-map" class="s-map"></div>
+      <button id="s-finals" class="s-btn s-primary s-block" type="button">大會師總決賽</button>
+
+      <h2 class="s-h2">我的弱點紀錄</h2>
+      <div id="s-myth-panel" class="s-myth-panel"></div>
+
+      <a class="s-link" href="../index.html">← 回學習大廳</a>
+    </div>
+  </section>
+
+  <!-- 作答 -->
+  <section id="s-play" class="s-screen">
+    <div class="s-card">
+      <div class="s-play-head">
+        <div>
+          <span id="s-play-title" class="s-play-title"></span>
+          <small id="s-play-sub" class="s-play-sub"></small>
+        </div>
+        <button class="s-btn s-mini s-home-btn" type="button">中止</button>
+      </div>
+      <div class="s-bar"><div id="s-bar-fill" class="s-bar-fill"></div></div>
+      <div class="s-meta">
+        <span id="s-count"></span>
+        <span id="s-coins" class="s-coins"></span>
+        <span id="s-score"></span>
+      </div>
+
+      <div id="s-perk" class="s-perk"></div>
+      <p id="s-note" class="s-note hidden"></p>
+
+      <p id="s-concept" class="s-concept"></p>
+      <h2 id="s-q" class="s-q"></h2>
+      <div id="s-opts" class="s-opts"></div>
+      <div id="s-stage2" class="s-stage2"></div>
+      <div id="s-fb" class="s-fb hidden"></div>
+      <button id="s-next" class="s-btn s-primary s-block hidden" type="button">下一題 →</button>
+    </div>
+  </section>
+
+  <!-- 結算 -->
+  <section id="s-result" class="s-screen">
+    <div class="s-card">
+      <h1 id="s-r-title" class="s-title sm"></h1>
+      <p id="s-r-sub" class="s-lead"></p>
+      <h2 class="s-h2">各領域表現</h2>
+      <div id="s-r-areas" class="s-r-areas"></div>
+      <div id="s-r-myth" class="s-r-myth"></div>
+      <button class="s-btn s-primary s-block s-home-btn" type="button">回試煉場地圖</button>
+    </div>
+  </section>
+
+</main>
+<script src="../detective-system.js"></script>
+<script src="questions.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

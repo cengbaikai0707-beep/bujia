@@ -36,7 +36,9 @@ input {
 }
 fieldset { border:0; padding:0; margin:22px 0; }
 .choices { display:grid; gap:10px; margin-top:9px; }
-.choices.three { grid-template-columns:repeat(4,1fr); }
+.choices.two { grid-template-columns:repeat(2,1fr); }
+.choices.three { grid-template-columns:repeat(3,1fr); }
+.choices.four { grid-template-columns:repeat(4,1fr); }
 .choice {
   border:2px solid var(--line); border-radius:12px; background:#fff;
   text-align:left; padding:13px; cursor:pointer; color:var(--ink);
@@ -44,6 +46,12 @@ fieldset { border:0; padding:0; margin:22px 0; }
 .choice strong, .choice span { display:block; }
 .choice span { font-size:12px; color:var(--muted); margin-top:3px; }
 .choice.selected { border-color:var(--orange); background:var(--orange-soft); }
+.notice {
+  display:flex; flex-direction:column; gap:3px; margin:18px 0;
+  padding:14px 16px; border-radius:11px; background:#F2F5F3;
+  color:var(--muted); font-size:14px;
+}
+.notice strong { color:var(--ink); }
 
 .primary, .secondary {
   border-radius:11px; padding:14px 20px; min-height:52px;
@@ -71,7 +79,35 @@ fieldset { border:0; padding:0; margin:22px 0; }
 #rail-fill { height:100%; background:var(--orange); width:0; transition:width .2s ease; }
 
 .meta { color:var(--muted); font-size:13px; margin:0 0 7px; }
+.question-head { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+.stage-badge {
+  flex:0 0 auto; border:1px solid var(--orange); border-radius:99px;
+  padding:4px 10px; color:var(--orange); background:var(--orange-soft);
+  font-size:12px; font-weight:800;
+}
+.stage-badge.calc { color:#376B61; border-color:#72A499; background:#E7F2EF; }
+.stimulus {
+  margin:10px 0 20px; padding:18px; border:1px solid var(--line);
+  border-radius:12px; background:#FCFAF6;
+}
+.stimulus h3 { margin:0 0 10px; font-family:var(--kai); color:var(--orange); font-size:21px; }
+.stimulus p { margin:6px 0; }
+.stimulus ul { margin:4px 0; padding-left:24px; }
+.stimulus-note { margin-top:12px !important; padding-top:10px; border-top:1px dashed var(--line); font-weight:700; }
+.table-scroll { overflow-x:auto; }
+.stimulus table { width:100%; border-collapse:collapse; min-width:420px; }
+.stimulus th, .stimulus td { padding:9px 12px; border:1px solid var(--line); text-align:left; }
+.stimulus th { background:var(--orange-soft); }
 .card h2 { font-size:24px; line-height:1.55; margin:0 0 20px; }
+.hint-btn {
+  border:1px solid var(--line); border-radius:99px; background:#fff;
+  color:var(--muted); padding:7px 13px; margin:-8px 0 14px; cursor:pointer;
+}
+.hint-btn:hover { border-color:var(--orange); color:var(--orange); }
+.hint-box {
+  margin:-4px 0 14px; padding:10px 13px; border-radius:8px;
+  color:#72551F; background:#FFF6D9; font-size:14px;
+}
 .options { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
 .option {
   display:flex; gap:10px; align-items:center; text-align:left;
@@ -103,6 +139,16 @@ fieldset { border:0; padding:0; margin:22px 0; }
   margin:18px 0;
 }
 .score strong { font-size:42px; color:var(--orange); }
+.dual-score { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin:18px 0; }
+.dual-score>div {
+  display:flex; flex-direction:column; padding:18px; border-radius:12px;
+  background:var(--orange-soft);
+}
+.dual-score>div:last-child { background:#E7F2EF; }
+.dual-score span { font-weight:800; font-size:14px; }
+.dual-score strong { font-size:38px; line-height:1.25; color:var(--orange); }
+.dual-score>div:last-child strong { color:#376B61; }
+.dual-score small { color:var(--muted); }
 .report h3 {
   font-size:14px; color:var(--muted); letter-spacing:.12em;
   border-bottom:1px solid var(--line); padding-bottom:7px;
@@ -120,99 +166,18 @@ fieldset { border:0; padding:0; margin:22px 0; }
 .result-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:28px; }
 .result-actions>* { flex:1; text-align:center; text-decoration:none; }
 .result-actions .primary { width:auto; }
+.report-note {
+  margin-top:18px; padding:12px 14px; border-left:4px solid var(--line);
+  color:var(--muted); background:#F7F7F5; font-size:13px;
+}
 
 @media(max-width:760px) {
-  .choices.three, .options { grid-template-columns:1fr; }
+  .choices.two, .choices.three, .choices.four, .options { grid-template-columns:1fr; }
   .hero h1 { font-size:34px; }
   .play-wrap { padding-top:110px; }
   .card, .setup { padding:18px; }
   .top-actions .tag { display:none; }
   .result-actions { flex-direction:column; }
+  .dual-score { grid-template-columns:1fr; }
+  .question-head { align-items:flex-start; }
 }
-
-/* ================= 偵探系統（偵探幣・商店・押注・陷阱怪） ================= */
-.daily-event {
-  background:var(--orange-soft); border:1px dashed var(--orange); color:var(--ink);
-  border-radius:12px; padding:10px 14px; margin-bottom:14px; font-size:14px; text-align:center;
-}
-.detective-home { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:14px; margin-bottom:18px; }
-.dh-line { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; }
-.coin-chip { background:var(--orange-soft); border:1px solid var(--line); border-radius:20px; padding:5px 13px; font-size:14px; }
-.titles { display:flex; flex-wrap:wrap; gap:7px; margin-top:9px; }
-.title-chip { background:#FFF6E2; border:1px solid var(--orange); color:var(--orange); border-radius:16px; padding:3px 11px; font-size:13px; }
-
-/* 資源列 */
-.detective-bar {
-  position:sticky; top:96px; z-index:5;
-  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
-  background:var(--card); border:1px solid var(--line); border-radius:14px;
-  padding:9px 12px; margin-bottom:14px; box-shadow:0 3px 0 rgba(44,36,28,.06);
-}
-.tool-row { display:flex; gap:7px; flex-wrap:wrap; }
-.tool-btn, .shop-btn {
-  font:inherit; font-size:14px; cursor:pointer; border-radius:20px; padding:7px 13px;
-  border:1px solid var(--line); background:#fff; color:var(--ink); min-height:40px;
-}
-.tool-btn:hover, .shop-btn:hover { border-color:var(--orange); }
-.shop-btn { margin-left:auto; background:var(--orange); color:#fff; border-color:var(--orange); }
-
-/* 商店 */
-.shop-modal { background:var(--card); border:2px solid var(--orange); border-radius:14px; padding:16px; margin-bottom:14px; }
-.shop-modal h3 { margin:0 0 4px; font-family:var(--kai); }
-.shop-list { display:flex; flex-direction:column; gap:9px; margin:12px 0; }
-.shop-row { display:flex; align-items:center; justify-content:space-between; gap:12px;
-  border:1px solid var(--line); border-radius:12px; padding:10px 13px; }
-.shop-info { display:flex; flex-direction:column; }
-.shop-info small { color:var(--muted); font-size:13px; }
-.buy-btn { font:inherit; font-size:14px; cursor:pointer; white-space:nowrap; min-height:42px;
-  border:2px solid var(--orange); background:#fff; color:var(--orange); border-radius:10px; padding:8px 14px; }
-.shop-msg { min-height:22px; color:var(--orange); font-size:14px; margin:6px 0 10px; }
-
-/* 信心押注 */
-.betting-zone { background:#FFFCF4; border:1px solid var(--line); border-radius:12px; padding:12px; margin:14px 0; }
-.bet-lead { margin:0 0 9px; font-size:15px; }
-.bet-choices { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; }
-.bet { border:2px solid var(--line); border-radius:12px; background:#fff; text-align:left;
-  padding:11px; cursor:pointer; color:var(--ink); font:inherit; min-height:62px; }
-.bet strong, .bet span { display:block; }
-.bet span { font-size:12px; color:var(--muted); margin-top:3px; }
-.bet.selected { border-color:var(--orange); background:var(--orange-soft); }
-
-/* 陷阱怪提示 */
-.monster-alert { background:var(--danger-soft); border:1px solid var(--danger); color:var(--danger);
-  border-radius:12px; padding:11px 14px; margin-top:13px; font-size:15px; }
-.monster-alert small { display:block; color:var(--ink); margin-top:4px; font-size:13px; }
-.fb-coins { color:var(--orange); font-size:14px; margin:8px 0 0; }
-.option.removed { opacity:.32; text-decoration:line-through; }
-
-/* 陷阱怪圖鑑 */
-.bestiary { display:flex; flex-direction:column; gap:9px; margin-top:12px; }
-.beast-card { display:flex; gap:12px; align-items:flex-start;
-  border:1px solid var(--line); border-radius:12px; padding:10px 13px; background:#fff; }
-.beast-card.locked { opacity:.55; }
-.beast-face { font-size:26px; width:38px; text-align:center; flex:none; }
-.beast-body { display:flex; flex-direction:column; }
-.beast-body small { color:var(--muted); font-size:13px; }
-.beast-count { color:var(--orange) !important; margin-top:2px; }
-
-/* 復仇任務 */
-.revenge { background:#FFF6E2; border:1px solid var(--orange); border-radius:12px; padding:14px; margin:16px 0; }
-.revenge p { margin:0 0 10px; }
-
-@media (max-width:640px){
-  .choices.three { grid-template-columns:1fr 1fr; }
-  .bet-choices { grid-template-columns:1fr; }
-  .detective-bar { position:static; }
-  .shop-btn { margin-left:0; }
-}
-
-/* 道具說明與押注儀式感 */
-.help-btn { font:inherit; cursor:pointer; width:40px; min-height:40px; border-radius:50%;
-  border:1px solid var(--line); background:#fff; color:var(--muted); }
-.help-btn:hover { border-color:var(--orange); color:var(--orange); }
-.tool-help { background:var(--orange-soft); border:1px solid var(--line); border-radius:12px;
-  padding:11px 14px; margin-bottom:13px; font-size:14px; }
-.tool-help p { margin:3px 0; }
-.card.gamble-on { border-color:var(--danger); box-shadow:0 3px 0 rgba(170,72,63,.18); }
-.card.gamble-on .bet-lead { color:var(--danger); font-weight:700; }
-.card.gamble-on .option { border-color:var(--danger); }
