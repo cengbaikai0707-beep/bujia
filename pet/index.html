@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>偵探夥伴｜永齡學習偵探社</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="lobby" href="../index.html">← 回學習大廳</a>
+
+    <!-- 領養畫面（尚未有寵物時顯示） -->
+    <section id="screen-adopt" class="screen hidden">
+      <div class="hero">
+        <div class="icon-mark">🥚</div>
+        <p class="eyebrow">偵探社新成員</p>
+        <h1>領養偵探夥伴</h1>
+        <p>選一顆偵探蛋帶回家。多摸摸牠、餵養牠，就會孵化。<br>破解案件獲得的進化材料，能讓牠一路成長為名偵探夥伴。</p>
+      </div>
+      <div class="egg-choices" id="egg-choices"></div>
+      <label class="name-field">幫牠取個名字（最多 10 字）
+        <input id="pet-name-input" maxlength="10" placeholder="例如：福爾摩喵">
+      </label>
+      <button id="btn-adopt" class="primary">🏠 帶回偵探社</button>
+      <p id="adopt-message" class="message"></p>
+    </section>
+
+    <!-- 寵物主畫面 -->
+    <section id="screen-pet" class="screen hidden">
+      <div class="pet-stage-card">
+        <div class="pet-head">
+          <div>
+            <p class="eyebrow" id="pet-species"></p>
+            <h1 id="pet-name"></h1>
+          </div>
+          <span class="stage-chip" id="pet-stage"></span>
+        </div>
+        <div class="pet-avatar" id="pet-avatar">🥚</div>
+        <p class="pet-mood-line" id="pet-line"></p>
+
+        <div class="stat">
+          <div><span>🍖 飽足</span><b id="stat-hunger-num"></b></div>
+          <div class="bar"><i id="stat-hunger"></i></div>
+        </div>
+        <div class="stat">
+          <div><span>💛 心情</span><b id="stat-mood-num"></b></div>
+          <div class="bar"><i id="stat-mood"></i></div>
+        </div>
+
+        <div class="actions" id="pet-actions"></div>
+        <p id="pet-message" class="message"></p>
+      </div>
+
+      <div class="panel">
+        <h2>🧬 進化研究</h2>
+        <p id="evolve-status" class="muted"></p>
+        <div class="mat-list" id="mat-list"></div>
+        <button id="btn-evolve" class="primary">✨ 進化</button>
+        <p class="muted small">進化材料無法購買：在各館案件中拿到 85 分以上（每館每天前兩次有效），或完成聯合案件局的支線，就會掉落。</p>
+      </div>
+
+      <div class="panel">
+        <h2>🏪 夥伴補給站</h2>
+        <p class="muted">目前偵探幣：🪙 <b id="coins"></b></p>
+        <div class="shop-list" id="pet-shop"></div>
+        <p id="shop-message" class="message"></p>
+      </div>
+    </section>
+  </main>
+
+  <script src="../detective-system.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

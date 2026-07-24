@@ -3,6 +3,20 @@
   const DS = window.DetectiveSystem;
   const CASES = window.GUILD_CASES;
   const MYTHS = window.GUILD_MYTH_QUESTIONS;
+
+  // 每隻迷思怪有多題，輪替抽出，並避免連續兩次抽到同一題。
+  // 若某隻怪仍是舊的單題物件格式，直接沿用，不會壞掉。
+  const lastMyth = {};
+  function pickMythQuestion(monsterId) {
+    const set = MYTHS[monsterId];
+    if (!set) return { domain:"迷思救援", q:"再讀一次題目，說說看你原本是怎麼想的？", opts:["跳過","重讀問句並說出每個數字的意思"], ans:1, focus:"錯誤歸因", exp:"說出自己的想法，才找得到卡住的地方。" };
+    if (!Array.isArray(set)) return set;
+    if (set.length === 1) return set[0];
+    let i = Math.floor(Math.random() * set.length);
+    if (i === lastMyth[monsterId]) i = (i + 1) % set.length;
+    lastMyth[monsterId] = i;
+    return set[i];
+  }
   const $ = id => document.getElementById(id);
   const state = { id:null, title:"", queue:[], index:0, correct:0, answers:[], locked:false, retryArmed:false, retryUsed:false };
 
@@ -60,7 +74,7 @@
     let queue, title;
     if (id === "mythRescue") {
       const targets = DS.rescueTargets().slice(0, 6);
-      queue = targets.map(target => ({ ...MYTHS[target.id], monster:target }));
+      queue = targets.map(target => Object.assign({}, pickMythQuestion(target.id), { monster:target }));
       title = "迷思救援";
     } else {
       queue = CASES[id].questions;
@@ -102,7 +116,7 @@
     state.locked=true;
     document.querySelectorAll("#g-options .option").forEach(node=>{node.disabled=true;if(node.dataset.correct==="1")node.classList.add("correct");});
     if(!ok)button.classList.add("wrong"); else state.correct++;
-    state.answers.push({correct:ok,myth:q.monster?.id || q.myth || "unknown_fog"});
+    state.answers.push({correct:ok,myth:(q.monster && q.monster.id) || q.myth || "unknown_fog"});
     $("g-feedback").className=`feedback ${ok?"":"bad"}`;
     $("g-feedback").textContent=(ok?"判斷成立。":"證據不支持這個判斷。")+q.exp;
     $("g-next").textContent=state.index===state.queue.length-1?"完成案件":"下一份證物 →";
@@ -116,7 +130,7 @@
   }
   function useScanner() {
     if(state.locked || !DS.useItem("mythScanner").success)return;
-    const q=state.queue[state.index], monster=DS.monsterFor(q.monster?.id || q.myth || "unknown_fog");
+    const q=state.queue[state.index], monster=DS.monsterFor((q.monster && q.monster.id) || q.myth || "unknown_fog");
     $("g-hint").textContent=`考點：${q.focus}。小心「${monster.name}」：${monster.desc}`;
     $("g-hint").classList.remove("hidden"); renderTools();
   }

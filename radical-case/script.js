@@ -114,11 +114,11 @@ function drawQuestions(level, mode, stage) {
   function takeFrom(candidates) {
     const avail = candidates.filter(q => !used.has(q.id));
     if (avail.length === 0) return null;
-    const minSkill = Math.min(...avail.map(q => skillCount[q.skillType] ?? 0));
-    const best = avail.filter(q => (skillCount[q.skillType] ?? 0) === minSkill);
+    const minSkill = Math.min.apply(null, avail.map(q => skillCount[q.skillType] || 0));
+    const best = avail.filter(q => (skillCount[q.skillType] || 0) === minSkill);
     const chosen = best[Math.floor(Math.random() * best.length)];
     used.add(chosen.id);
-    skillCount[chosen.skillType] = (skillCount[chosen.skillType] ?? 0) + 1;
+    skillCount[chosen.skillType] = (skillCount[chosen.skillType] || 0) + 1;
     picked.push(chosen);
     return chosen;
   }

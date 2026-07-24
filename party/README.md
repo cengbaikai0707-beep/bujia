@@ -2,7 +2,7 @@
 
 給國小的故事型推理闖關：三章調查＋Boss 戰，支援單機故事模式與四線協作模式（四台平板各走一條線，湊齊密語通關碼）。
 
-由 `../hub.html` 進入，或直接開 `party/index.html`。
+由 `../index.html` 進入，或直接開 `party/index.html`。
 
 ## 檔案
 

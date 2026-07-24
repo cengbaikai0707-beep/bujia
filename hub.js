@@ -5,7 +5,7 @@
   let newType = "individual";
 
   function esc(value) {
-    return String(value ?? "").replace(/[&<>"']/g, char => ({
+    return String(value == null ? "" : value).replace(/[&<>"']/g, char => ({
       "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
     })[char]);
   }
@@ -109,7 +109,8 @@
   }
 
   function openModal(id) {
-    $(id)?.classList.remove("hidden");
+    var box = $(id);
+    if (box) box.classList.remove("hidden");
     renderAll();
   }
   function closeModals() {

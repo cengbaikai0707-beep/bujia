@@ -1,3 +1,24 @@
+/* 舊版平板相容性補強（ES2019 以下裝置）：
+   本檔在每個模組都最先載入，因此 polyfill 放這裡即可覆蓋全站。
+   若確定所有裝置都在 iOS 13.4 / Chrome 80 以上，可安全刪除這一段。 */
+(function () {
+  if (!Array.prototype.flatMap) {
+    Array.prototype.flatMap = function (fn, thisArg) {
+      return this.reduce(function (acc, v, i, arr) {
+        var r = fn.call(thisArg, v, i, arr);
+        return acc.concat(Array.isArray(r) ? r : [r]);
+      }, []);
+    };
+  }
+  if (!Object.fromEntries) {
+    Object.fromEntries = function (entries) {
+      var out = {};
+      Array.prototype.forEach.call(entries, function (pair) { out[pair[0]] = pair[1]; });
+      return out;
+    };
+  }
+})();
+
 /**
  * 永齡學習偵探社・共用世界系統 v3
  * 純前端：多個個人／小隊檔案、偵探幣、證據、背包、迷思、任務與跨館解鎖。
@@ -86,7 +107,9 @@ const DetectiveSystem = {
       moduleSeals:{}, moduleBest:{}, myths:{}, titles:[],
       unlocks:{ sealedArchive:false, grandCase:false },
       casesCleared:{}, history:[],
-      questDay:"", quest:{ missions:0, evidence:0, modules:[], claimed:{} }
+      questDay:"", quest:{ missions:0, evidence:0, modules:[], claimed:{} },
+      farmDay:"", farmCount:{},
+      pet:null, petMat:{}
     };
   },
 
@@ -100,9 +123,9 @@ const DetectiveSystem = {
         const legacy = JSON.parse(localStorage.getItem(this.LEGACY_KEY) || "null");
         if (legacy) {
           first.coins = Math.max(20, Number(legacy.coins) || 0);
-          first.inventory.clueLens += Number(legacy.inventory?.magnifier) || 0;
-          first.inventory.retryTicket += Number(legacy.inventory?.calmCard) || 0;
-          first.inventory.mythScanner += Number(legacy.inventory?.detectiveNote) || 0;
+          first.inventory.clueLens += Number((legacy.inventory || {}).magnifier) || 0;
+          first.inventory.retryTicket += Number((legacy.inventory || {}).calmCard) || 0;
+          first.inventory.mythScanner += Number((legacy.inventory || {}).detectiveNote) || 0;
           first.myths = Object.assign({}, legacy.trapStats || {});
           first.titles = Array.isArray(legacy.titles) ? legacy.titles.slice() : [];
         }
@@ -132,6 +155,8 @@ const DetectiveSystem = {
     profile.myths = Object.assign({}, profile.myths || {});
     profile.unlocks = Object.assign(base.unlocks, profile.unlocks || {});
     profile.casesCleared = Object.assign({}, profile.casesCleared || {});
+    profile.farmCount = Object.assign({}, profile.farmCount || {});
+    profile.petMat = Object.assign({}, profile.petMat || {});
     if (!Array.isArray(profile.titles)) profile.titles = [];
     if (!Array.isArray(profile.history)) profile.history = [];
   },
@@ -202,7 +227,7 @@ const DetectiveSystem = {
     if ((this.state.inventory[itemId] || 0) < 1) return { success:false, msg:"背包裡沒有這項道具。" };
     this.state.inventory[itemId] -= 1; this.save(); return { success:true };
   },
-  priceOf(itemId) { return this.items[itemId]?.cost || 0; },
+  priceOf(itemId) { return (this.items[itemId] || {}).cost || 0; },
 
   monsterFor(tag) {
     const id = this.trapMap[tag] || (this.trapMonsters[tag] ? tag : "unknown_fog");
@@ -249,8 +274,13 @@ const DetectiveSystem = {
     this.state.quest.claimed[id] = true;
     this.state.coins += quest.reward;
     this.state.xp += 5;
+    let bonus = "";
+    if (id === "mission") {
+      this.state.inventory.petFood = (this.state.inventory.petFood || 0) + 1;
+      bonus = "、🍖偵探飼料 ×1";
+    }
     this.save();
-    return { success:true, msg:`委託完成，取得 ${quest.reward} 枚偵探幣。` };
+    return { success:true, msg:`委託完成，取得 ${quest.reward} 枚偵探幣${bonus}。` };
   },
 
   completeModule(moduleId, summary={}) {
@@ -264,6 +294,17 @@ const DetectiveSystem = {
     }
 
     let coins = 6 + Math.floor(accuracy / 10);
+    // 正確率太低視為亂點，不給幣（但仍記錄迷思、仍給少量經驗，不懲罰認真但答錯的孩子）
+    if (accuracy < 40) coins = 0;
+    else if (accuracy < 60) coins = Math.floor(coins / 2);
+    // 同一館同一天重複完成，第 3 次起收益折半、第 5 次起歸零，避免重跑刷幣
+    const today = new Date().toISOString().slice(0, 10);
+    if (this.state.farmDay !== today) { this.state.farmDay = today; this.state.farmCount = {}; }
+    const runs = (this.state.farmCount[moduleId] || 0);
+    if (runs >= 4) coins = 0;
+    else if (runs >= 2) coins = Math.floor(coins / 2);
+    this.state.farmCount[moduleId] = runs + 1;
+
     let evidence = accuracy >= 60 ? 1 : 0;
     if (accuracy >= 85) evidence += 1;
     if (summary.reasoning && accuracy >= 70) evidence += 1;
@@ -278,6 +319,13 @@ const DetectiveSystem = {
       this.state.moduleSeals[moduleId] = (this.state.moduleSeals[moduleId] || 0) + 1;
     }
     this.state.moduleBest[moduleId] = Math.max(this.state.moduleBest[moduleId] || 0, accuracy);
+
+    // 進化材料：高正確率且非重複刷關才掉落（防止刷材料）
+    let petMatDrop = null;
+    if (accuracy >= 85 && runs < 2) {
+      this.state.petMat[moduleId] = (this.state.petMat[moduleId] || 0) + 1;
+      petMatDrop = this.petMaterials[moduleId];
+    }
 
     const mistakes = Array.isArray(summary.mistakes) ? summary.mistakes.slice(0, 8) : [];
     mistakes.forEach(tag => this.recordMyth(tag));
@@ -294,8 +342,8 @@ const DetectiveSystem = {
     this.state.history = this.state.history.slice(0, 60);
     this.checkUnlocks();
     this.save();
-    const result = { coins, evidence, rank:this.rankFor(), module:this.modules[moduleId] };
-    this.toast(`完成${result.module.name}：＋${coins} 幣${evidence ? `、＋${evidence} 證據` : ""}`);
+    const result = { coins, evidence, rank:this.rankFor(), module:this.modules[moduleId], petMatDrop };
+    this.toast(`完成${result.module.name}：＋${coins} 幣${evidence ? `、＋${evidence} 證據` : ""}${petMatDrop ? `、＋1 ${petMatDrop.emoji}${petMatDrop.name}` : ""}`);
     return result;
   },
 
@@ -336,6 +384,12 @@ const DetectiveSystem = {
     this.state.xp += 30;
     if (id !== "mythRescue") this.state.casesCleared[id] = true;
     if (!this.state.titles.includes(reward.title)) this.state.titles.push(reward.title);
+    // 支線成就掉落 2 個隨機進化材料
+    const matIds = Object.keys(this.petMaterials);
+    for (let i = 0; i < 2; i++) {
+      const pick = matIds[Math.floor(Math.random() * matIds.length)];
+      this.state.petMat[pick] = (this.state.petMat[pick] || 0) + 1;
+    }
     this.checkUnlocks(); this.save();
     return reward;
   },
@@ -343,6 +397,206 @@ const DetectiveSystem = {
     if (this.distinctModules().length >= 5 && this.state.evidence >= 8) {
       this.state.unlocks.grandCase = true;
     }
+  },
+
+  /* ---------- 偵探夥伴（電子寵物）系統 ---------- */
+
+  petSpecies: {
+    cat: { id:"cat", name:"推理貓", stages:["🥚","🐱","🐈","🐈‍⬛"] },
+    dog: { id:"dog", name:"線索犬", stages:["🥚","🐶","🐕","🦮"] },
+    owl: { id:"owl", name:"檔案鴞", stages:["🥚","🐣","🐦","🦉"] }
+  },
+  petStageNames: ["偵探蛋","幼年期","少年期","成熟期"],
+
+  petItems: {
+    petFood:  { id:"petFood",  name:"偵探飼料",   emoji:"🍖", cost:6,  desc:"飽足感 +40。" },
+    petSnack: { id:"petSnack", name:"特調點心",   emoji:"🍮", cost:10, desc:"飽足感 +20、心情 +15。" },
+    petToy:   { id:"petToy",   name:"線索毛線球", emoji:"🧶", cost:8,  desc:"心情 +35。" },
+    petMed:   { id:"petMed",   name:"偵探藥水",   emoji:"💊", cost:15, desc:"治好生病，恢復基本精神。" }
+  },
+
+  petMaterials: {
+    summer:  { id:"summer",  name:"陽光碎片", emoji:"🌞" },
+    chinese: { id:"chinese", name:"文字結晶", emoji:"🖋️" },
+    math:    { id:"math",    name:"數字齒輪", emoji:"⚙️" },
+    reading: { id:"reading", name:"證詞捲軸", emoji:"📜" },
+    party:   { id:"party",   name:"合作徽記", emoji:"🤝" },
+    battle:  { id:"battle",  name:"核心碎屑", emoji:"💎" },
+    radical: { id:"radical", name:"字族書頁", emoji:"📖" }
+  },
+
+  // 進化條件：材料總數／來自幾個不同館。stage 0→1 只需照顧次數。
+  petEvolveRules: [
+    { care:5 },
+    { mat:4,  kinds:2 },
+    { mat:10, kinds:4 }
+  ],
+
+  // 衰退速率（每小時）：飽足約 4 天歸零、心情約 3 天歸零。
+  // 飽足歸零累計超過 36 小時才生病；不會死亡，藥水可治。
+  PET_HUNGER_RATE: 1.05,
+  PET_MOOD_RATE: 1.4,
+  PET_SICK_HOURS: 36,
+  PET_MAX_OFFLINE_HOURS: 24 * 14,
+
+  adoptPet(speciesId, name) {
+    if (this.state.pet) return { success:false, msg:"你已經有一位偵探夥伴了。" };
+    const species = this.petSpecies[speciesId];
+    if (!species) return { success:false, msg:"請先選擇一顆偵探蛋。" };
+    const clean = String(name || "").trim().slice(0, 10) || species.name;
+    this.state.pet = {
+      species:speciesId, name:clean, stage:0,
+      hunger:80, mood:80, sick:false, zeroHours:0,
+      care:0, careDay:"", petsToday:0,
+      lastTick:new Date().toISOString(), adoptedAt:new Date().toISOString()
+    };
+    this.save();
+    return { success:true, msg:`${species.stages[0]} 偵探蛋「${clean}」已加入偵探社！多照顧牠就會孵化。` };
+  },
+
+  petTick() {
+    const pet = this.state.pet;
+    if (!pet) return null;
+    const now = Date.now();
+    const last = Date.parse(pet.lastTick) || now;
+    let hours = Math.max(0, (now - last) / 3600000);
+    hours = Math.min(hours, this.PET_MAX_OFFLINE_HOURS);
+    if (pet.stage > 0 && hours > 0) {
+      const hungerBefore = pet.hunger;
+      pet.hunger = Math.max(0, pet.hunger - hours * this.PET_HUNGER_RATE);
+      pet.mood = Math.max(0, pet.mood - hours * this.PET_MOOD_RATE);
+      // 累計「餓到見底」的時數，超過門檻才生病
+      const hoursToZero = hungerBefore / this.PET_HUNGER_RATE;
+      if (hours > hoursToZero) pet.zeroHours += hours - Math.max(0, hoursToZero);
+      else if (pet.hunger > 0) pet.zeroHours = 0;
+      if (pet.zeroHours >= this.PET_SICK_HOURS) pet.sick = true;
+    }
+    pet.lastTick = new Date(now).toISOString();
+    const day = new Date().toISOString().slice(0, 10);
+    if (pet.careDay !== day) { pet.careDay = day; pet.petsToday = 0; }
+    this.save();
+    return pet;
+  },
+
+  petCareOnce(pet) {
+    pet.care += 1;
+    if (pet.stage === 0 && pet.care >= this.petEvolveRules[0].care) {
+      pet.stage = 1;
+      pet.hunger = 90; pet.mood = 90;
+      return true; // 孵化了
+    }
+    return false;
+  },
+
+  petUse(itemId) {
+    const pet = this.petTick();
+    if (!pet) return { success:false, msg:"還沒有偵探夥伴。" };
+    const item = this.petItems[itemId];
+    if (!item) return { success:false, msg:"找不到這項用品。" };
+    if ((this.state.inventory[itemId] || 0) < 1) return { success:false, msg:`背包裡沒有「${item.name}」，可以到下方補給站購買。` };
+    if (itemId !== "petMed" && pet.sick) return { success:false, msg:`${pet.name} 生病了，要先喝偵探藥水才有精神。` };
+    this.state.inventory[itemId] -= 1;
+    let msg = "";
+    if (itemId === "petFood")  { pet.hunger = Math.min(100, pet.hunger + 40); pet.zeroHours = 0; msg = `${pet.name} 吃得津津有味！`; }
+    if (itemId === "petSnack") { pet.hunger = Math.min(100, pet.hunger + 20); pet.mood = Math.min(100, pet.mood + 15); pet.zeroHours = 0; msg = `${pet.name} 開心地舔舔嘴巴。`; }
+    if (itemId === "petToy")   { pet.mood = Math.min(100, pet.mood + 35); msg = `${pet.name} 玩得不亦樂乎！`; }
+    if (itemId === "petMed")   {
+      if (!pet.sick) return { success:false, msg:`${pet.name} 很健康，不需要藥水。` };
+      pet.sick = false; pet.zeroHours = 0;
+      pet.hunger = Math.max(pet.hunger, 30); pet.mood = Math.max(pet.mood, 30);
+      msg = `${pet.name} 恢復健康了！記得常常回來看牠。`;
+    }
+    const hatched = this.petCareOnce(pet);
+    this.save();
+    return { success:true, msg, hatched };
+  },
+
+  petPat() {
+    const pet = this.petTick();
+    if (!pet) return { success:false, msg:"還沒有偵探夥伴。" };
+    if (pet.sick) return { success:false, msg:`${pet.name} 生病了，要先喝偵探藥水。` };
+    if (pet.petsToday >= 5) return { success:false, msg:`${pet.name} 今天被摸得很滿足了，明天再來吧。` };
+    pet.petsToday += 1;
+    pet.mood = Math.min(100, pet.mood + 8);
+    const hatched = this.petCareOnce(pet);
+    this.save();
+    return { success:true, msg:pet.stage === 0 ? "蛋殼微微發亮，好像感受到你的溫度。" : `${pet.name} 瞇起眼睛蹭蹭你。`, hatched };
+  },
+
+  buyPetItem(itemId) {
+    const item = this.petItems[itemId];
+    if (!item) return { success:false, msg:"找不到這項用品。" };
+    if (this.state.coins < item.cost) return { success:false, msg:`偵探幣不足，還差 ${item.cost - this.state.coins} 枚。` };
+    this.state.coins -= item.cost;
+    this.state.inventory[itemId] = (this.state.inventory[itemId] || 0) + 1;
+    this.save();
+    return { success:true, msg:`已購買「${item.name}」。` };
+  },
+
+  petMatSummary() {
+    const entries = Object.entries(this.state.petMat).filter(([, n]) => n > 0);
+    return {
+      total: entries.reduce((sum, [, n]) => sum + n, 0),
+      kinds: entries.length,
+      entries
+    };
+  },
+
+  petEvolveCheck() {
+    const pet = this.state.pet;
+    if (!pet) return { ready:false, msg:"還沒有偵探夥伴。" };
+    if (pet.stage === 0) {
+      const need = this.petEvolveRules[0].care;
+      return { ready:false, msg:`再照顧 ${Math.max(0, need - pet.care)} 次就會孵化。` };
+    }
+    if (pet.stage >= 3) return { ready:false, done:true, msg:"已經是成熟期的名偵探夥伴了。" };
+    const rule = this.petEvolveRules[pet.stage];
+    const mat = this.petMatSummary();
+    const lacks = [];
+    if (mat.total < rule.mat) lacks.push(`進化材料 ${mat.total}/${rule.mat}`);
+    if (mat.kinds < rule.kinds) lacks.push(`材料來自 ${mat.kinds}/${rule.kinds} 個不同館`);
+    if (pet.sick) lacks.push("需要先治好生病");
+    if (pet.hunger < 40 || pet.mood < 40) lacks.push("飽足與心情需達 40 以上");
+    return lacks.length
+      ? { ready:false, rule, msg:`還差：${lacks.join("、")}` }
+      : { ready:true, rule, msg:"進化條件已達成！" };
+  },
+
+  petEvolve() {
+    const pet = this.petTick();
+    const check = this.petEvolveCheck();
+    if (!check.ready) return { success:false, msg:check.msg };
+    // 從數量最多的材料開始扣除
+    let remain = check.rule.mat;
+    Object.entries(this.state.petMat)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([id, count]) => {
+        if (remain <= 0) return;
+        const used = Math.min(count, remain);
+        this.state.petMat[id] -= used;
+        if (!this.state.petMat[id]) delete this.state.petMat[id];
+        remain -= used;
+      });
+    pet.stage += 1;
+    pet.hunger = 100; pet.mood = 100;
+    this.save();
+    const species = this.petSpecies[pet.species];
+    return { success:true, msg:`${pet.name} 進化為${this.petStageNames[pet.stage]}的${species.name} ${species.stages[pet.stage]}！` };
+  },
+
+  petStatus() {
+    const pet = this.petTick();
+    if (!pet) return null;
+    const species = this.petSpecies[pet.species];
+    return {
+      pet, species,
+      emoji: species.stages[pet.stage],
+      stageName: this.petStageNames[pet.stage],
+      hunger: Math.round(pet.hunger),
+      mood: Math.round(pet.mood),
+      sick: pet.sick,
+      evolve: this.petEvolveCheck()
+    };
   },
 
   exportActive() {
@@ -360,7 +614,7 @@ const DetectiveSystem = {
     try { data = typeof text === "string" ? JSON.parse(text) : text; } catch (e) {
       return { success:false, msg:"檔案格式無法讀取。" };
     }
-    const raw = data?.profile || data;
+    const raw = (data && data.profile) || data;
     if (!raw || !raw.name) return { success:false, msg:"這不是有效的偵探檔案。" };
     const id = "p_" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
     const profile = Object.assign(this.emptyProfile(id, raw.name, raw.type), raw, { id });

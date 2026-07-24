@@ -1,0 +1,67 @@
+:root{--ink:#182633;--muted:#64727e;--navy:#183c57;--gold:#e0a62d;--rose:#c06077;--line:#d6deda;--shadow:0 10px 28px #17384c14;--sans:"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;--kai:"標楷體","BiauKai","DFKai-SB","KaiTi",serif}
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(180deg,#fdeef2 0,#f4f1e8 340px,#eef1ed 100%);color:var(--ink);font-family:var(--sans)}
+button,input{font:inherit}
+.wrap{width:min(680px,calc(100% - 28px));margin:auto;padding:28px 0 70px}
+.lobby{display:inline-block;margin-bottom:16px;color:#254a60;font-weight:800;text-decoration:none}
+.hidden{display:none!important}
+.hero{text-align:center;margin-bottom:22px}
+.icon-mark{font-size:52px}
+.eyebrow{margin:6px 0 2px;font-size:12px;font-weight:800;letter-spacing:.15em;color:#8a5560;text-transform:uppercase}
+h1{font:800 38px/1.15 var(--kai);letter-spacing:.08em;color:var(--navy);margin:4px 0 10px}
+.hero p{color:var(--muted);line-height:1.8;margin:0}
+.message{min-height:22px;margin:10px 0 0;color:#975824;font-weight:800;text-align:center}
+.muted{color:var(--muted);line-height:1.6}
+.small{font-size:12px}
+
+/* 領養 */
+.egg-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:8px 0 16px}
+.egg{border:2px solid var(--line);border-radius:16px;background:#fff;padding:16px 10px;text-align:center;cursor:pointer;transition:.15s;box-shadow:0 4px 0 #18212b10}
+.egg:hover{transform:translateY(-2px)}
+.egg.selected{border-color:var(--rose);background:#fdf3f5;box-shadow:var(--shadow)}
+.egg .big{font-size:42px;display:block;margin-bottom:6px}
+.egg strong{display:block;font:700 18px var(--kai)}
+.egg small{color:var(--muted)}
+.name-field{display:grid;gap:6px;margin:12px 0;font-weight:800}
+.name-field input{border:1px solid #b9c7ca;border-radius:10px;padding:11px;background:#fff}
+.primary{width:100%;border:1px solid var(--navy);border-radius:11px;background:var(--navy);color:#fff;padding:12px;font-weight:900;cursor:pointer}
+.primary:disabled{opacity:.45;cursor:not-allowed}
+
+/* 寵物主畫面 */
+.pet-stage-card,.panel{background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:22px;margin-bottom:18px}
+.pet-head{display:flex;justify-content:space-between;align-items:start;gap:10px}
+.pet-head h1{font-size:30px;margin:0}
+.stage-chip{padding:6px 12px;border-radius:999px;background:#fff2c8;color:#604a11;font-weight:900;font-size:13px;white-space:nowrap}
+.pet-avatar{font-size:96px;text-align:center;margin:14px 0 4px;transition:.3s;user-select:none}
+.pet-avatar.sick{filter:grayscale(.8);opacity:.75}
+.pet-avatar.bounce{animation:bounce .5s}
+@keyframes bounce{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px) scale(1.05)}}
+.pet-mood-line{text-align:center;color:var(--muted);margin:0 0 16px;min-height:20px}
+.stat{margin:10px 0}
+.stat>div:first-child{display:flex;justify-content:space-between;font-size:13px;font-weight:800;color:#36566c;margin-bottom:5px}
+.bar{height:12px;border-radius:99px;background:#eceff0;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#2e7892,var(--gold));transition:.3s}
+.bar i.low{background:#c4574a}
+.actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:16px}
+.actions button{border:1px solid #bdcacd;border-radius:11px;background:#fff;padding:10px 6px;font-weight:800;color:#254a60;cursor:pointer}
+.actions button:hover:not(:disabled){background:#edf5f6}
+.actions button:disabled{opacity:.45;cursor:not-allowed}
+.actions button small{display:block;font-weight:600;color:var(--muted);margin-top:2px}
+
+/* 進化與商店 */
+.panel h2{margin:0 0 8px;font:700 24px var(--kai);color:var(--navy)}
+.mat-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:12px 0}
+.mat{display:flex;gap:8px;align-items:center;padding:9px 10px;border-radius:10px;background:#f0f5f4;font-size:13px}
+.mat span{font-size:20px}
+.mat b{margin-left:auto}
+.mat.zero{opacity:.45}
+.shop-list{display:grid;gap:9px;margin-top:10px}
+.shop-item{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:12px;border:1px solid var(--line);border-radius:13px}
+.shop-item .item-icon{font-size:26px}
+.shop-item strong{display:block}
+.shop-item p{margin:3px 0;color:var(--muted);font-size:13px}
+.shop-item small{color:#527286}
+.shop-item button{border:1px solid #bdcacd;border-radius:9px;background:#fff;padding:8px 12px;color:#254a60;font-weight:800;cursor:pointer}
+.shop-item button:hover:not(:disabled){background:#edf5f6}
+.shop-item button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:520px){.egg-choices{grid-template-columns:1fr}h1{font-size:30px}.pet-avatar{font-size:80px}}
