@@ -179,6 +179,7 @@ const DetectiveSystem = {
       const pet = profile.pets[speciesId];
       pet.species = pet.species || speciesId;
       if (pet.bond == null) pet.bond = Number(pet.care || 0);
+      if (!Array.isArray(pet.growthModules)) pet.growthModules = [];
       if (!pet.accessory) pet.accessory = "none";
       if (!pet.room) pet.room = "study";
       if (pet.sick == null) pet.sick = false;
@@ -501,11 +502,11 @@ const DetectiveSystem = {
     radical: { id:"radical", name:"字族書頁", emoji:"📖" }
   },
 
-  // 進化條件：材料總數／來自幾個不同館。stage 0→1 只需照顧次數。
+  // 七館依 2＋2＋3 分散到三個階段；玩家可決定順序，但同館不重複計入。
   petEvolveRules: [
-    { care:3 },
-    { mat:3, kinds:2 },
-    { mat:6, kinds:3 }
+    { mat:2, kinds:2 },
+    { mat:2, kinds:2 },
+    { mat:3, kinds:3 }
   ],
 
   // 一週一次使用也不會受到重罰；狀態最低停在安全值，不會因離線生病或死亡。
@@ -544,6 +545,7 @@ const DetectiveSystem = {
       species:speciesId, name:clean, stage:0,
       hunger:80, mood:80, sick:false, zeroHours:0,
       care:0, bond:0, careDay:"", petsToday:0,
+      growthModules:[],
       accessory:"none", room:"study",
       lastTick:new Date().toISOString(), adoptedAt:new Date().toISOString()
     };
@@ -551,7 +553,7 @@ const DetectiveSystem = {
     this.state.activePetId = speciesId;
     this.state.pet = pet;
     this.save();
-    return { success:true, msg:`${species.stages[0]} 偵探蛋「${clean}」已加入偵探社！多照顧牠就會孵化。` };
+    return { success:true, msg:`${species.stages[0]} 偵探蛋「${clean}」已加入偵探社！先自由選擇兩館取得材料，就能孵化。` };
   },
 
   switchPet(speciesId) {
@@ -585,11 +587,7 @@ const DetectiveSystem = {
   petCareOnce(pet) {
     pet.care += 1;
     pet.bond = (pet.bond || 0) + 1;
-    if (pet.stage === 0 && pet.care >= this.petEvolveRules[0].care) {
-      pet.stage = 1;
-      pet.hunger = 90; pet.mood = 90;
-      return true; // 孵化了
-    }
+    // 照顧增加羈絆；孵化則依本階段蒐集到的不同館別材料判定。
     return false;
   },
 
@@ -679,46 +677,50 @@ const DetectiveSystem = {
     };
   },
 
+  petRouteFor(pet, stage) {
+    if (!pet) return [];
+    const used = new Set(Array.isArray(pet.growthModules) ? pet.growthModules : []);
+    return Object.keys(this.modules).filter(id => !used.has(id));
+  },
+
+  petRouteNames(route) {
+    return route.map(id => `${(this.modules[id] || {}).icon || "🏛️"}${(this.modules[id] || {}).name || id}`);
+  },
+
   petEvolveCheck() {
     const pet = this.state.pet;
     if (!pet) return { ready:false, msg:"還沒有偵探夥伴。" };
-    if (pet.stage === 0) {
-      const need = this.petEvolveRules[0].care;
-      return { ready:false, msg:`再照顧 ${Math.max(0, need - pet.care)} 次就會孵化。` };
-    }
     if (pet.stage >= 3) return { ready:false, done:true, msg:"已經是成熟期的名偵探夥伴了。" };
     const rule = this.petEvolveRules[pet.stage];
-    const mat = this.petMatSummary();
+    const route = this.petRouteFor(pet);
+    const available = route.filter(id => (this.state.petMat[id] || 0) >= 1);
+    const selected = available.slice(0, rule.kinds);
     const lacks = [];
-    if (mat.total < rule.mat) lacks.push(`進化材料 ${mat.total}/${rule.mat}`);
-    if (mat.kinds < rule.kinds) lacks.push(`材料來自 ${mat.kinds}/${rule.kinds} 個不同館`);
+    if (selected.length < rule.kinds) lacks.push(`尚需 ${rule.kinds - selected.length} 個未使用過的館別材料`);
     if (pet.sick) lacks.push("需要先治好生病");
     if (pet.hunger < 40 || pet.mood < 40) lacks.push("飽足與心情需達 40 以上");
+    const action = pet.stage === 0 ? "孵化" : "進化";
     return lacks.length
-      ? { ready:false, rule, msg:`還差：${lacks.join("、")}` }
-      : { ready:true, rule, msg:"進化條件已達成！" };
+      ? { ready:false, rule:Object.assign({}, rule, { modules:selected, eligible:route }), msg:`本階段可從尚未使用的館別自選 ${rule.kinds} 館。還差：${lacks.join("、")}` }
+      : { ready:true, rule:Object.assign({}, rule, { modules:selected, eligible:route }), msg:`已取得 ${this.petRouteNames(selected).join("、")} 的材料，可以${action}！` };
   },
 
   petEvolve() {
     const pet = this.petTick();
     const check = this.petEvolveCheck();
     if (!check.ready) return { success:false, msg:check.msg };
-    // 從數量最多的材料開始扣除
-    let remain = check.rule.mat;
-    Object.entries(this.state.petMat)
-      .sort((a, b) => b[1] - a[1])
-      .forEach(([id, count]) => {
-        if (remain <= 0) return;
-        const used = Math.min(count, remain);
-        this.state.petMat[id] -= used;
-        if (!this.state.petMat[id]) delete this.state.petMat[id];
-        remain -= used;
-      });
+    // 扣除本階段自選館別各 1 個，並記錄為已使用；後續階段改練其他館。
+    check.rule.modules.forEach(id => {
+      this.state.petMat[id] -= 1;
+      if (!this.state.petMat[id]) delete this.state.petMat[id];
+      if (!pet.growthModules.includes(id)) pet.growthModules.push(id);
+    });
     pet.stage += 1;
     pet.hunger = 100; pet.mood = 100;
     this.save();
     const species = this.petSpecies[pet.species];
-    return { success:true, msg:`${pet.name} 進化為${this.petStageNames[pet.stage]}的${species.name} ${species.stages[pet.stage]}！` };
+    const verb = pet.stage === 1 ? "孵化成" : "進化為";
+    return { success:true, msg:`${pet.name} ${verb}${this.petStageNames[pet.stage]}的${species.name} ${species.stages[pet.stage]}！` };
   },
 
   petStatus() {

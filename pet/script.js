@@ -49,7 +49,7 @@
   };
 
   function moodLine(status) {
-    if (status.pet.stage === 0) return "蛋殼偶爾晃一下。再多照顧幾次，牠就會孵化。";
+    if (status.pet.stage === 0) return "蛋殼偶爾晃一下。先從喜歡的兩館取得材料，就能迎接孵化。";
     if (status.sick) return "牠看起來沒精神，喝一瓶活力飲就會好起來。";
     if (status.hunger < 30) return "牠的肚子咕嚕咕嚕叫，一直看著食盆。";
     if (status.mood < 30) return "牠有點無聊，正在等你拿玩具過來。";
@@ -131,10 +131,27 @@
     const check = DS.petEvolveCheck();
     $("evolve-status").textContent = check.msg;
     $("btn-evolve").disabled = !check.ready;
-    $("mat-list").innerHTML = Object.values(DS.petMaterials).map(mat => {
+    const pet = DS.state.pet;
+    $("btn-evolve").textContent = pet && pet.stage === 0 ? "🐣 孵化目前夥伴" : "✨ 讓目前夥伴進化";
+    let route = [];
+    let goal = "先領養一位偵探夥伴。";
+    if (pet && pet.stage < 3) {
+      route = DS.petRouteFor(pet);
+      const need = DS.petEvolveRules[pet.stage].kinds;
+      const stageGoal = pet.stage === 0 ? "孵化" : pet.stage === 1 ? "進入少年期" : "進入成熟期";
+      goal = `🎯 從尚未計入成長的館別中自選 ${need} 館，各取得 1 個材料即可${stageGoal}。`;
+    } else if (pet) {
+      goal = "🏅 已完成所有成長階段，之後取得的材料會保留在收藏中。";
+    }
+    const readyIds = route.filter(id => (DS.state.petMat[id] || 0) > 0);
+    const shown = route.length ? readyIds.map(id => DS.petMaterials[id]) :
+      Object.values(DS.petMaterials).filter(mat => (DS.state.petMat[mat.id] || 0) > 0);
+    const cards = shown.map(mat => {
       const count = DS.state.petMat[mat.id] || 0;
-      return `<div class="mat ${count ? "" : "zero"}"><span>${mat.emoji}</span>${esc(mat.name)}<b>×${count}</b></div>`;
+      return `<div class="mat ${count ? "" : "zero"}"><span>${mat.emoji}</span>${esc(mat.name)}<b>${count ? "✓" : "尚缺"}</b></div>`;
     }).join("");
+    $("mat-list").innerHTML = `<div class="mat mat-goal"><span>🧭</span>${esc(goal)}</div>` +
+      (cards || `<div class="mat mat-empty"><span>🎒</span>目前還沒有可用材料；可自由選擇一個尚未使用過的館別開始。</div>`);
   }
   $("btn-evolve").onclick = () => {
     const result = DS.petEvolve();
