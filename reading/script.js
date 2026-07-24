@@ -99,6 +99,7 @@ function drawPractice() {
 
 function startGame() {
   state.name = $("student-name").value.trim() || "無名偵探";
+  state.worldSessionId = `reading_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
   state.queue = state.mode === "diagnostic" ? drawDiagnostic() : drawPractice();
   const expected = state.mode === "diagnostic" ? 12 : 1;
   if (state.queue.length < expected) {
@@ -370,6 +371,14 @@ function showResult() {
   $("r-context").textContent = `${state.mode === "diagnostic" ? "完整診斷" : "自由練習"} ｜ ${BAND_LABEL[state.band]} ｜ ${new Date().toLocaleDateString("zh-TW")}`;
   const stats = state.mode === "diagnostic" ? diagnosticResult() : practiceResult();
   state.lastStats = stats;
+  const summary = rate(state.answers);
+  if (window.DetectiveSystem) {
+    window.DetectiveSystem.completeModule("reading", {
+      accuracy:summary.pct, correct:summary.correct, total:summary.total,
+      mistakes:state.answers.filter(record => !record.correct).map(record => record.trap || record.skill || "問句定位"),
+      reasoning:state.mode === "diagnostic", sessionId:state.worldSessionId
+    });
+  }
   show("screen-result");
 }
 

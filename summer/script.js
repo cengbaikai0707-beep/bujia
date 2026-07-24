@@ -115,6 +115,7 @@
   }
   function begin(qs, meta) {
     st.qs=qs; st.i=0; st.meta=meta; st.correct=0; st.combo=0; st.best=0;
+    st.worldSessionId=`summer_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
     st.wrong=[]; st.areas={}; st.usedPerk=false; st.shield=false; st.retryReady=false;
     $("s-play-title").textContent = meta.title;
     $("s-play-sub").textContent = `共 ${qs.length} 題 ｜ 概念為主，算式為輔`;
@@ -282,10 +283,6 @@
       if(save.wrongConcepts[q.concept]<=0) delete save.wrongConcepts[q.concept];
     }
     persist();
-    if(ok && DS){
-      DS.addCoins(6); DS.save();
-      $("s-coins").textContent = "🪙 " + DS.state.coins;
-    }
     const fb=$("s-fb");
     fb.className="s-fb "+(ok?"good":"bad");
     fb.textContent="";
@@ -312,6 +309,11 @@
       if(stars>(save.stars[st.meta.lv]||0)) save.stars[st.meta.lv]=stars;
       persist();
     }
+    if(DS) DS.completeModule("summer",{
+      accuracy:pct,correct:st.correct,total,
+      mistakes:st.wrong.map(q=>q.myth||q.concept||"unknown_fog"),
+      reasoning:st.meta.lv==="final",sessionId:st.worldSessionId
+    });
     $("s-r-title").textContent = stars===3?"🏆 完美通關！你是本屆夏日英雄"
       : stars===2?"🥇 通過試煉！還有一點可以更穩"
       : stars===1?"🥈 低空通過，弱點已經記下來了"

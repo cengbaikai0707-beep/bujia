@@ -89,6 +89,7 @@
   }
   function startLevel(node) {
     state.node = node; state.lv = node.lv; state.ti = 0;
+    state.worldSessionId = `battle_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
     state.tasks = buildTasks(node.lv);
     state.stat = { shape: [0, 0], meaning: [0, 0], context: [0, 0] };
     state.correct = 0; state.combo = 0; state.newComps = new Set();
@@ -362,6 +363,13 @@
     const nxt = NODES[nodeIndex(state.node.id) + 1];
     $("b-next-node").style.display = nxt && unlocked(nxt.id) ? "" : "none";
     if (nxt) $("b-next-node").onclick = () => nxt.type === "level" ? startLevel(nxt) : startBoss(nxt);
+    if (window.DetectiveSystem) {
+      const mistakes = vals.filter(item => item.v < 70).map(item => labels[item.k]);
+      window.DetectiveSystem.completeModule("battle", {
+        accuracy:pct, correct:state.correct, total, mistakes,
+        reasoning:true, sessionId:state.worldSessionId
+      });
+    }
     showScreen("b-result");
     renderHome();
   }
@@ -385,6 +393,7 @@
   }
   function startBoss(node) {
     state.node = node; state.boss = node.boss;
+    state.worldSessionId = `battle_boss_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
     state.queue = bossQueue(node.boss); state.qi = 0; state.solved = 0; state.tries = 0;
     const bi = BOSS_INFO[node.boss];
     $("b-boss-title").textContent = bi.title; $("b-boss-desc").textContent = bi.desc;
@@ -424,6 +433,14 @@
     const nxt = NODES[nodeIndex(state.node.id) + 1];
     $("b-next-node").style.display = nxt && unlocked(nxt.id) ? "" : "none";
     if (nxt) $("b-next-node").onclick = () => nxt.type === "level" ? startLevel(nxt) : startBoss(nxt);
+    if (window.DetectiveSystem) {
+      const total = state.queue.length + state.tries;
+      window.DetectiveSystem.completeModule("battle", {
+        accuracy:Math.round(state.queue.length / total * 100),
+        correct:state.queue.length,total,mistakes:state.tries?["部件辨識"]:[],
+        reasoning:true,sessionId:state.worldSessionId
+      });
+    }
     showScreen("b-result"); renderHome();
   }
 

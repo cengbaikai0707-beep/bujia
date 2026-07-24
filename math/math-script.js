@@ -29,6 +29,7 @@ function drawQuestions(){
 
 function startGame(){
   state.name=$("student-name").value.trim()||"無名偵探";state.skill=$("skill-filter").value;state.answers=[];state.index=0;
+  state.worldSessionId=`math_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
   state.queue=drawQuestions();
   if(!state.queue.length){alert("目前沒有符合條件的題目。");return;}
   render();show("screen-game");
@@ -68,6 +69,7 @@ function showResult(){
   $("r-skills").innerHTML=SKILLS.filter(k=>s.skills[k].total).map(k=>{const v=s.skills[k],pct=Math.round(v.correct/v.total*100);return`<div class="skill-row"><div class="skill-top"><strong>${k}</strong><span>${v.correct}/${v.total}　${pct}%</span></div><div class="skill-rail"><div class="skill-fill" style="width:${pct}%"></div></div></div>`}).join("");
   const weak=SKILLS.filter(k=>s.skills[k].total).sort((a,b)=>(s.skills[a].correct/s.skills[a].total)-(s.skills[b].correct/s.skills[b].total)).slice(0,2);
   $("r-next").textContent=s.accuracy>=85?`共同核心已穩定，可改走進階延伸；仍可用「${weak.join("、")}」題說明不同解法。`:`下一次先練「${weak.join("、")}」。先做短題，再請同學只給一個線索，最後由自己重說一次方法。`;
+  if(window.DetectiveSystem)window.DetectiveSystem.completeModule("math",{accuracy:s.accuracy,correct:s.correct,total:s.total,mistakes:state.answers.filter(a=>!a.correct).map(a=>a.skillType),reasoning:state.path==="extension",sessionId:state.worldSessionId});
   show("screen-result");
 }
 function exportResult(){const s=stats(),data={subject:"math",studentName:state.name,path:state.path,mode:state.mode,skillFilter:state.skill,...s,answers:state.answers,completedAt:new Date().toISOString()};const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob),a=document.createElement("a");a.href=url;a.download=`數感偵探社_${state.name}_${new Date().toISOString().slice(0,10)}.json`;a.click();URL.revokeObjectURL(url);}

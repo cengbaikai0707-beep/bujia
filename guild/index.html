@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>聯合案件局｜永齡學習偵探社</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <section id="g-home" class="screen active">
+      <a class="back" href="../index.html">← 回學習偵探社大廳</a>
+      <header>
+        <p class="eyebrow">七館共用・支線調查區</p>
+        <h1>聯合案件局</h1>
+        <p>這裡不是必做作業。帶著各館證物、商店工具與曾經犯過的錯，來破解只屬於你的支線案件。</p>
+      </header>
+      <section class="brief">
+        <div><span>目前偵探</span><strong id="g-name"></strong></div>
+        <div><span>偵探幣</span><strong id="g-coins"></strong></div>
+        <div><span>證據</span><strong id="g-evidence"></strong></div>
+        <div><span>已探索</span><strong id="g-modules"></strong></div>
+      </section>
+      <section id="g-cases" class="case-grid"></section>
+      <p class="ethics">核心七館永遠免費。這裡的解鎖條件只用來增加探索感，不阻擋課程內容。</p>
+    </section>
+
+    <section id="g-play" class="screen">
+      <div class="play-top">
+        <button id="g-quit" class="plain">← 暫停案件</button>
+        <strong id="g-case-title"></strong>
+        <span id="g-progress"></span>
+      </div>
+      <div class="play-card">
+        <div id="g-monster" class="monster hidden"></div>
+        <p id="g-domain" class="domain"></p>
+        <h2 id="g-question"></h2>
+        <div id="g-options" class="options"></div>
+        <div class="tools">
+          <button id="g-lens">🔍 放大鏡 <b></b></button>
+          <button id="g-scan">📡 迷思掃描 <b></b></button>
+          <button id="g-retry">⏳ 本題答錯可重試 <b></b></button>
+        </div>
+        <div id="g-hint" class="hint hidden"></div>
+        <div id="g-feedback" class="feedback hidden"></div>
+        <button id="g-next" class="primary hidden">下一份證物 →</button>
+      </div>
+    </section>
+
+    <section id="g-result" class="screen result">
+      <div class="result-card">
+        <p class="eyebrow">案件報告</p>
+        <h1 id="g-result-title"></h1>
+        <div id="g-result-score" class="score"></div>
+        <p id="g-result-text"></p>
+        <div id="g-result-reward" class="reward"></div>
+        <button id="g-home-btn" class="primary">返回聯合案件局</button>
+        <a href="../index.html">回偵探社大廳</a>
+      </div>
+    </section>
+  </main>
+  <script src="../detective-system.js"></script>
+  <script src="questions.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>

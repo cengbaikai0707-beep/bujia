@@ -98,7 +98,6 @@ function pick(idx) {
     $("p-feedback").className = "p-feedback good";
     if (Q.opts.evidenceList && Q.opts.evidenceList[Q.i]) addEvidence(Q.opts.evidenceList[Q.i]);
     if (Q.opts.collectClue) grantClue();
-    if (window.DetectiveSystem) window.DetectiveSystem.addCoins(5), updateWallet();
   } else {
     btns[idx].classList.add("no");
     $("p-feedback").textContent = q.explanation || q.wrongHint || "再想想看，回到題目重讀一次。";
@@ -173,7 +172,6 @@ function toggleCombine(id) {
       $("p-notes").appendChild(note);
       msg.textContent = "合成成功！線索報告已存進偵探筆記。";
       msg.className = "p-combo-msg good";
-      if (window.DetectiveSystem) window.DetectiveSystem.addCoins(10), updateWallet();
     } else if (hit) {
       msg.textContent = "這份報告已經寫過了。"; msg.className = "p-combo-msg";
     } else {
@@ -247,7 +245,6 @@ function accuse(clueId) {
     state.cfTarget = null;
     fb.textContent = st.reply;
     fb.className = "p-feedback good";
-    if (window.DetectiveSystem) window.DetectiveSystem.addCoins(15), updateWallet();
     renderConfront();
     if (state.cfSolved.length >= lieCount()) confrontWin(st.reply);
   } else {
@@ -409,6 +406,14 @@ function endGame() {
   $("p-ending-text").textContent = e.text;
   $("p-ending-reveal").textContent = STORY.boss.reveal;
   $("p-ending-score").textContent = `章末推理一次答對 ${state.firstTryCount}/3　Boss ${state.bossCorrect}/6　剩餘 ${Math.max(0, state.hp)} 心`;
+  if (window.DetectiveSystem) {
+    const correct = state.firstTryCount + state.bossCorrect, total = 9;
+    window.DetectiveSystem.completeModule("party", {
+      accuracy:Math.round(correct / total * 100), correct, total,
+      mistakes:state.hp < STORY.hp ? ["多條件整合"] : [],
+      reasoning:true, sessionId:state.worldSessionId
+    });
+  }
   showScreen("p-ending");
 }
 
@@ -431,6 +436,7 @@ function refreshStart() {
 }
 function startGame() {
   state.ci = 0; state.hp = STORY.hp; state.firstTryCount = 0; state.chapterHadWrong = false; state.bossCorrect = 0;
+  state.worldSessionId = `party_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
   startChapter();
 }
 function backHome() { hideTimer(); showScreen("p-home"); }

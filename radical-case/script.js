@@ -200,6 +200,7 @@ function startGame() {
   state.name = $("input-name").value.trim() || "無名偵探";
   state.answers = [];
   state.stageIndex = 0;
+  state.worldSessionId = `radical_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
 
   if (state.mode === "adventure") {
     state.stages = [1, 2, 3, 4, 5].map(s => drawQuestions(state.level, "adventure", s));
@@ -491,6 +492,13 @@ function showResult() {
     ? `${st.rank.next}　特別留意這幾個部件：${mis.slice(0, 3).map(m => m[0]).join("、")}。`
     : st.rank.next;
 
+  if (window.DetectiveSystem) {
+    window.DetectiveSystem.completeModule("radical", {
+      accuracy:st.accuracy, correct:st.correct, total:st.total,
+      mistakes:Object.keys(st.radicalMistakes), reasoning:true,
+      sessionId:state.worldSessionId
+    });
+  }
   showScreen("screen-result");
 }
 
