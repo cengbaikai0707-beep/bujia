@@ -26,9 +26,12 @@
       action = `<button data-adopt-new="${species.id}" ${status.unlocked ? "" : "disabled"}>
         ${status.unlocked ? "領養" : "尚未解鎖"}</button><small>${esc(status.reason)}</small>`;
     }
+    const preview = owned && pet.stage === 0
+      ? species.stages[0]
+      : `<img src="${DS.petImageUrl(species.id)}" alt="${esc(species.name)}">`;
     return `<article class="species-card ${active ? "active" : ""} ${status.unlocked ? "" : "locked"}"
       ${mode === "adopt" && status.unlocked ? `data-egg="${species.id}"` : ""}>
-      <span class="species-emoji">${owned ? species.stages[pet.stage] : species.stages[1]}</span>
+      <span class="species-emoji">${preview}</span>
       <div><strong>${owned ? esc(pet.name) : esc(species.name)}</strong>
       <p>${esc(species.personality)}</p><small>最喜歡：${esc(favoriteName(species))}</small></div>${action}
     </article>`;
@@ -68,7 +71,13 @@
     $("pet-name").textContent = pet.name;
     $("pet-stage").textContent = status.stageName;
     $("pet-count").textContent = `收藏 ${status.ownedCount}/9`;
-    $("pet-avatar").textContent = status.emoji;
+    if (pet.stage === 0) {
+      $("pet-avatar").classList.remove("pixel");
+      $("pet-avatar").textContent = status.emoji;
+    } else {
+      $("pet-avatar").classList.add("pixel");
+      $("pet-avatar").innerHTML = `<img src="${DS.petImageUrl(pet.species)}" alt="${esc(pet.name)}">`;
+    }
     $("pet-accessory").textContent = status.accessory === "none" ? "" : ((DS.petCosmetics[status.accessory] || {}).emoji || "");
     $("pet-line").textContent = moodLine(status);
     $("pet-personality").textContent = `${species.personality}　最喜歡：${favoriteName(species)}。`;

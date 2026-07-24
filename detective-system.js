@@ -145,6 +145,7 @@ const DetectiveSystem = {
     this.resetDailyQuest();
     this.save();
     this.autoMountDock();
+    this.autoMountCompanion();
     return this.state;
   },
 
@@ -191,6 +192,7 @@ const DetectiveSystem = {
   save() {
     try { localStorage.setItem(this.KEY, JSON.stringify(this.world)); } catch (e) {}
     this.refreshDock();
+    this.refreshCompanion();
   },
 
   listProfiles() { return Object.values(this.world.profiles); },
@@ -371,6 +373,7 @@ const DetectiveSystem = {
     this.save();
     const result = { coins, evidence, rank:this.rankFor(), module:this.modules[moduleId], petMatDrop };
     this.toast(`完成${result.module.name}：＋${coins} 幣${evidence ? `、＋${evidence} 證據` : ""}${petMatDrop ? `、＋1 ${petMatDrop.emoji}${petMatDrop.name}` : ""}`);
+    this.petReact("complete", petMatDrop ? `找到${petMatDrop.name}，一起帶回家！` : `完成${result.module.name}，辛苦了！`);
     return result;
   },
 
@@ -789,6 +792,17 @@ const DetectiveSystem = {
   },
   todayEvent() { return { id:"normal", name:"探索日", desc:"完成任務、蒐集證據、開啟支線。", coinMul:1, shopMul:1 }; },
 
+  assetBase() {
+    if (this._assetBase) return this._assetBase;
+    if (typeof document === "undefined" || typeof location === "undefined") return "";
+    const script = [...document.scripts].find(item => /detective-system\.js(?:\?|$)/.test(item.src));
+    this._assetBase = script ? new URL("./", script.src).href : new URL("./", location.href).href;
+    return this._assetBase;
+  },
+  petImageUrl(speciesId) {
+    return `${this.assetBase()}assets/pets/${speciesId || "dog"}.png`;
+  },
+
   detectModule() {
     const path = location.pathname;
     return Object.keys(this.modules).find(id => path.includes(`/${id === "radical" ? "radical-case" : id}/`)) || null;
@@ -801,6 +815,161 @@ const DetectiveSystem = {
     };
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
     else run();
+  },
+  autoMountCompanion() {
+    if (typeof document === "undefined") return;
+    const run = () => {
+      this.mountCompanion();
+      this.observeAnswerFeedback();
+    };
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", run);
+    else run();
+  },
+  mountCompanion() {
+    if (!document.body || document.getElementById("ds-companion-zone")) {
+      this.refreshCompanion();
+      return;
+    }
+    const style = document.createElement("style");
+    style.id = "ds-companion-style";
+    style.textContent = `
+      #ds-companion-zone{position:fixed;z-index:970;left:0;right:0;bottom:46px;height:105px;
+        overflow:visible;pointer-events:none;contain:layout style}
+      #ds-companion{--face:1;position:absolute;left:18px;bottom:0;width:78px;height:94px;
+        border:0;padding:0;background:transparent;pointer-events:auto;cursor:pointer;user-select:none;touch-action:manipulation;
+        transition:left 3s linear;filter:drop-shadow(0 5px 5px #17232d38)}
+      #ds-companion-visual{display:block;width:100%;height:100%}
+      #ds-companion img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
+        transform:scaleX(var(--face));transform-origin:center bottom}
+      #ds-companion .ds-pet-egg{display:grid;place-items:center;width:100%;height:100%;font-size:54px}
+      #ds-companion-bubble{position:absolute;left:50%;bottom:88px;translate:-50% 0;min-width:88px;
+        max-width:180px;padding:7px 9px;border:2px solid #263c4b;border-radius:12px;background:#fffdf4;
+        color:#263c4b;text-align:center;font:800 12px/1.35 "Microsoft JhengHei",sans-serif;
+        box-shadow:0 4px 10px #0002;opacity:0;transform:translateY(5px);transition:.18s;
+        pointer-events:none;white-space:nowrap}
+      #ds-companion-bubble.show{opacity:1;transform:translateY(0)}
+      #ds-companion.walk img{animation:ds-pet-walk .38s steps(2,end) infinite}
+      #ds-companion.idle img{animation:ds-pet-idle 1.8s ease-in-out infinite}
+      #ds-companion.sleep img{animation:ds-pet-sleep 2.4s ease-in-out infinite;filter:saturate(.75)}
+      #ds-companion.excited img{animation:ds-pet-jump .48s ease-in-out 2}
+      #ds-companion.comfort img{animation:ds-pet-comfort .65s ease-in-out 2}
+      @keyframes ds-pet-walk{50%{transform:scaleX(var(--face)) translateY(-4px) rotate(-1deg)}}
+      @keyframes ds-pet-idle{50%{transform:scaleX(var(--face)) translateY(-2px)}}
+      @keyframes ds-pet-sleep{50%{transform:scaleX(var(--face)) translateY(2px) scale(.98)}}
+      @keyframes ds-pet-jump{45%{transform:scaleX(var(--face)) translateY(-20px) rotate(4deg)}}
+      @keyframes ds-pet-comfort{35%{transform:scaleX(var(--face)) rotate(-5deg)}70%{transform:scaleX(var(--face)) rotate(5deg)}}
+      @media(max-width:600px){
+        #ds-companion-zone{bottom:48px;height:82px}
+        #ds-companion{width:62px;height:76px}
+        #ds-companion-bubble{bottom:70px;font-size:11px;max-width:145px}
+      }
+      @media(prefers-reduced-motion:reduce){
+        #ds-companion{transition:none!important}
+        #ds-companion img{animation:none!important}
+      }
+    `;
+    document.head.appendChild(style);
+    const zone = document.createElement("div");
+    zone.id = "ds-companion-zone";
+    zone.setAttribute("aria-live", "polite");
+    zone.innerHTML = `<button id="ds-companion" type="button" aria-label="和偵探夥伴互動">
+      <span id="ds-companion-visual"></span><span id="ds-companion-bubble"></span></button>`;
+    document.body.appendChild(zone);
+    const pet = document.getElementById("ds-companion");
+    pet.addEventListener("click", () => {
+      const result = this.petPat();
+      this.petReact(result.success ? "pat" : "idle", result.msg);
+    });
+    this.refreshCompanion();
+    this.scheduleCompanion();
+  },
+  refreshCompanion() {
+    if (typeof document === "undefined") return;
+    const zone = document.getElementById("ds-companion-zone");
+    const visual = document.getElementById("ds-companion-visual");
+    if (!zone || !visual) return;
+    const pet = this.state && this.state.pet;
+    zone.style.display = pet ? "" : "none";
+    if (!pet) return;
+    visual.innerHTML = pet.stage === 0
+      ? `<span class="ds-pet-egg">🥚</span>`
+      : `<img src="${this.petImageUrl(pet.species)}" alt="${String(pet.name || "偵探夥伴").replace(/"/g, "&quot;")}">`;
+    const button = document.getElementById("ds-companion");
+    if (button) button.setAttribute("aria-label", `和${pet.name}互動`);
+  },
+  scheduleCompanion(delay) {
+    if (typeof window === "undefined") return;
+    clearTimeout(this._companionTimer);
+    this._companionTimer = setTimeout(() => {
+      const pet = document.getElementById("ds-companion");
+      const zone = document.getElementById("ds-companion-zone");
+      if (!pet || !zone || zone.style.display === "none") {
+        this.scheduleCompanion(2500);
+        return;
+      }
+      const roll = Math.random();
+      pet.className = roll < .58 ? "walk" : roll < .82 ? "idle" : "sleep";
+      if (roll < .58) {
+        const max = Math.max(18, window.innerWidth - pet.offsetWidth - 18);
+        const current = parseFloat(pet.style.left) || 18;
+        const target = 18 + Math.random() * Math.max(1, max - 18);
+        const duration = Math.min(5.5, Math.max(1.8, Math.abs(target - current) / 65));
+        pet.style.setProperty("--face", target < current ? "-1" : "1");
+        pet.style.transitionDuration = `${duration}s`;
+        pet.style.left = `${target}px`;
+        this.scheduleCompanion(duration * 1000 + 700);
+      } else {
+        this.scheduleCompanion(1800 + Math.random() * 2600);
+      }
+    }, delay == null ? 1200 + Math.random() * 1600 : delay);
+  },
+  petReact(type, message) {
+    if (typeof document === "undefined") return;
+    const pet = document.getElementById("ds-companion");
+    const bubble = document.getElementById("ds-companion-bubble");
+    if (!pet || !bubble) return;
+    clearTimeout(this._companionTimer);
+    clearTimeout(this._companionReactTimer);
+    const copy = {
+      correct:"答對了！一起追下一條線索！",
+      wrong:"沒關係，我陪你再看一次。",
+      complete:"帶著新材料回家囉！",
+      pat:"我有感覺到你摸摸我！",
+      idle:"我在這裡陪你。"
+    };
+    pet.className = type === "correct" || type === "complete" ? "excited" :
+      type === "wrong" ? "comfort" : "idle";
+    bubble.textContent = message || copy[type] || copy.idle;
+    bubble.classList.add("show");
+    this._companionReactTimer = setTimeout(() => {
+      bubble.classList.remove("show");
+      this.scheduleCompanion(500);
+    }, type === "wrong" ? 2100 : 1600);
+  },
+  observeAnswerFeedback() {
+    if (typeof MutationObserver === "undefined" || this._answerObserver || !document.body) return;
+    const inspect = node => {
+      if (!(node instanceof Element)) return;
+      const nodes = [node, ...node.querySelectorAll(
+        '[class*="feedback"].good,[class*="feedback"].bad,.s-fb.good,.s-fb.bad,.b-fb.good,.b-fb.bad'
+      )];
+      const hit = nodes.find(item =>
+        item.matches('[class*="feedback"].good,[class*="feedback"].bad,.s-fb.good,.s-fb.bad,.b-fb.good,.b-fb.bad')
+      );
+      if (!hit || hit.classList.contains("hidden")) return;
+      const now = Date.now();
+      if (now - (this._lastAnswerReaction || 0) < 450) return;
+      this._lastAnswerReaction = now;
+      this.petReact(hit.classList.contains("good") ? "correct" : "wrong");
+    };
+    this._answerObserver = new MutationObserver(mutations => {
+      mutations.forEach(mutation => {
+        if (mutation.type === "attributes") inspect(mutation.target);
+        mutation.addedNodes.forEach(inspect);
+      });
+    });
+    this._answerObserver.observe(document.body, { subtree:true, childList:true, attributes:true, attributeFilter:["class"] });
+    window.addEventListener("detective:answer", event => this.petReact(event.detail && event.detail.correct ? "correct" : "wrong"));
   },
   mountDock(moduleId) {
     const style = document.createElement("style");
