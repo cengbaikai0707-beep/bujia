@@ -43,6 +43,26 @@
       : `完成 ${DS.distinctModules().length}/5 館、蒐集 ${DS.state.evidence}/8 證據可開大案件`;
   }
 
+  function renderCompanion() {
+    const status = DS.petStatus();
+    const total = Object.keys(DS.petSpecies).length;
+    if (!status) {
+      $("hub-pet-avatar").textContent = "🥚";
+      $("hub-pet-accessory").textContent = "";
+      $("hub-pet-name").textContent = "等待第一位夥伴";
+      $("hub-pet-line").textContent = "先選一顆偵探蛋；完成各館任務，就能帶回照顧與進化資源。";
+      $("hub-pet-stage").textContent = "尚未領養";
+      $("hub-pet-collection").textContent = `0 / ${total}`;
+      return;
+    }
+    $("hub-pet-avatar").textContent = status.emoji;
+    $("hub-pet-accessory").textContent = status.accessory === "none" ? "" : ((DS.petCosmetics[status.accessory] || {}).emoji || "");
+    $("hub-pet-name").textContent = status.pet.name;
+    $("hub-pet-line").textContent = `${status.species.personality}　飽足 ${status.hunger}、心情 ${status.mood}。`;
+    $("hub-pet-stage").textContent = `${status.species.name}｜${status.stageName}`;
+    $("hub-pet-collection").textContent = `${status.ownedCount} / ${total}`;
+  }
+
   function renderQuests() {
     $("quest-date").textContent = new Date().toLocaleDateString("zh-TW", { month:"long", day:"numeric" });
     $("quest-list").innerHTML = DS.questDefinitions().map(q => {
@@ -105,7 +125,7 @@
   }
 
   function renderAll() {
-    renderProfile(); renderModules(); renderQuests(); renderProfiles(); renderShop(); renderBag();
+    renderProfile(); renderCompanion(); renderModules(); renderQuests(); renderProfiles(); renderShop(); renderBag();
   }
 
   function openModal(id) {

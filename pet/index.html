@@ -2,42 +2,42 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>偵探夥伴｜永齡學習偵探社</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>偵探夥伴之家｜永齡學習偵探社</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="wrap">
-    <a class="lobby" href="../index.html">← 回學習大廳</a>
+    <a class="lobby" href="../index.html">← 回學習大廳接任務</a>
 
-    <!-- 領養畫面（尚未有寵物時顯示） -->
     <section id="screen-adopt" class="screen hidden">
-      <div class="hero">
+      <header class="hero">
         <div class="icon-mark">🥚</div>
-        <p class="eyebrow">偵探社新成員</p>
-        <h1>領養偵探夥伴</h1>
-        <p>選一顆偵探蛋帶回家。多摸摸牠、餵養牠，就會孵化。<br>破解案件獲得的進化材料，能讓牠一路成長為名偵探夥伴。</p>
-      </div>
-      <div class="egg-choices" id="egg-choices"></div>
-      <label class="name-field">幫牠取個名字（最多 10 字）
-        <input id="pet-name-input" maxlength="10" placeholder="例如：福爾摩喵">
+        <p class="eyebrow">第一位偵探夥伴</p>
+        <h1>選一顆偵探蛋</h1>
+        <p>初始有四種夥伴可以選。之後完成不同館別的任務，還能解鎖更多動物並加入收藏。</p>
+      </header>
+      <div class="species-grid" id="egg-choices"></div>
+      <label class="name-field">幫夥伴取名字（最多 10 字）
+        <input id="pet-name-input" maxlength="10" placeholder="例如：小福、摩卡、線索">
       </label>
       <button id="btn-adopt" class="primary">🏠 帶回偵探社</button>
       <p id="adopt-message" class="message"></p>
     </section>
 
-    <!-- 寵物主畫面 -->
     <section id="screen-pet" class="screen hidden">
-      <div class="pet-stage-card">
+      <section id="pet-room" class="pet-stage-card room-study">
         <div class="pet-head">
-          <div>
-            <p class="eyebrow" id="pet-species"></p>
-            <h1 id="pet-name"></h1>
-          </div>
-          <span class="stage-chip" id="pet-stage"></span>
+          <div><p class="eyebrow" id="pet-species"></p><h1 id="pet-name"></h1></div>
+          <div class="head-chips"><span id="pet-stage"></span><span id="pet-count"></span></div>
         </div>
-        <div class="pet-avatar" id="pet-avatar">🥚</div>
+        <div class="room-label" id="room-label">偵探書房</div>
+        <div class="pet-avatar-wrap">
+          <span class="pet-avatar" id="pet-avatar">🥚</span>
+          <span class="pet-accessory" id="pet-accessory"></span>
+        </div>
         <p class="pet-mood-line" id="pet-line"></p>
+        <p class="personality" id="pet-personality"></p>
 
         <div class="stat">
           <div><span>🍖 飽足</span><b id="stat-hunger-num"></b></div>
@@ -47,28 +47,47 @@
           <div><span>💛 心情</span><b id="stat-mood-num"></b></div>
           <div class="bar"><i id="stat-mood"></i></div>
         </div>
-
+        <div class="bond-line">🤝 親密照顧次數：<b id="pet-bond"></b></div>
         <div class="actions" id="pet-actions"></div>
         <p id="pet-message" class="message"></p>
-      </div>
+      </section>
 
-      <div class="panel">
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">夥伴圖鑑</p><h2>收集與切換夥伴</h2></div>
+          <span id="collection-count"></span></div>
+        <p class="muted">初始夥伴可直接領養；隱藏夥伴要靠學習任務解鎖。每位夥伴會保留自己的名字、成長和穿戴。</p>
+        <label class="name-field compact">新夥伴名字
+          <input id="new-pet-name" maxlength="10" placeholder="領養新夥伴時使用">
+        </label>
+        <div id="collection-list" class="collection-list"></div>
+        <p id="collection-message" class="message"></p>
+      </section>
+
+      <section class="panel">
         <h2>🧬 進化研究</h2>
         <p id="evolve-status" class="muted"></p>
         <div class="mat-list" id="mat-list"></div>
-        <button id="btn-evolve" class="primary">✨ 進化</button>
-        <p class="muted small">進化材料無法購買：在各館案件中拿到 85 分以上（每館每天前兩次有效），或完成聯合案件局的支線，就會掉落。</p>
-      </div>
+        <button id="btn-evolve" class="primary">✨ 讓目前夥伴進化</button>
+        <p class="muted small">各館達到 85 分以上時，每館每天前兩次可取得進化材料；材料不能直接購買。</p>
+      </section>
 
-      <div class="panel">
-        <h2>🏪 夥伴補給站</h2>
-        <p class="muted">目前偵探幣：🪙 <b id="coins"></b></p>
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">房間布置</p><h2>衣櫃與房間</h2></div><span>🪙 <b id="style-coins"></b></span></div>
+        <h3>夥伴配件</h3>
+        <div id="accessory-list" class="style-list"></div>
+        <h3>房間背景</h3>
+        <div id="room-list" class="style-list"></div>
+        <p id="style-message" class="message"></p>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head"><div><p class="eyebrow">資源商店</p><h2>夥伴補給站</h2></div><span>🪙 <b id="coins"></b></span></div>
+        <p class="muted">完成學習任務與今日委託，就能把偵探幣和飼料帶回來照顧夥伴。</p>
         <div class="shop-list" id="pet-shop"></div>
         <p id="shop-message" class="message"></p>
-      </div>
+      </section>
     </section>
   </main>
-
   <script src="../detective-system.js"></script>
   <script src="script.js"></script>
 </body>
