@@ -503,9 +503,9 @@ const DetectiveSystem = {
 
   // 進化條件：材料總數／來自幾個不同館。stage 0→1 只需照顧次數。
   petEvolveRules: [
-    { care:5 },
-    { mat:4,  kinds:2 },
-    { mat:10, kinds:4 }
+    { care:3 },
+    { mat:3, kinds:2 },
+    { mat:6, kinds:3 }
   ],
 
   // 一週一次使用也不會受到重罰；狀態最低停在安全值，不會因離線生病或死亡。
