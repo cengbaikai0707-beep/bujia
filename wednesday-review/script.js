@@ -78,6 +78,12 @@
     const unseen=shuffle(available.filter(q=>!progress.seen[q.id]&&!priority.includes(q)));
     const seen=shuffle(available.filter(q=>progress.seen[q.id]&&!priority.includes(q)));
     const ordered=[...priority,...unseen,...seen],picked=[],groups=new Set();
+    const challengeCount=Math.round(count*.3),foundationCount=Math.round(count*.2),standardCount=count-challengeCount-foundationCount;
+    const difficultyTargets=shuffle([...Array(foundationCount).fill(1),...Array(standardCount).fill(2),...Array(challengeCount).fill(3)]);
+    difficultyTargets.forEach(level=>{
+      const question=ordered.find(q=>!picked.includes(q)&&!groups.has(q.variantGroup)&&q.difficulty===level);
+      if(question){picked.push(question);groups.add(question.variantGroup);}
+    });
     ordered.forEach(q=>{if(picked.length<count&&!groups.has(q.variantGroup)){picked.push(q);groups.add(q.variantGroup);}});
     ordered.forEach(q=>{if(picked.length<count&&!picked.includes(q))picked.push(q);});
     const usedSignatures=new Set(),questions=[];
@@ -92,10 +98,11 @@
     $("screen-lookup").classList.add("hidden");$("screen-result").classList.add("hidden");$("screen-quiz").classList.remove("hidden");$("quiz-student").textContent=`${state.student}的數學總複習`;renderQuestion();
   }
   function typeLabel(type){return ({concept:"概念辨識",basic:"基本操作",application:"生活應用",error:"找錯訂正",transfer:"遷移挑戰"})[type]||"數學練習";}
+  function difficultyLabel(level){return ({1:"基礎",2:"標準",3:"挑戰"})[level]||`難度 ${level}`;}
   function renderQuestion(){
     const item=state.queue[state.index];state.locked=false;
     $("quiz-position").textContent=`${state.index+1} / ${state.queue.length}`;$("quiz-score").textContent=`目前答對 ${state.answers.filter(a=>a.correct).length}`;$("progress-fill").style.width=`${state.index/state.queue.length*100}%`;
-    $("question-unit").textContent=`${item.unit} ${item.topic}`;$("question-skill").textContent=item.skill;$("question-level").textContent=`${typeLabel(item.questionType)}｜難度 ${item.difficulty}`;$("question-status").textContent=`${item.status==="provisional"?"暫定範圍":"已核定"}${item.dynamic?"｜動態數字":"｜固定診斷"}`;
+    $("question-unit").textContent=`${item.unit} ${item.topic}`;$("question-skill").textContent=item.skill;$("question-level").textContent=`${typeLabel(item.questionType)}｜${difficultyLabel(item.difficulty)}`;$("question-status").textContent=`${item.status==="provisional"?"暫定範圍":"已核定"}${item.dynamic?"｜動態數字":"｜固定診斷"}`;
     $("repair-label").classList.toggle("hidden",!item.remedial);$("question-stem").textContent=item.stem;
     $("options").innerHTML=item.sessionOptions.map((option,index)=>`<button class="option" data-option="${index}" type="button">${esc(option)}</button>`).join("");
     document.querySelectorAll("[data-option]").forEach(button=>button.onclick=()=>answer(Number(button.dataset.option)));

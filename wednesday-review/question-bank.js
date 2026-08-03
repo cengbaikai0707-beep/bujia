@@ -209,70 +209,70 @@
       const a=smallA*scale,b=smallB*scale;
       const common={id,student,book,unit,topic,status:"provisional",generatorKey:"arithmetic"};
       if(mode===0){
-        const x=book<=4?smallA:a,y=book<=4?smallB:b,answer=x+y;
-        out.push(q({...common,skill:"加法應用",questionType:"application",difficulty:1,
-          stem:`圖書角原有 ${x} 本書，又補進 ${y} 本，現在共有多少本？`,options:numericOptions(answer,[x-y,answer+10,Math.max(0,answer-10)]),answer:`${answer}`,
-          explanation:`求合起來的數量，用加法：${x}＋${y}＝${answer}。`,errorCode:"application_add",prerequisite:"理解共有多少",variantGroup:`${unit}-add`,audit:{op:"add",values:[x,y],result:answer}}));
+        const x=book<=4?smallA:a,y=book<=4?smallB:b,lent=book<=4?3+i%8:3*scale+(i%5)*scale,answer=x+y-lent;
+        out.push(q({...common,skill:"兩步驟加減應用",questionType:"application",difficulty:2,
+          stem:`圖書角原有 ${x} 本書，又補進 ${y} 本，接著借出 ${lent} 本。現在還有多少本？`,options:numericOptions(answer,[x+y,x-lent,answer+lent]),answer:`${answer}`,
+          explanation:`先算補進後共有 ${x}＋${y}＝${x+y} 本，再減借出的 ${lent} 本：${x+y}－${lent}＝${answer}。`,errorCode:"application_two_step_add_sub",prerequisite:"依事件順序先加後減",variantGroup:`${unit}-add`,audit:{op:"addSub",values:[x,y,lent],result:answer}}));
       }else if(mode===1){
-        const remain=book<=4?smallA:a,used=book<=4?smallB:b,total=remain+used;
-        out.push(q({...common,skill:"減法應用",questionType:"application",difficulty:1,
-          stem:`倉庫原有 ${total} 個物品，送出 ${used} 個後，還剩多少個？`,options:numericOptions(remain,[total+used,total,Math.max(0,remain-10)]),answer:`${remain}`,
-          explanation:`求剩下的數量，用減法：${total}－${used}＝${remain}。`,errorCode:"application_subtract",prerequisite:"理解還剩多少",variantGroup:`${unit}-sub`,audit:{op:"sub",values:[total,used],result:remain}}));
+        const remain=book<=4?smallA:a,used=book<=4?smallB:b,total=remain+used,returned=book<=4?2+i%7:2*scale+(i%4)*scale,answer=remain+returned;
+        out.push(q({...common,skill:"減後再增加",questionType:"application",difficulty:2,
+          stem:`倉庫原有 ${total} 個物品，先送出 ${used} 個，後來退回 ${returned} 個。最後有多少個？`,options:numericOptions(answer,[remain,total-returned,total+returned]),answer:`${answer}`,
+          explanation:`先算 ${total}－${used}＝${remain}，再加退回的 ${returned}：${remain}＋${returned}＝${answer}。`,errorCode:"application_sub_then_add",prerequisite:"依事件順序先減後加",variantGroup:`${unit}-sub`,audit:{op:"addSub",values:[total,returned,used],result:answer}}));
       }else if(mode===2){
-        const groups=3+i%7,each=book<=4?2+i%8:book<=6?12+i%18:24+i%27,total=groups*each;
-        out.push(q({...common,skill:"乘法應用",questionType:"application",difficulty:book<=4?1:2,
-          stem:`每盒有 ${each} 枝筆，共有 ${groups} 盒，一共有多少枝筆？`,options:numericOptions(total,[each+groups,total-each,total+groups]),answer:`${total}`,
-          explanation:`每盒數量相同，用乘法：${each}×${groups}＝${total}。`,errorCode:"application_multiply",prerequisite:"理解幾個幾",variantGroup:`${unit}-mul`,audit:{op:"mul",values:[each,groups],result:total}}));
+        const groups=3+i%7,each=book<=4?2+i%8:book<=6?12+i%18:24+i%27,loose=1+i%Math.max(2,each-1),answer=groups*each+loose;
+        out.push(q({...common,skill:"乘法後加零散量",questionType:"application",difficulty:2,
+          stem:`每盒有 ${each} 枝筆，共有 ${groups} 盒，桌上另外還有 ${loose} 枝。一共有多少枝筆？`,options:numericOptions(answer,[groups*each,each+groups+loose,answer-each]),answer:`${answer}`,
+          explanation:`先算盒內共有 ${each}×${groups}＝${groups*each} 枝，再加零散的 ${loose} 枝，得到 ${answer} 枝。`,errorCode:"application_multiply_then_add",prerequisite:"先算整盒再加零散量",variantGroup:`${unit}-mul`,audit:{op:"mulAdd",values:[each,groups,loose],result:answer}}));
       }else if(mode===3){
-        const groups=3+i%7,each=book<=4?2+i%8:book<=6?8+i%17:15+i%26,total=groups*each;
-        out.push(q({...common,skill:"平均分除法",questionType:"application",difficulty:2,
-          stem:`${total} 顆糖平均分給 ${groups} 人，每人可以分到幾顆？`,options:numericOptions(each,[groups,total-groups,each+2]),answer:`${each}`,
-          explanation:`平均分要用除法：${total}÷${groups}＝${each}。`,errorCode:"application_divide",prerequisite:"乘除互逆",variantGroup:`${unit}-div`,audit:{op:"div",values:[total,groups],result:each}}));
+        const groups=3+i%7,each=book<=4?2+i%8:book<=6?8+i%17:15+i%26,extra=1+i%4,total=groups*each,added=groups*extra,answer=each+extra;
+        out.push(q({...common,skill:"補足後平均分",questionType:"application",difficulty:3,
+          stem:`原有 ${total} 顆糖，老師又拿來 ${added} 顆，全部平均分給 ${groups} 人，每人可分到幾顆？`,options:numericOptions(answer,[each,answer+groups,total/groups+added]),answer:`${answer}`,
+          explanation:`先算總數 ${total}＋${added}＝${total+added}，再平均分：${total+added}÷${groups}＝${answer}。`,errorCode:"application_add_then_divide",prerequisite:"先求新總數再平均分",variantGroup:`${unit}-div`,audit:{op:"addDivide",values:[total,added,groups],result:answer}}));
       }else if(mode===4){
-        const capacity=4+i%6,full=5+i%9,remainder=1+i%(capacity-1),people=capacity*full+remainder,answer=full+1;
-        out.push(q({...common,skill:"有餘數的分組",questionType:"application",difficulty:2,
-          stem:`${people} 人搭車，每輛最多坐 ${capacity} 人，至少需要幾輛車？`,options:numericOptions(answer,[full,answer+1,Math.max(1,answer-2)]),answer:`${answer}`,
-          explanation:`${people}÷${capacity}＝${full} 餘 ${remainder}，剩下的人仍需要一輛，所以至少要 ${answer} 輛。`,errorCode:"remainder_round_up",prerequisite:"有餘數除法",variantGroup:`${unit}-remainder`,audit:{op:"ceilDiv",values:[people,capacity],result:answer}}));
+        const capacity=4+i%6,full=5+i%9,remainder=1+i%(capacity-1),people=capacity*full+remainder,cars=full+1,answer=cars*capacity-people;
+        out.push(q({...common,skill:"有餘數分組與空位",questionType:"application",difficulty:3,
+          stem:`${people} 人搭車，每輛最多坐 ${capacity} 人。使用最少輛數且全部上車後，總共會空幾個座位？`,options:numericOptions(answer,[remainder,cars,capacity-remainder+1]),answer:`${answer}`,
+          explanation:`${people}÷${capacity}＝${full} 餘 ${remainder}，需 ${cars} 輛；共有 ${cars*capacity} 個座位，空位是 ${cars*capacity}－${people}＝${answer}。`,errorCode:"remainder_empty_seats",prerequisite:"先決定車數再求空位",variantGroup:`${unit}-remainder`,audit:{op:"capacityGap",values:[people,capacity],result:answer}}));
       }else if(mode===5){
         const start=(book<=4?35:350*scale),arrive=(book<=4?12+i%18:12*scale+(i%9)*scale),leave=(book<=4?5+i%9:5*scale+(i%4)*scale),answer=start+arrive-leave;
-        out.push(q({...common,skill:"兩步驟加減",questionType:"application",difficulty:2,
+        out.push(q({...common,skill:"兩步驟加減",questionType:"application",difficulty:3,
           stem:`場內原有 ${start} 人，後來進入 ${arrive} 人，又有 ${leave} 人離開，現在有多少人？`,options:numericOptions(answer,[start+arrive,start-leave,answer+leave]),answer:`${answer}`,
           explanation:`先加上進入的人，再減去離開的人：${start}＋${arrive}－${leave}＝${answer}。`,errorCode:"two_step_order",prerequisite:"依情境判斷加減",variantGroup:`${unit}-two-step`,audit:{op:"addSub",values:[start,arrive,leave],result:answer}}));
       }else if(mode===6){
-        const start=8*60+(i%8)*10,duration=20+(i%8)*10,end=start+duration,answer=`${duration} 分鐘`;
-        out.push(q({...common,skill:"經過時間應用",questionType:"application",difficulty:2,
-          stem:`練習從 ${timeText(start)} 開始，到 ${timeText(end)} 結束，共經過多久？`,options:unique([answer,`${duration+10} 分鐘`,`${Math.max(5,duration-10)} 分鐘`,`${duration} 小時`]),answer,
-          explanation:`結束時刻減去開始時刻，共經過 ${duration} 分鐘。`,errorCode:"elapsed_time_application",prerequisite:"時間往後推",variantGroup:`${unit}-time`,audit:{op:"sub",values:[end,start],result:duration}}));
+        const start=8*60+(i%8)*10,first=20+(i%5)*10,rest=5+(i%3)*5,second=15+(i%4)*10,end=start+first+rest+second,answer=timeText(end);
+        out.push(q({...common,skill:"多段時間推算",questionType:"application",difficulty:3,
+          stem:`活動從 ${timeText(start)} 開始，先練習 ${first} 分鐘、休息 ${rest} 分鐘，再練習 ${second} 分鐘。幾點結束？`,options:clockOptions(answer,[timeText(end-rest),timeText(start+first+second),timeText(end+10)],end),answer,
+          explanation:`總共經過 ${first}＋${rest}＋${second}＝${first+rest+second} 分鐘，從 ${timeText(start)} 往後推到 ${answer}。`,errorCode:"multi_stage_time",prerequisite:"依序累加經過時間",variantGroup:`${unit}-time`,audit:{op:"sum4",values:[start,first,rest,second],result:end}}));
       }else if(mode===7){
-        const price=35+(i*17)%(book<=4?60:360),paid=Math.ceil((price+20)/100)*100,answer=paid-price;
-        out.push(q({...common,skill:"金錢找零應用",questionType:"application",difficulty:2,
-          stem:`買東西花了 ${price} 元，付 ${paid} 元，應找回多少元？`,options:numericOptions(answer,[price,paid+price,answer+10]),answer:`${answer}`,
-          explanation:`找回金額＝付款金額－商品價格：${paid}－${price}＝${answer} 元。`,errorCode:"money_change_application",prerequisite:"減法",variantGroup:`${unit}-money`,audit:{op:"sub",values:[paid,price],result:answer}}));
+        const price1=35+(i*17)%(book<=4?60:360),price2=15+(i*13)%(book<=4?40:240),total=price1+price2,paid=Math.ceil((total+20)/100)*100,answer=paid-total;
+        out.push(q({...common,skill:"兩件商品找零",questionType:"application",difficulty:3,
+          stem:`買 ${price1} 元和 ${price2} 元的商品各一件，付 ${paid} 元，應找回多少元？`,options:numericOptions(answer,[paid-price1,total,answer+price2]),answer:`${answer}`,
+          explanation:`先算總價 ${price1}＋${price2}＝${total} 元，再算找零 ${paid}－${total}＝${answer} 元。`,errorCode:"money_total_then_change",prerequisite:"先算總價再找零",variantGroup:`${unit}-money`,audit:{op:"sub2",values:[paid,price1,price2],result:answer}}));
       }else if(mode===8){
-        const fewer=book<=4?smallB:b,more=fewer+(book<=4?15+i%20:15*scale+(i%8)*scale),answer=more-fewer;
-        out.push(q({...common,skill:"相差多少應用",questionType:"application",difficulty:1,
-          stem:`甲隊收集了 ${more} 個瓶蓋，乙隊收集了 ${fewer} 個，甲隊比乙隊多多少個？`,options:numericOptions(answer,[more+fewer,more,fewer]),answer:`${answer}`,
-          explanation:`求相差多少，用減法：${more}－${fewer}＝${answer}。`,errorCode:"difference_application",prerequisite:"比較型減法",variantGroup:`${unit}-difference`,audit:{op:"sub",values:[more,fewer],result:answer}}));
+        const fewer=book<=4?smallB:b,more=fewer+(book<=4?15+i%20:15*scale+(i%8)*scale),gainA=book<=4?3+i%8:3*scale+(i%4)*scale,gainB=book<=4?2+i%5:2*scale+(i%3)*scale,finalA=more+gainA,finalB=fewer+gainB,answer=Math.abs(finalA-finalB);
+        out.push(q({...common,skill:"變化後比較差",questionType:"application",difficulty:3,
+          stem:`甲隊原有 ${more} 個瓶蓋，又收集 ${gainA} 個；乙隊原有 ${fewer} 個，又收集 ${gainB} 個。最後兩隊相差多少個？`,options:numericOptions(answer,[more-fewer,gainA+gainB,finalA+finalB]),answer:`${answer}`,
+          explanation:`甲隊最後 ${more}＋${gainA}＝${finalA}，乙隊最後 ${fewer}＋${gainB}＝${finalB}，相差 ${answer} 個。`,errorCode:"difference_after_change",prerequisite:"先求各自最後數量再比較",variantGroup:`${unit}-difference`,audit:{op:"differenceAfter",values:[more,gainA,fewer,gainB],result:answer}}));
       }else if(book<=4){
         const bags=2+i%5,red=3+i%7,blue=2+i%6,answer=bags*(red+blue);
-        out.push(q({...common,skill:"兩步驟乘法",questionType:"application",difficulty:2,
+        out.push(q({...common,skill:"兩步驟乘法",questionType:"application",difficulty:3,
           stem:`每袋有 ${red} 顆紅球和 ${blue} 顆藍球，共有 ${bags} 袋，全部有幾顆球？`,options:numericOptions(answer,[red+blue,bags*red,answer+bags]),answer:`${answer}`,
           explanation:`每袋有 ${red+blue} 顆，${bags} 袋共有（${red}＋${blue}）×${bags}＝${answer} 顆。`,errorCode:"two_step_multiply",prerequisite:"先算每份再算全部",variantGroup:`${unit}-review`,audit:{op:"groupSum",values:[red,blue,bags],result:answer}}));
       }else if(book<=6){
-        const length=8+i%13,width=4+i%7,answer=2*(length+width);
-        out.push(q({...common,skill:"長方形周長",questionType:"application",difficulty:2,
-          stem:`一個長方形長 ${length} 公分、寬 ${width} 公分，它的周長是多少公分？`,options:numericOptions(answer,[length*width,length+width,answer+2]),answer:`${answer}`,
-          explanation:`長方形周長＝（長＋寬）×2＝（${length}＋${width}）×2＝${answer} 公分。`,errorCode:"perimeter_formula",prerequisite:"長方形邊長",variantGroup:`${unit}-review`,audit:{op:"perimeter",values:[length,width],result:answer}}));
+        const length=8+i%13,width=4+i%7,gate=1+i%3,answer=2*(length+width)-gate;
+        out.push(q({...common,skill:"周長扣除缺口",questionType:"application",difficulty:3,
+          stem:`長方形花圃長 ${length} 公尺、寬 ${width} 公尺，四周圍籬但保留 ${gate} 公尺入口，需要多少公尺圍籬？`,options:numericOptions(answer,[2*(length+width),length*width,length+width-gate]),answer:`${answer}`,
+          explanation:`先算周長（${length}＋${width}）×2＝${2*(length+width)}，再扣入口 ${gate} 公尺，得到 ${answer} 公尺。`,errorCode:"perimeter_minus_gap",prerequisite:"先算完整周長再扣缺口",variantGroup:`${unit}-review`,audit:{op:"perimeterGap",values:[length,width,gate],result:answer}}));
       }else if(book<=8){
         const denominator=6+i%5,numerator=1+i%(denominator-2),used=1+(i*3)%(denominator-numerator),remain=denominator-numerator-used,answer=`${remain}/${denominator}`;
-        out.push(q({...common,skill:"同分母分數減法",questionType:"application",difficulty:2,
+        out.push(q({...common,skill:"同分母分數減法",questionType:"application",difficulty:3,
           stem:`一條緞帶全長看成 ${denominator}/${denominator}，先用掉 ${numerator}/${denominator}，再用掉 ${used}/${denominator}，還剩多少？`,options:unique([answer,`${denominator-numerator}/${denominator}`,`${numerator+used}/${denominator}`,`${remain}/${denominator+1}`]),answer,
           explanation:`同分母分數只計算分子：${denominator}－${numerator}－${used}＝${remain}，所以剩 ${answer}。`,errorCode:"fraction_same_denominator",prerequisite:"同分母分數",variantGroup:`${unit}-review`,audit:{op:"fractionRemain",values:[denominator,numerator,used],result:remain}}));
       }else{
-        const x=10+(i%30)/10,y=2+(i%20)/10,answer=(x+y).toFixed(1);
-        out.push(q({...common,skill:"小數加法應用",questionType:"application",difficulty:2,
-          stem:`甲段繩長 ${x.toFixed(1)} 公尺，乙段繩長 ${y.toFixed(1)} 公尺，接起來共長多少公尺？`,options:unique([answer,(x-y).toFixed(1),(x+y+1).toFixed(1),(x+y-.1).toFixed(1)]),answer,
-          explanation:`求合起來的長度，用加法：${x.toFixed(1)}＋${y.toFixed(1)}＝${answer} 公尺。`,errorCode:"decimal_add_application",prerequisite:"一位小數加法",variantGroup:`${unit}-review`,audit:{op:"decimalAdd",values:[x,y],result:Number(answer)}}));
+        const x=10+(i%30)/10,y=2+(i%20)/10,used=1+(i%9)/10,answer=(x+y-used).toFixed(1);
+        out.push(q({...common,skill:"小數兩步驟應用",questionType:"application",difficulty:3,
+          stem:`甲段繩長 ${x.toFixed(1)} 公尺，乙段繩長 ${y.toFixed(1)} 公尺，接起來後用掉 ${used.toFixed(1)} 公尺，還剩多少公尺？`,options:unique([answer,(x+y).toFixed(1),(x+y+used).toFixed(1),(x+y-used+.1).toFixed(1)]),answer,
+          explanation:`先合計 ${x.toFixed(1)}＋${y.toFixed(1)}＝${(x+y).toFixed(1)}，再減 ${used.toFixed(1)}，剩 ${answer} 公尺。`,errorCode:"decimal_two_step_application",prerequisite:"先加後減並對齊小數點",variantGroup:`${unit}-review`,audit:{op:"decimalAddSub",values:[x,y,used],result:Number(answer)}}));
       }
     }
     return out;
