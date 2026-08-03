@@ -96,7 +96,17 @@ const DetectiveSystem = {
     "步驟遺漏":"step_snail", "平均分":"step_snail", "每份數量":"step_snail",
     "只完成第一步":"step_snail", "增減順序混亂":"step_snail",
     "至少陷阱":"bound_golem", "至少最多":"bound_golem", "最多限制":"bound_golem",
-    "只看除法商、不檢查限制":"bound_golem", "混用人數限制與價格":"bound_golem"
+    "只看除法商、不檢查限制":"bound_golem", "混用人數限制與價格":"bound_golem",
+    "money_value_count":"unit_imp", "money_coin_number":"unit_imp", "money_compare":"comparison_ninja",
+    "money_total_vs_difference":"question_thief", "money_enough_compare":"comparison_ninja",
+    "money_change_direction":"question_thief", "money_change_add":"question_thief", "money_table_missing_item":"step_snail",
+    "elapsed_time":"unit_imp", "time_end_forward":"unit_imp", "time_start_backward":"unit_imp",
+    "time_sequence":"comparison_ninja", "clock_hand_scale":"unit_imp", "time_base60":"unit_imp",
+    "integer_place_value":"unit_imp", "integer_compare":"comparison_ninja", "integer_add_carry":"step_snail",
+    "integer_sub_borrow":"step_snail", "integer_multiply":"step_snail", "integer_divide":"step_snail",
+    "remainder_context":"remainder_ghost", "integer_estimate":"distractor_slime",
+    "decimal_fraction":"unit_imp", "decimal_place_value":"unit_imp", "decimal_compare":"comparison_ninja",
+    "decimal_align_add":"unit_imp", "decimal_align_sub":"unit_imp", "decimal_misalignment":"unit_imp"
   },
 
   emptyProfile(id, name, type) {

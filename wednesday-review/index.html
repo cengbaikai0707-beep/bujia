@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>週三數學總複習｜永齡學習偵探社</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="wrap">
+    <a class="lobby" href="../index.html">← 回學習偵探社大廳</a>
+
+    <section id="screen-lookup" class="screen">
+      <header class="hero">
+        <span class="hero-icon">🗓️</span>
+        <p class="eyebrow">Wednesday Review</p>
+        <h1>週三數學總複習</h1>
+        <p>輸入自己的名字，系統會從專屬 50 題配置中抽出本次練習。答錯的技能會在後面換數字再出現。</p>
+      </header>
+
+      <section class="lookup-card">
+        <label for="student-name">偵探姓名</label>
+        <div class="lookup-row">
+          <input id="student-name" list="student-list" autocomplete="off" maxlength="8" placeholder="輸入姓名，例如：吉成">
+          <datalist id="student-list"></datalist>
+          <button id="find-student" type="button">尋找我的題目</button>
+        </div>
+        <p class="privacy">姓名只用來在這台裝置分流題目，不會傳送到網路。</p>
+        <p id="lookup-message" class="message"></p>
+      </section>
+
+      <section id="student-card" class="student-card hidden">
+        <div class="student-head">
+          <div><p class="eyebrow">個人複習檔案</p><h2 id="student-title"></h2><p id="student-note"></p></div>
+          <div class="ready-count"><strong id="ready-count">0</strong><span>可練題目</span></div>
+        </div>
+        <div id="student-plan" class="plan-grid"></div>
+        <div id="coverage-warning" class="coverage-warning hidden"></div>
+        <label class="count-field">本次先做
+          <select id="question-count"><option value="10">10 題</option><option value="12" selected>12 題</option><option value="15">15 題</option></select>
+        </label>
+        <button id="start-review" class="primary" type="button">開始本次總複習</button>
+      </section>
+
+      <details class="teacher-coverage">
+        <summary>教師查看：七人題庫建置狀態</summary>
+        <div class="coverage-table-wrap"><table><thead><tr><th>學生</th><th>題庫槽</th><th>可練</th><th>正式</th><th>暫定</th><th>待核定</th></tr></thead><tbody id="coverage-rows"></tbody></table></div>
+        <p>「待核定」題槽不會抽給學生；補上永齡 12 冊單元總表後，可直接替換而不需重做頁面。</p>
+      </details>
+    </section>
+
+    <section id="screen-quiz" class="screen hidden">
+      <header class="quiz-head">
+        <div><p class="eyebrow">週三案件</p><h2 id="quiz-student"></h2></div>
+        <div class="quiz-meta"><span id="quiz-position"></span><span id="quiz-score"></span></div>
+      </header>
+      <div class="progress"><i id="progress-fill"></i></div>
+      <article class="question-card">
+        <div class="question-tags"><span id="question-unit"></span><span id="question-skill"></span><span id="question-level"></span><span id="question-status"></span></div>
+        <p id="repair-label" class="repair-label hidden">🔁 這是剛才錯誤技能的換題修復</p>
+        <h1 id="question-stem"></h1>
+        <div id="options" class="options"></div>
+        <button id="show-hint" class="hint-button" type="button">需要一點提示</button>
+        <p id="hint-box" class="hint-box hidden"></p>
+        <div id="feedback" class="feedback hidden">
+          <strong id="feedback-title"></strong>
+          <p id="feedback-explanation"></p>
+          <small id="feedback-error"></small>
+        </div>
+        <button id="next-question" class="primary hidden" type="button">下一題</button>
+      </article>
+    </section>
+
+    <section id="screen-result" class="screen hidden">
+      <header class="result-head"><span>📁</span><p class="eyebrow">案件歸檔</p><h1 id="result-title"></h1><p id="result-summary"></p></header>
+      <div class="result-stats"><div><strong id="result-accuracy"></strong><span>正確率</span></div><div><strong id="result-correct"></strong><span>答對</span></div><div><strong id="result-repairs"></strong><span>修復題</span></div></div>
+      <section class="diagnosis"><h2>本次能力紀錄</h2><div id="skill-results"></div></section>
+      <div id="reward-result" class="reward-result"></div>
+      <div class="result-actions"><button id="retry-review" type="button">再抽一組</button><a href="../pet/index.html">看看偵探夥伴</a><a href="../index.html">回大廳</a></div>
+    </section>
+  </main>
+  <script src="../detective-system.js"></script>
+  <script src="question-bank.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
