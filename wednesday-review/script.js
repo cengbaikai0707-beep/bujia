@@ -54,9 +54,9 @@
     state.student=name;state.bank=DATA.banks[name];
     const config=DATA.students[name],c=coverage(name);
     $("lookup-message").textContent="";$("student-title").textContent=`${name}的週三題庫`;$("student-note").textContent=config.note;$("ready-count").textContent=c.ready;
-    $("student-plan").innerHTML=config.plan.map(([unit,count])=>{const status=unitStatus(name,unit);const topic=(DATA.unitMeta[unit]||{}).topic||(unit==="mixed"?"混合題":"單元待核定");const label=status==="ready"?"正式可練":status==="provisional"?"暫定可練":"等待單元表";return `<div class="plan-item ${status}"><strong>${esc(unit)}｜${count} 題</strong><small>${esc(topic)}</small><small>${label}</small></div>`;}).join("");
+    $("student-plan").innerHTML=config.plan.map(([unit,count])=>{const status=unitStatus(name,unit);const bankTopic=(state.bank.find(item=>item.unit===unit)||{}).topic;const topic=bankTopic||(DATA.unitMeta[unit]||{}).topic||(unit==="mixed"?"跨單元綜合應用":"綜合應用練習");const label=status==="ready"?"正式可練":status==="provisional"?"可練習（範圍暫定）":"尚未建立";return `<div class="plan-item ${status}"><strong>${esc(unit)}｜${count} 題</strong><small>${esc(topic)}</small><small>${label}</small></div>`;}).join("");
     const warning=$("coverage-warning");warning.classList.toggle("hidden",c.pending===0);
-    warning.textContent=c.pending?`目前有 ${c.pending} 題仍待永齡單元總表核定，不會抽給學生；本次只會使用 ${c.ready} 題已確認或明確標示為暫定的內容。`:"所有題槽都已核定。";
+    warning.textContent=c.pending?`目前有 ${c.pending} 題尚未建立，不會抽給學生；本次會使用 ${c.ready} 題可練內容。`:"所有 50 題都可以練習。";
     const countSelect=$("question-count"),countOptions=[...countSelect.options];
     countOptions.forEach(option=>{option.disabled=Number(option.value)>c.ready;});
     if(countSelect.selectedOptions[0]&&countSelect.selectedOptions[0].disabled){
