@@ -32,9 +32,10 @@
     }, base);
   }
 
-  function moneyQuestions(student, count) {
+  function moneyQuestions(student, count, offset=0) {
     const out = [];
-    for (let i=0; i<count; i++) {
+    for (let localIndex=0; localIndex<count; localIndex++) {
+      const i = localIndex + offset;
       const mode = i % 8;
       const a = 20 + (i % 6) * 10;
       const b = 15 + (i % 5) * 5;
@@ -93,9 +94,20 @@
     const h = Math.floor(totalMinutes / 60) % 24, m = totalMinutes % 60;
     return `${h}:${String(m).padStart(2,"0")}`;
   }
-  function timeQuestions(student, count) {
+  function clockOptions(answer, candidates, baseMinutes) {
+    const options = unique([answer, ...candidates]);
+    let bump = 5;
+    while (options.length < 4) {
+      const candidate = timeText(baseMinutes + bump);
+      if (!options.includes(candidate)) options.push(candidate);
+      bump += 5;
+    }
+    return options.slice(0, 4);
+  }
+  function timeQuestions(student, count, offset=0) {
     const out=[];
-    for(let i=0;i<count;i++){
+    for(let localIndex=0;localIndex<count;localIndex++){
+      const i=localIndex+offset;
       const mode=i%6,id=`${student}-3-4-${String(i+1).padStart(3,"0")}`;
       const start=8*60+(i%6)*10, duration=20+(i%5)*10, end=start+duration;
       if(mode===0){
@@ -106,12 +118,12 @@
       }else if(mode===1){
         const answer=timeText(end);
         out.push(q({id,student,book:3,unit:"3-4",topic:"時間（三）",skill:"求結束時間",questionType:"application",difficulty:2,
-          stem:`小美 ${timeText(start)} 開始閱讀，讀了 ${duration} 分鐘，幾點結束？`,options:[answer,timeText(end+10),timeText(start-duration),timeText(start+duration+60)],answer,
+          stem:`小美 ${timeText(start)} 開始閱讀，讀了 ${duration} 分鐘，幾點結束？`,options:clockOptions(answer,[timeText(end+10),timeText(start-duration),timeText(start+duration+60)],end),answer,
           explanation:`開始時間往後加 ${duration} 分鐘，得到 ${answer}。`,errorCode:"time_end_forward",prerequisite:"時間往後推",variantGroup:"time-end"}));
       }else if(mode===2){
         const answer=timeText(start);
         out.push(q({id,student,book:3,unit:"3-4",topic:"時間（三）",skill:"反推開始時間",questionType:"application",difficulty:2,
-          stem:`一堂活動在 ${timeText(end)} 結束，共進行 ${duration} 分鐘。活動幾點開始？`,options:[answer,timeText(end+duration),timeText(start-10),timeText(end-duration+60)],answer,
+          stem:`一堂活動在 ${timeText(end)} 結束，共進行 ${duration} 分鐘。活動幾點開始？`,options:clockOptions(answer,[timeText(end+duration),timeText(start-10),timeText(end-duration+60)],start),answer,
           explanation:`已知結束時間，要往前退 ${duration} 分鐘，得到 ${answer}。`,errorCode:"time_start_backward",prerequisite:"時間往前推",variantGroup:"time-start"}));
       }else if(mode===3){
         const a=timeText(start),b=timeText(start+25),answer=`${a} 比較早`;
@@ -133,9 +145,10 @@
     return out;
   }
 
-  function integerQuestions(student,count){
+  function integerQuestions(student,count,offset=0){
     const out=[];
-    for(let i=0;i<count;i++){
+    for(let localIndex=0;localIndex<count;localIndex++){
+      const i=localIndex+offset;
       const mode=i%8,id=`${student}-6-1-${String(i+1).padStart(3,"0")}`;
       const a=1250+(i*137)%7000,b=320+(i*83)%1800;
       const common={id,student,book:6,unit:"6-1",topic:"整數（六）安全範圍",status:"provisional"};
@@ -151,9 +164,10 @@
     return out;
   }
 
-  function decimalQuestions(student,count){
+  function decimalQuestions(student,count,offset=0){
     const out=[];
-    for(let i=0;i<count;i++){
+    for(let localIndex=0;localIndex<count;localIndex++){
+      const i=localIndex+offset;
       const mode=i%6,id=`${student}-6-4-${String(i+1).padStart(3,"0")}`;
       const whole=i%5,tenths=1+i%8,value=`${whole}.${tenths}`;
       const common={id,student,book:6,unit:"6-4",topic:"小數（一）",status:"verified"};
@@ -168,6 +182,26 @@
   }
 
   const GENERATORS = { "3-3":moneyQuestions, "3-4":timeQuestions, "6-1":integerQuestions, "6-4":decimalQuestions };
+  function materialize(base, seed=Date.now()) {
+    if (!base || base.status === "pending") return Object.assign({}, base, { dynamic:false });
+    // 概念辨識與找錯題保留固定敘述；操作、計算、生活應用才重新生成數字。
+    if (base.questionType !== "basic" && base.questionType !== "application") {
+      return Object.assign({}, base, { sourceId:base.id, variantKey:`${base.id}:fixed`, dynamic:false });
+    }
+    const generator = GENERATORS[base.unit];
+    if (!generator) return Object.assign({}, base, { sourceId:base.id, variantKey:`${base.id}:fixed`, dynamic:false });
+    const numericSeed = Math.abs(Number(seed) || 1);
+    let generated = null;
+    for (let attempt=0; attempt<12 && (!generated || generated.stem === base.stem); attempt++) {
+      const offset = 64 + (numericSeed + attempt * 97) % 12000;
+      generated = generator(base.student, 32, offset).find(item => item.skill === base.skill) || generated;
+    }
+    if (!generated) return Object.assign({}, base, { sourceId:base.id, variantKey:`${base.id}:fixed`, dynamic:false });
+    return Object.assign({}, generated, {
+      id:base.id, sourceId:base.id, student:base.student, status:base.status,
+      variantKey:`${base.id}:${numericSeed}`, dynamic:true
+    });
+  }
   function pendingQuestion(student, unit, index) {
     return {
       id:`${student}-${unit}-${String(index+1).padStart(3,"0")}`, student, unit,
@@ -186,5 +220,5 @@
   }
 
   const BANKS = Object.fromEntries(Object.entries(STUDENTS).map(([student,config]) => [student,buildBank(student,config)]));
-  window.WEDNESDAY_REVIEW_DATA = { students:STUDENTS, unitMeta:UNIT_META, banks:BANKS };
+  window.WEDNESDAY_REVIEW_DATA = { students:STUDENTS, unitMeta:UNIT_META, banks:BANKS, materialize };
 })();

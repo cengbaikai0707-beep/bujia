@@ -9,6 +9,19 @@
   function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);}
   function normalizeName(value){return String(value||"").replace(/[\s　]/g,"").trim();}
   function shuffle(items){const a=[...items];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+  function hash(value){return String(value||"").split("").reduce((sum,ch)=>(sum*31+ch.charCodeAt(0))>>>0,7);}
+  function questionSignature(item){return item.dynamic?item.stem:`${item.stem}||${(item.options||[]).join("|")}`;}
+  function instantiate(base, usedSignatures, salt=0){
+    let item=null;
+    for(let attempt=0;attempt<20;attempt++){
+      const seed=Date.now()+hash(base.id)+salt*1009+attempt*7919+Math.floor(Math.random()*1000000);
+      item=DATA.materialize(base,seed);
+      if(!usedSignatures.has(questionSignature(item)))break;
+    }
+    if(!item||usedSignatures.has(questionSignature(item)))return null;
+    usedSignatures.add(questionSignature(item));
+    return Object.assign({},item,{sessionOptions:shuffle(item.options)});
+  }
   function loadProgress(){try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||"{}")||{};}catch(e){return {};}}
   function saveProgress(all){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(all));}catch(e){}}
   function studentProgress(name){const all=loadProgress();return all[name]||{seen:{},wrong:{},errors:{},history:[],rewardWeeks:{}};}
@@ -44,6 +57,12 @@
     $("student-plan").innerHTML=config.plan.map(([unit,count])=>{const status=unitStatus(name,unit);const topic=(DATA.unitMeta[unit]||{}).topic||(unit==="mixed"?"混合題":"單元待核定");const label=status==="ready"?"正式可練":status==="provisional"?"暫定可練":"等待單元表";return `<div class="plan-item ${status}"><strong>${esc(unit)}｜${count} 題</strong><small>${esc(topic)}</small><small>${label}</small></div>`;}).join("");
     const warning=$("coverage-warning");warning.classList.toggle("hidden",c.pending===0);
     warning.textContent=c.pending?`目前有 ${c.pending} 題仍待永齡單元總表核定，不會抽給學生；本次只會使用 ${c.ready} 題已確認或明確標示為暫定的內容。`:"所有題槽都已核定。";
+    const countSelect=$("question-count"),countOptions=[...countSelect.options];
+    countOptions.forEach(option=>{option.disabled=Number(option.value)>c.ready;});
+    if(countSelect.selectedOptions[0]&&countSelect.selectedOptions[0].disabled){
+      const fallback=countOptions.filter(option=>!option.disabled).pop();
+      if(fallback)countSelect.value=fallback.value;
+    }
     $("start-review").disabled=c.ready<10;
     if(c.ready<10)$("lookup-message").textContent="這位學生目前不足 10 題可用題目；補上單元總表後才能開始，避免抽到錯誤單元。";
     $("student-card").classList.remove("hidden");
@@ -61,7 +80,10 @@
     const ordered=[...priority,...unseen,...seen],picked=[],groups=new Set();
     ordered.forEach(q=>{if(picked.length<count&&!groups.has(q.variantGroup)){picked.push(q);groups.add(q.variantGroup);}});
     ordered.forEach(q=>{if(picked.length<count&&!picked.includes(q))picked.push(q);});
-    return shuffle(picked.slice(0,Math.min(count,available.length))).map(q=>Object.assign({},q,{sessionOptions:shuffle(q.options)}));
+    const usedSignatures=new Set(),questions=[];
+    const candidates=[...shuffle(picked.slice(0,Math.min(count,available.length))),...shuffle(ordered.filter(question=>!picked.includes(question)))];
+    candidates.forEach((question,index)=>{if(questions.length>=count)return;const item=instantiate(question,usedSignatures,index);if(item)questions.push(item);});
+    return questions;
   }
 
   function startReview(){
@@ -73,7 +95,7 @@
   function renderQuestion(){
     const item=state.queue[state.index];state.locked=false;
     $("quiz-position").textContent=`${state.index+1} / ${state.queue.length}`;$("quiz-score").textContent=`目前答對 ${state.answers.filter(a=>a.correct).length}`;$("progress-fill").style.width=`${state.index/state.queue.length*100}%`;
-    $("question-unit").textContent=`${item.unit} ${item.topic}`;$("question-skill").textContent=item.skill;$("question-level").textContent=`${typeLabel(item.questionType)}｜難度 ${item.difficulty}`;$("question-status").textContent=item.status==="provisional"?"暫定範圍":"已核定";
+    $("question-unit").textContent=`${item.unit} ${item.topic}`;$("question-skill").textContent=item.skill;$("question-level").textContent=`${typeLabel(item.questionType)}｜難度 ${item.difficulty}`;$("question-status").textContent=`${item.status==="provisional"?"暫定範圍":"已核定"}${item.dynamic?"｜動態數字":"｜固定診斷"}`;
     $("repair-label").classList.toggle("hidden",!item.remedial);$("question-stem").textContent=item.stem;
     $("options").innerHTML=item.sessionOptions.map((option,index)=>`<button class="option" data-option="${index}" type="button">${esc(option)}</button>`).join("");
     document.querySelectorAll("[data-option]").forEach(button=>button.onclick=()=>answer(Number(button.dataset.option)));
@@ -81,12 +103,18 @@
   }
   function scheduleRepair(item){
     const distance=3+Math.floor(Math.random()*3),at=Math.min(state.queue.length,state.index+distance);
-    const candidate=shuffle(state.bank.filter(q=>(q.status==="verified"||q.status==="provisional")&&q.skill===item.skill&&q.id!==item.id&&!state.queue.some(current=>current.id===q.id))).shift();
-    if(candidate&&state.queue.length<15){state.queue.splice(at,0,Object.assign({},candidate,{remedial:true,sessionOptions:shuffle(candidate.options)}));state.repairs+=1;return true;}
+    const pool=state.bank.filter(q=>(q.status==="verified"||q.status==="provisional")&&q.skill===item.skill);
+    const candidate=shuffle(pool.filter(q=>q.id!==item.id&&!state.queue.some(current=>current.id===q.id)))[0]||shuffle(pool.filter(q=>q.id!==item.id))[0]||(item.dynamic?pool[0]:null);
+    if(candidate&&state.queue.length<15){
+      const used=new Set(state.queue.map(questionSignature));const repair=instantiate(candidate,used,state.repairs+state.index+41);
+      if(repair&&questionSignature(repair)!==questionSignature(item)){state.queue.splice(at,0,Object.assign({},repair,{remedial:true}));state.repairs+=1;return true;}
+    }
     const futureIndex=state.queue.findIndex((q,index)=>index>state.index&&q.skill===item.skill&&q.id!==item.id);
     if(futureIndex<0)return false;
-    const existing=state.queue.splice(futureIndex,1)[0];
-    const target=Math.min(state.queue.length,at);state.queue.splice(target,0,Object.assign({},existing,{remedial:true}));state.repairs+=1;return true;
+    const existing=state.queue[futureIndex],base=state.bank.find(q=>q.id===existing.id)||existing;
+    const used=new Set(state.queue.filter((_,index)=>index!==futureIndex).map(questionSignature));
+    const refreshed=instantiate(base,used,state.repairs+state.index+73);if(!refreshed)return false;
+    state.queue.splice(futureIndex,1);const target=Math.min(state.queue.length,at);state.queue.splice(target,0,Object.assign({},refreshed,{remedial:true}));state.repairs+=1;return true;
   }
   function answer(index){
     if(state.locked)return;state.locked=true;const item=state.queue[state.index],chosen=item.sessionOptions[index],correct=chosen===item.answer;
