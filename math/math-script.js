@@ -54,7 +54,7 @@ function answer(index){
   if(state.locked)return;state.locked=true;const q=state.queue[state.index],chosen=state.current[index],ok=chosen.correct;
   state.answers.push({id:q.id,skillType:q.skillType,difficulty:q.difficulty,chosen:chosen.text,correct:ok,hintUsed:state.hintUsed});
   $("options").querySelectorAll(".option").forEach((b,i)=>{b.disabled=true;if(state.current[i].correct)b.classList.add("correct");else if(i===index)b.classList.add("wrong");});
-  $("feedback").className=`feedback${ok?"":" bad"}`;$("fb-title").textContent=ok?"判斷正確":"先別急，跟著解析修正";$("fb-message").textContent=ok?q.correctFeedback:q.wrongHint;$("fb-explain").textContent=q.explanation;
+  $("feedback").className=`feedback ${ok?"good":"bad"}`;$("fb-title").textContent=ok?"判斷正確":"先別急，跟著解析修正";$("fb-message").textContent=ok?q.correctFeedback:q.wrongHint;$("fb-explain").textContent=q.explanation;
   $("btn-hint").classList.add("hidden");$("btn-next").classList.remove("hidden");$("rail-fill").style.width=`${(state.index+1)/state.queue.length*100}%`;
 }
 

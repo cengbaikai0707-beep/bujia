@@ -32,10 +32,17 @@
           <div class="head-chips"><span id="pet-stage"></span><span id="pet-count"></span></div>
         </div>
         <div class="room-label" id="room-label">偵探書房</div>
-        <div class="pet-avatar-wrap">
-          <span class="pet-avatar" id="pet-avatar">🥚</span>
-          <span class="pet-accessory" id="pet-accessory"></span>
+        <div class="pet-habitat" id="pet-habitat" aria-label="夥伴互動房間">
+          <button class="habitat-item bowl" data-habitat="food" type="button"><span>🥣</span><small>食盆</small></button>
+          <button class="habitat-item bed" data-habitat="bed" type="button"><span>🛏️</span><small>小床</small></button>
+          <button class="habitat-item toy" data-habitat="toy" type="button"><span>🧶</span><small>玩具</small></button>
+          <div class="pet-avatar-wrap" id="pet-avatar-wrap">
+            <span class="pet-avatar" id="pet-avatar">🥚</span>
+            <span class="pet-accessory" id="pet-accessory"></span>
+            <span class="habitat-speech" id="habitat-speech"></span>
+          </div>
         </div>
+        <p class="habitat-help">點房間地面呼叫牠；點食盆、床或玩具與牠互動。牠也會依狀態自行靠近家具。</p>
         <p class="pet-mood-line" id="pet-line"></p>
         <p class="personality" id="pet-personality"></p>
 
@@ -48,8 +55,15 @@
           <div class="bar"><i id="stat-mood"></i></div>
         </div>
         <div class="bond-line">🤝 親密照顧次數：<b id="pet-bond"></b></div>
+        <div id="bond-levels" class="bond-levels" aria-label="親密能力"></div>
         <div class="actions" id="pet-actions"></div>
         <p id="pet-message" class="message"></p>
+      </section>
+
+      <section class="panel wish-panel">
+        <div class="panel-head"><div><p class="eyebrow">今天想和你一起做</p><h2>🐾 夥伴小願望</h2></div><span id="wish-progress"></span></div>
+        <p id="wish-label" class="wish-label"></p>
+        <p id="wish-reward" class="muted small"></p>
       </section>
 
       <section class="panel">
@@ -73,6 +87,7 @@
 
       <section class="panel">
         <div class="panel-head"><div><p class="eyebrow">房間布置</p><h2>衣櫃與房間</h2></div><span>🪙 <b id="style-coins"></b></span></div>
+        <p id="rotation-note" class="muted small"></p>
         <h3>夥伴配件</h3>
         <div id="accessory-list" class="style-list"></div>
         <h3>房間背景</h3>

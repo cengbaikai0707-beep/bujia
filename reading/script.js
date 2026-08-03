@@ -224,7 +224,7 @@ function answer(optionIndex) {
     else if (index === optionIndex) button.classList.add("wrong");
   });
 
-  $("feedback").className = `feedback${chosen.correct ? "" : " bad"}`;
+  $("feedback").className = `feedback ${chosen.correct ? "good" : "bad"}`;
   $("fb-title").textContent = chosen.correct ? "✔ 判斷正確" : "✘ 這裡有一個讀題陷阱";
   $("fb-message").textContent = chosen.correct
     ? (state.hintUsed ? "你利用線索完成了這一關。" : "你有抓到這一關的關鍵。")

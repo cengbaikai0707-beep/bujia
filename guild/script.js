@@ -117,7 +117,7 @@
     document.querySelectorAll("#g-options .option").forEach(node=>{node.disabled=true;if(node.dataset.correct==="1")node.classList.add("correct");});
     if(!ok)button.classList.add("wrong"); else state.correct++;
     state.answers.push({correct:ok,myth:(q.monster && q.monster.id) || q.myth || "unknown_fog"});
-    $("g-feedback").className=`feedback ${ok?"":"bad"}`;
+    $("g-feedback").className=`feedback ${ok?"good":"bad"}`;
     $("g-feedback").textContent=(ok?"判斷成立。":"證據不支持這個判斷。")+q.exp;
     $("g-next").textContent=state.index===state.queue.length-1?"完成案件":"下一份證物 →";
     $("g-next").classList.remove("hidden"); renderTools();
