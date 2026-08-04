@@ -242,6 +242,7 @@
 
   function renderCollection() {
     const all = Object.values(DS.petSpecies);
+    $("lifetime-coins").textContent = DS.state.coinsEarned;
     $("collection-count").textContent = `${DS.ownedPetIds().length} / ${all.length}`;
     $("collection-list").innerHTML = all.map(species => speciesCard(species, "collection")).join("");
     document.querySelectorAll("[data-switch]").forEach(button => {

@@ -15,7 +15,7 @@
         <div class="icon-mark">🥚</div>
         <p class="eyebrow">第一位偵探夥伴</p>
         <h1>選一顆偵探蛋</h1>
-        <p>初始有四種夥伴可以選。之後完成不同館別的任務，還能解鎖更多動物並加入收藏。</p>
+        <p>初始有四種夥伴可以選。之後靠學習任務累積偵探幣，就能逐步解鎖更多動物並加入收藏。</p>
       </header>
       <div class="species-grid" id="egg-choices"></div>
       <label class="name-field">幫夥伴取名字（最多 10 字）
@@ -69,7 +69,7 @@
       <section class="panel">
         <div class="panel-head"><div><p class="eyebrow">夥伴圖鑑</p><h2>收集與切換夥伴</h2></div>
           <span id="collection-count"></span></div>
-        <p class="muted">初始夥伴可直接領養；隱藏夥伴要靠學習任務解鎖。每位夥伴會保留自己的名字、成長和穿戴。</p>
+        <p class="muted">初始夥伴可直接領養；隱藏夥伴依生涯累積金幣解鎖。買東西只扣錢包，不會倒扣解鎖進度。目前生涯累積：🪙 <b id="lifetime-coins">0</b></p>
         <label class="name-field compact">新夥伴名字
           <input id="new-pet-name" maxlength="10" placeholder="領養新夥伴時使用">
         </label>
@@ -82,7 +82,7 @@
         <p id="evolve-status" class="muted"></p>
         <div class="mat-list" id="mat-list"></div>
         <button id="btn-evolve" class="primary">✨ 讓目前夥伴進化</button>
-        <p class="muted small">成長路線採 2＋2＋3：孵化先自選 2 館，少年期再從未使用的館中自選 2 館，成熟期完成剩下 3 館。順序保有彈性，但完整養成仍會練到七館。</p>
+        <p class="muted small">成長路線調整為 2＋2＋2：每次通過一館，固定取得該館完整材料，另得兩種隨機材料碎片（兩片自動合成）。每階段仍須選不同館別，但不必一次練遍全館。</p>
       </section>
 
       <section class="panel">
@@ -97,7 +97,7 @@
 
       <section class="panel">
         <div class="panel-head"><div><p class="eyebrow">資源商店</p><h2>夥伴補給站</h2></div><span>🪙 <b id="coins"></b></span></div>
-        <p class="muted">完成學習任務與今日委託，就能把偵探幣和飼料帶回來照顧夥伴。</p>
+        <p class="muted">完成學習任務與今日委託，就能把偵探幣和飼料帶回來照顧夥伴；補給價格與狀態消耗都已調低。</p>
         <div class="shop-list" id="pet-shop"></div>
         <p id="shop-message" class="message"></p>
       </section>

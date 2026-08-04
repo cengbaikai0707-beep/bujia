@@ -112,7 +112,8 @@ const DetectiveSystem = {
   emptyProfile(id, name, type) {
     return {
       id, name:name || "本機偵探", type:type || "individual",
-      createdAt:new Date().toISOString(), coins:20, evidence:0, xp:0,
+      // coinsEarned 是生涯累積獲得量；購物只會扣 coins，不會讓寵物重新上鎖。
+      createdAt:new Date().toISOString(), coins:20, coinsEarned:20, evidence:0, xp:0,
       inventory:{
         clueLens:1, retryTicket:0, mythScanner:0, supplyPack:0, sideKey:0,
         petFood:0, petSnack:0, petToy:0, petMed:0
@@ -200,6 +201,14 @@ const DetectiveSystem = {
     });
     if (!Array.isArray(profile.titles)) profile.titles = [];
     if (!Array.isArray(profile.history)) profile.history = [];
+    // 舊存檔沒有完整的生涯統計；用現有錢包、任務紀錄與已知成就回推最低值，寧可多承認、不讓孩子重練。
+    const historyCoins = profile.history.reduce((sum, entry) => sum + Math.max(0, Number(entry.coins) || 0), 0);
+    const claimed = (profile.quest && profile.quest.claimed) || {};
+    const questCoins = (claimed.mission ? 8 : 0) + (claimed.evidence ? 12 : 0) + (claimed.explore ? 15 : 0);
+    const caseCoins = (profile.casesCleared.sealedArchive ? 35 : 0) + (profile.casesCleared.grandCase ? 60 : 0) +
+      (profile.titles.includes("迷思救援員") ? 20 : 0) + profile.titles.filter(title => /剋星$/.test(title)).length * 20;
+    const inferredEarned = 20 + historyCoins + questCoins + caseCoins;
+    profile.coinsEarned = Math.max(0, Number(profile.coinsEarned) || 0, Number(profile.coins) || 0, inferredEarned);
   },
 
   save() {
@@ -244,7 +253,9 @@ const DetectiveSystem = {
   },
 
   addCoins(amount) {
+    const earned = Math.max(0, Math.round(Number(amount || 0)));
     this.state.coins = Math.max(0, Math.round(this.state.coins + Number(amount || 0)));
+    this.state.coinsEarned = Math.max(Number(this.state.coinsEarned) || 0, 0) + earned;
     this.save(); return this.state.coins;
   },
   addEvidence(amount) {
@@ -324,6 +335,7 @@ const DetectiveSystem = {
     }
     this.state.quest.claimed[id] = true;
     this.state.coins += quest.reward;
+    this.state.coinsEarned += quest.reward;
     this.state.xp += 5;
     let bonus = "";
     if (id === "mission") {
@@ -364,6 +376,7 @@ const DetectiveSystem = {
       coins = Math.ceil(coins * 1.5);
     }
     this.state.coins += coins;
+    this.state.coinsEarned += Math.max(0, coins);
     this.state.evidence += evidence;
     this.state.xp += correct * 2 + evidence * 10 + 4;
     if (accuracy >= 60) {
@@ -371,20 +384,29 @@ const DetectiveSystem = {
     }
     this.state.moduleBest[moduleId] = Math.max(this.state.moduleBest[moduleId] || 0, accuracy);
 
-    // 進化材料：85 分以上掉完整材料；70～84 分給碎片，兩片自動合成。
+    // 成長材料：達 60 分固定掉該館完整材料，再掉兩種不同館別的隨機碎片。
+    // 隨機碎片兩片自動合成，讓孩子能補足較少進入的館別，但仍保留跨館探索。
     let petMatDrop = null;
     let petFragDrop = null;
-    if (accuracy >= 85 && runs < 2) {
+    const petBonusDrops = [];
+    if (accuracy >= 60 && runs < 2) {
       this.state.petMat[moduleId] = (this.state.petMat[moduleId] || 0) + 1;
       petMatDrop = this.petMaterials[moduleId];
-    } else if (accuracy >= 70 && runs < 2) {
-      this.state.petFrag[moduleId] = (this.state.petFrag[moduleId] || 0) + 1;
-      petFragDrop = this.petMaterials[moduleId];
-      if (this.state.petFrag[moduleId] >= 2) {
-        this.state.petFrag[moduleId] -= 2;
-        this.state.petMat[moduleId] = (this.state.petMat[moduleId] || 0) + 1;
-        petMatDrop = this.petMaterials[moduleId];
+      const randomIds = Object.keys(this.petMaterials).filter(id => id !== moduleId);
+      for (let i = randomIds.length - 1; i > 0; i--) {
+        const pick = Math.floor(Math.random() * (i + 1));
+        [randomIds[i], randomIds[pick]] = [randomIds[pick], randomIds[i]];
       }
+      randomIds.slice(0, 2).forEach(id => {
+        this.state.petFrag[id] = (this.state.petFrag[id] || 0) + 1;
+        let combined = false;
+        if (this.state.petFrag[id] >= 2) {
+          this.state.petFrag[id] -= 2;
+          this.state.petMat[id] = (this.state.petMat[id] || 0) + 1;
+          combined = true;
+        }
+        petBonusDrops.push({ ...this.petMaterials[id], combined });
+      });
     }
 
     const mistakes = Array.isArray(summary.mistakes) ? summary.mistakes.slice(0, 8) : [];
@@ -403,8 +425,9 @@ const DetectiveSystem = {
     this.state.history = this.state.history.slice(0, 60);
     this.checkUnlocks();
     this.save();
-    const result = { coins, evidence, rank:this.rankFor(), module:this.modules[moduleId], petMatDrop, petFragDrop, wishResult };
-    const materialCopy = petMatDrop ? `、＋1 ${petMatDrop.emoji}${petMatDrop.name}` : petFragDrop ? `、＋1/2 ${petFragDrop.emoji}${petFragDrop.name}碎片` : "";
+    const result = { coins, evidence, rank:this.rankFor(), module:this.modules[moduleId], petMatDrop, petFragDrop, petBonusDrops, wishResult };
+    const bonusCopy = petBonusDrops.length ? `、隨機碎片 ${petBonusDrops.map(item => `${item.emoji}${item.name}${item.combined ? "（已合成）" : ""}`).join("、")}` : "";
+    const materialCopy = petMatDrop ? `、＋1 ${petMatDrop.emoji}${petMatDrop.name}${bonusCopy}` : "";
     const wishCopy = wishResult && wishResult.completed ? `、完成夥伴願望` : "";
     this.toast(`完成${result.module.name}：＋${coins} 幣${evidence ? `、＋${evidence} 證據` : ""}${materialCopy}${wishCopy}`);
     this.petReact("complete", wishResult && wishResult.completed ? wishResult.msg : petMatDrop ? `找到${petMatDrop.name}，一起帶回家！` : `完成${result.module.name}，辛苦了！`);
@@ -444,6 +467,7 @@ const DetectiveSystem = {
     };
     const reward = rewards[id]; if (!reward) return null;
     this.state.coins += reward.coins;
+    this.state.coinsEarned += reward.coins;
     this.state.evidence += reward.evidence;
     this.state.xp += 30;
     if (id !== "mythRescue") this.state.casesCleared[id] = true;
@@ -485,36 +509,36 @@ const DetectiveSystem = {
     owl: {
       id:"owl", name:"檔案鴞", stages:["🥚","🐣","🐦","🦉"],
       personality:"夜裡最有精神，喜歡閱讀完整的證詞。", favorite:"petToy",
-      unlock:{ type:"seal", module:"reading", count:2, text:"取得 2 枚讀題館證物" }
+      unlock:{ type:"coins", count:50, text:"生涯累積取得 50 枚偵探幣" }
     },
     fox: {
       id:"fox", name:"墨燈狐", stages:["🥚","🦊","🦊","🦊"],
       personality:"聰明又神祕，尾巴會在發現新事物時亮起。", favorite:"petSnack",
-      unlock:{ type:"modules", count:3, text:"探索 3 個不同館別" }
+      unlock:{ type:"coins", count:90, text:"生涯累積取得 90 枚偵探幣" }
     },
     bear: {
       id:"bear", name:"守護熊", stages:["🥚","🐻","🐻","🐻"],
       personality:"穩重可靠，喜歡把房間整理得舒舒服服。", favorite:"petFood",
-      unlock:{ type:"evidence", count:8, text:"蒐集 8 枚證據" }
+      unlock:{ type:"coins", count:140, text:"生涯累積取得 140 枚偵探幣" }
     },
     penguin: {
       id:"penguin", name:"整理企鵝", stages:["🥚","🐧","🐧","🐧"],
       personality:"做事井然有序，尤其喜歡數字和分類。", favorite:"petToy",
-      unlock:{ type:"seal", module:"math", count:2, text:"取得 2 枚數學館證物" }
+      unlock:{ type:"coins", count:200, text:"生涯累積取得 200 枚偵探幣" }
     },
     dragon: {
       id:"dragon", name:"神祕幼龍", stages:["🥚","🐲","🐉","🐉"],
       personality:"只願意跟真正走遍偵探世界的人回家。", favorite:"petSnack",
-      unlock:{ type:"grand", text:"完成七館聯合案件並探索全部館別" }
+      unlock:{ type:"coins", count:280, text:"生涯累積取得 280 枚偵探幣" }
     }
   },
   petStageNames: ["偵探蛋","幼年期","少年期","成熟期"],
 
   petItems: {
-    petFood:  { id:"petFood",  name:"偵探飼料",   emoji:"🍖", cost:6,  desc:"補充飽足；喜歡飼料的夥伴效果更好。" },
-    petSnack: { id:"petSnack", name:"特調點心",   emoji:"🍮", cost:10, desc:"同時補充飽足與心情。" },
-    petToy:   { id:"petToy",   name:"線索玩具",   emoji:"🧶", cost:8,  desc:"陪夥伴玩耍，提升心情。" },
-    petMed:   { id:"petMed",   name:"活力飲",     emoji:"🧃", cost:15, desc:"精神低落時，將飽足與心情恢復至 65。" }
+    petFood:  { id:"petFood",  name:"偵探飼料",   emoji:"🍖", cost:4, desc:"補充飽足；喜歡飼料的夥伴效果更好。" },
+    petSnack: { id:"petSnack", name:"特調點心",   emoji:"🍮", cost:6, desc:"同時補充飽足與心情。" },
+    petToy:   { id:"petToy",   name:"線索玩具",   emoji:"🧶", cost:5, desc:"陪夥伴玩耍，提升心情。" },
+    petMed:   { id:"petMed",   name:"活力飲",     emoji:"🧃", cost:9, desc:"精神低落時，將飽足與心情恢復至 65。" }
   },
 
   petCosmetics: {
@@ -551,16 +575,16 @@ const DetectiveSystem = {
     owl:"reading", fox:"chinese", bear:"party", penguin:"math", dragon:"guild"
   },
 
-  // 七館依 2＋2＋3 分散到三個階段；玩家可決定順序，但同館不重複計入。
+  // 六種館別依 2＋2＋2 分散到三個階段；玩家可決定順序，但同館不重複計入。
   petEvolveRules: [
     { mat:2, kinds:2 },
     { mat:2, kinds:2 },
-    { mat:3, kinds:3 }
+    { mat:2, kinds:2 }
   ],
 
   // 一週一次使用也不會受到重罰；狀態最低停在安全值，不會因離線生病或死亡。
-  PET_HUNGER_RATE: 0.35,
-  PET_MOOD_RATE: 0.28,
+  PET_HUNGER_RATE: 0.22,
+  PET_MOOD_RATE: 0.16,
   PET_MAX_OFFLINE_HOURS: 24 * 14,
 
   petSpeciesStatus(speciesId) {
@@ -569,13 +593,11 @@ const DetectiveSystem = {
     if (species.starter || this.state.pets[speciesId]) return { unlocked:true, reason:"可以領養" };
     const rule = species.unlock || {};
     let unlocked = false;
-    if (rule.type === "seal") unlocked = (this.state.moduleSeals[rule.module] || 0) >= rule.count;
-    if (rule.type === "modules") unlocked = this.distinctModules().length >= rule.count;
-    if (rule.type === "evidence") unlocked = this.state.evidence >= rule.count;
-    if (rule.type === "grand") {
-      unlocked = this.distinctModules().length >= 7 && !!this.state.casesCleared.grandCase;
-    }
-    return { unlocked, reason:unlocked ? "可以領養" : rule.text };
+    if (rule.type === "coins") unlocked = this.state.coinsEarned >= rule.count;
+    const reason = unlocked
+      ? `已達成！生涯累積 ${this.state.coinsEarned} 枚，可以領養`
+      : `${rule.text}（目前 ${this.state.coinsEarned} / ${rule.count}；購物不會扣除進度）`;
+    return { unlocked, reason, progress:this.state.coinsEarned, goal:rule.count || 0 };
   },
 
   ownedPetIds() { return Object.keys(this.state.pets || {}); },
@@ -911,7 +933,9 @@ const DetectiveSystem = {
     this.clearMyth(monsterId, 3);
     const title = monster.name + "剋星";
     if (!this.state.titles.includes(title)) this.state.titles.push(title);
-    this.state.coins += 20; this.save(); return title;
+    this.state.coins += 20;
+    this.state.coinsEarned += 20;
+    this.save(); return title;
   },
   todayEvent() { return { id:"normal", name:"探索日", desc:"完成任務、蒐集證據、開啟支線。", coinMul:1, shopMul:1 }; },
 
@@ -928,6 +952,7 @@ const DetectiveSystem = {
 
   setCompanionVisible(visible) {
     this.state.companionVisible = visible !== false;
+    if (!this.state.companionVisible) this.clearCompanionAttention(true);
     this.save();
     return this.state.companionVisible;
   },
@@ -966,11 +991,11 @@ const DetectiveSystem = {
     const style = document.createElement("style");
     style.id = "ds-companion-style";
     style.textContent = `
-      #ds-companion-zone{position:fixed;z-index:970;left:0;right:0;bottom:46px;height:105px;
+      #ds-companion-zone{position:fixed;z-index:970;inset:0;
         overflow:visible;pointer-events:none;contain:layout style}
-      #ds-companion{--face:1;position:absolute;left:18px;bottom:0;width:78px;height:94px;
+      #ds-companion{--face:1;position:absolute;left:18px;top:calc(100vh - 148px);width:78px;height:94px;
         border:0;padding:0;background:transparent;pointer-events:auto;cursor:pointer;user-select:none;touch-action:manipulation;
-        transition:left 3s linear;filter:drop-shadow(0 5px 5px #17232d38)}
+        transition:left 3s linear,top 3s linear;filter:drop-shadow(0 5px 5px #17232d38)}
       #ds-companion-visual{display:block;width:100%;height:100%}
       #ds-companion[data-stage="1"] #ds-companion-visual{transform:scale(.84);transform-origin:center bottom}
       #ds-companion[data-stage="2"] #ds-companion-visual{transform:scale(1);transform-origin:center bottom}
@@ -997,6 +1022,13 @@ const DetectiveSystem = {
       #ds-companion.quirk-hop #ds-companion-visual{animation:ds-pet-quirk-hop .72s ease-in-out 2}
       #ds-companion.quirk-spin #ds-companion-visual{animation:ds-pet-quirk-spin .9s ease-in-out}
       #ds-companion.quirk-peek #ds-companion-visual{animation:ds-pet-quirk-peek 1.1s ease-in-out}
+      #ds-companion.begging{z-index:3;filter:drop-shadow(0 8px 9px #17232d66)}
+      #ds-companion.begging #ds-companion-visual{animation:ds-pet-beg .62s ease-in-out infinite}
+      #ds-companion-bite{position:fixed;z-index:971;width:118px;height:72px;pointer-events:none;
+        border-radius:48% 52% 42% 58%;background:repeating-conic-gradient(from 8deg,#fff 0 9deg,#263c4b 10deg 15deg,#fff 16deg 23deg);
+        clip-path:polygon(0 16%,10% 3%,21% 16%,33% 2%,46% 17%,58% 1%,70% 16%,82% 3%,94% 18%,100% 45%,92% 76%,79% 64%,67% 83%,54% 66%,41% 84%,28% 65%,14% 79%,2% 58%);
+        opacity:0;transform:scale(.3) rotate(-8deg);transition:.18s;filter:drop-shadow(0 4px 5px #17232d77)}
+      #ds-companion-bite.show{opacity:.92;transform:scale(1) rotate(-8deg);animation:ds-screen-bite .28s ease-in-out 3}
       @keyframes ds-pet-walk{50%{transform:scaleX(var(--face)) translateY(-4px) rotate(-1deg)}}
       @keyframes ds-pet-idle{50%{transform:scaleX(var(--face)) translateY(-2px)}}
       @keyframes ds-pet-sleep{50%{transform:scaleX(var(--face)) translateY(2px) scale(.98)}}
@@ -1005,8 +1037,9 @@ const DetectiveSystem = {
       @keyframes ds-pet-quirk-hop{45%{translate:0 -15px}70%{translate:0 0}}
       @keyframes ds-pet-quirk-spin{50%{rotate:12deg;scale:1.08}100%{rotate:0deg;scale:1}}
       @keyframes ds-pet-quirk-peek{35%{translate:10px 0;rotate:5deg}70%{translate:-7px 0;rotate:-4deg}}
+      @keyframes ds-pet-beg{45%{translate:0 -10px;rotate:-3deg}70%{translate:0 0;rotate:3deg}}
+      @keyframes ds-screen-bite{35%{translate:-5px 3px}70%{translate:5px -2px}}
       @media(max-width:600px){
-        #ds-companion-zone{bottom:48px;height:82px}
         #ds-companion{width:62px;height:76px}
         #ds-companion-bubble{bottom:70px;font-size:11px;max-width:145px}
         #ds-companion-toy{width:30px;height:30px;font-size:16px}
@@ -1022,13 +1055,17 @@ const DetectiveSystem = {
     zone.setAttribute("aria-live", "polite");
     zone.innerHTML = `<button id="ds-companion" type="button" aria-label="和偵探夥伴互動">
       <span id="ds-companion-visual"></span><span id="ds-companion-bubble"></span></button>
-      <button id="ds-companion-toy" type="button" aria-label="拖曳線索球讓夥伴追逐">🧶</button>`;
+      <button id="ds-companion-toy" type="button" aria-label="拖曳線索球讓夥伴追逐">🧶</button>
+      <span id="ds-companion-bite" aria-hidden="true"></span>`;
     document.body.appendChild(zone);
     const pet = document.getElementById("ds-companion");
     pet.addEventListener("click", () => {
+      this._lastCompanionPat = Date.now();
+      this.clearCompanionAttention();
       const result = this.petPat();
       this.petReact(result.success ? "pat" : "idle", result.msg);
     });
+    this._lastCompanionPat = Date.now();
     this.bindCompanionInteractions();
     this.refreshCompanion();
     this.scheduleCompanion();
@@ -1045,6 +1082,8 @@ const DetectiveSystem = {
         toy.style.left = `${Math.max(12, Math.min(max, event.clientX - toy.offsetWidth / 2))}px`;
       };
       toy.addEventListener("pointerdown", event => {
+        this._lastCompanionPat = Date.now();
+        this.clearCompanionAttention();
         dragging = true;
         toy.setPointerCapture(event.pointerId);
         moveToy(event);
@@ -1054,32 +1093,110 @@ const DetectiveSystem = {
         if (!dragging) return;
         dragging = false;
         toy.releasePointerCapture(event.pointerId);
-        this.companionMoveTo(event.clientX, "抓到線索球了！");
+        this.companionMoveTo(event.clientX, "抓到線索球了！", event.clientY);
       });
     }
     document.addEventListener("click", event => {
       if (event.clientY < window.innerHeight - 170) return;
       if (event.target.closest("button,a,input,textarea,select,label,#ds-companion-zone")) return;
-      this.companionMoveTo(event.clientX, "你在叫我嗎？");
+      this.companionMoveTo(event.clientX, "你在叫我嗎？", event.clientY - 20);
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape") this.clearCompanionAttention();
     });
   },
-  companionMoveTo(clientX, message) {
+  companionMoveTo(clientX, message, clientY) {
     const pet = document.getElementById("ds-companion");
     if (!pet) return;
     clearTimeout(this._companionTimer);
     clearTimeout(this._companionMoveTimer);
     const max = Math.max(18, window.innerWidth - pet.offsetWidth - 18);
+    const maxY = Math.max(18, window.innerHeight - pet.offsetHeight - 58);
     const current = parseFloat(pet.style.left) || 18;
+    const currentY = parseFloat(pet.style.top) || maxY;
     const target = Math.max(18, Math.min(max, clientX - pet.offsetWidth / 2));
+    const targetY = Math.max(18, Math.min(maxY, clientY == null ? currentY : clientY - pet.offsetHeight / 2));
     const species = this.state && this.state.pet && this.state.pet.species;
     const baseSpeed = ({ dog:1.18, cat:.9, rabbit:1.3, hamster:.78, owl:.85, fox:1.12, bear:.7, penguin:.82, dragon:1.02 })[species] || 1;
     const speed = baseSpeed * ((this.state.pet.bond || 0) >= 3 ? 1.2 : 1);
-    const duration = Math.min(4.8, Math.max(.75, Math.abs(target - current) / (95 * speed)));
+    const distance = Math.hypot(target - current, targetY - currentY);
+    const duration = Math.min(4.8, Math.max(.75, distance / (95 * speed)));
     pet.className = "walk";
     pet.style.setProperty("--face", target < current ? "-1" : "1");
     pet.style.transitionDuration = `${duration}s`;
     pet.style.left = `${target}px`;
+    pet.style.top = `${targetY}px`;
     this._companionMoveTimer = setTimeout(() => this.petReact("correct", message || "我來了！"), duration * 1000 + 80);
+  },
+  companionQuestionTarget() {
+    if (typeof document === "undefined") return null;
+    const selectors = [
+      "#question-stem", "#q-text", "#p-question", "#p-final-q", "#s-q",
+      "#g-question", "#exam-prompt", ".question-card h1", ".question-card h2"
+    ];
+    return selectors.map(selector => document.querySelector(selector)).find(element => {
+      if (!element) return false;
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return rect.width > 80 && rect.height > 20 && rect.bottom > 0 && rect.top < window.innerHeight && style.display !== "none" && style.visibility !== "hidden";
+    }) || null;
+  },
+  clearCompanionAttention(silent=false) {
+    clearTimeout(this._companionBiteTimer);
+    clearTimeout(this._companionBiteHideTimer);
+    const wasBegging = this._companionBegging;
+    this._companionBegging = false;
+    const pet = typeof document !== "undefined" ? document.getElementById("ds-companion") : null;
+    const bite = typeof document !== "undefined" ? document.getElementById("ds-companion-bite") : null;
+    const bubble = typeof document !== "undefined" ? document.getElementById("ds-companion-bubble") : null;
+    if (pet) pet.classList.remove("begging");
+    if (bite) bite.classList.remove("show");
+    if (wasBegging && bubble) bubble.classList.remove("show");
+    if (!silent) this._companionBegCooldownUntil = Date.now() + 75000;
+  },
+  companionBeg() {
+    const pet = document.getElementById("ds-companion");
+    const zone = document.getElementById("ds-companion-zone");
+    const target = this.companionQuestionTarget();
+    const status = this.petStatus();
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!pet || !zone || !target || reduced || zone.style.display === "none" || !status || status.pet.stage === 0) return false;
+    const rect = target.getBoundingClientRect();
+    this._companionBegging = true;
+    clearTimeout(this._companionTimer);
+    this.companionMoveTo(rect.left + rect.width * (.38 + Math.random() * .24), "摸摸我一下嘛～（點我）", rect.top + Math.min(rect.height * .55, 75));
+    clearTimeout(this._companionMoveTimer);
+    const distance = Math.hypot((parseFloat(pet.style.left) || 0) - rect.left, (parseFloat(pet.style.top) || 0) - rect.top);
+    const arrive = Math.min(3000, Math.max(700, distance * 5));
+    this._companionMoveTimer = setTimeout(() => {
+      if (!this._companionBegging) return;
+      pet.className = "begging";
+      const bubble = document.getElementById("ds-companion-bubble");
+      if (bubble) { bubble.textContent = "摸摸我一下嘛～（點我）"; bubble.classList.add("show"); }
+      this._companionBiteTimer = setTimeout(() => this.companionBite(), 8000);
+    }, arrive);
+    return true;
+  },
+  companionBite() {
+    if (!this._companionBegging) return false;
+    const pet = document.getElementById("ds-companion");
+    const bite = document.getElementById("ds-companion-bite");
+    const target = this.companionQuestionTarget();
+    if (!pet || !bite) return false;
+    const rect = target ? target.getBoundingClientRect() : { right:window.innerWidth - 30, top:80, height:80 };
+    bite.style.left = `${Math.max(8, Math.min(window.innerWidth - 126, rect.right - 92))}px`;
+    bite.style.top = `${Math.max(8, Math.min(window.innerHeight - 80, rect.top + rect.height * .25))}px`;
+    bite.classList.add("show");
+    pet.className = "quirk-hop";
+    const bubble = document.getElementById("ds-companion-bubble");
+    if (bubble) { bubble.textContent = "都不摸我，我咬螢幕邊邊囉！"; bubble.classList.add("show"); }
+    this._companionBiteHideTimer = setTimeout(() => {
+      this.clearCompanionAttention();
+      if (bubble) bubble.classList.remove("show");
+      this.companionMoveTo(window.innerWidth - 55, "好啦，我陪你繼續答題。", window.innerHeight - 105);
+      this._companionBegCooldownUntil = Date.now() + 150000;
+    }, 2600);
+    return true;
   },
   refreshCompanion() {
     if (typeof document === "undefined") return;
@@ -1117,8 +1234,13 @@ const DetectiveSystem = {
         this.scheduleCompanion(2500);
         return;
       }
+      if (this._companionBegging) return;
       const roll = Math.random();
       const status = this.petStatus();
+      const quietFor = Date.now() - (this._lastCompanionPat || Date.now());
+      if (status && status.pet.stage > 0 && quietFor > 45000 && Date.now() > (this._companionBegCooldownUntil || 0) && roll < .12) {
+        if (this.companionBeg()) return;
+      }
       if (status && status.pet.stage > 0 && roll < .18 && status.hunger < 38) {
         this.petReact("idle", "肚子有點餓，回房間看看食盆吧。");
         return;
@@ -1143,14 +1265,19 @@ const DetectiveSystem = {
       pet.className = roll < .58 ? "walk" : roll < .82 ? "idle" : "sleep";
       if (roll < .58) {
         const max = Math.max(18, window.innerWidth - pet.offsetWidth - 18);
+        const maxY = Math.max(18, window.innerHeight - pet.offsetHeight - 58);
+        const minY = Math.max(18, window.innerHeight * (Math.random() < .18 ? .28 : .53));
         const current = parseFloat(pet.style.left) || 18;
+        const currentY = parseFloat(pet.style.top) || maxY;
         const target = 18 + Math.random() * Math.max(1, max - 18);
+        const targetY = minY + Math.random() * Math.max(1, maxY - minY);
         const species = this.state && this.state.pet && this.state.pet.species;
         const speed = ({ dog:1.18, cat:.9, rabbit:1.3, hamster:.78, owl:.85, fox:1.12, bear:.7, penguin:.82, dragon:1.02 })[species] || 1;
-        const duration = Math.min(5.5, Math.max(1.5, Math.abs(target - current) / (65 * speed)));
+        const duration = Math.min(5.5, Math.max(1.5, Math.hypot(target - current, targetY - currentY) / (65 * speed)));
         pet.style.setProperty("--face", target < current ? "-1" : "1");
         pet.style.transitionDuration = `${duration}s`;
         pet.style.left = `${target}px`;
+        pet.style.top = `${targetY}px`;
         this.scheduleCompanion(duration * 1000 + 700);
       } else {
         this.scheduleCompanion(1800 + Math.random() * 2600);
@@ -1162,6 +1289,7 @@ const DetectiveSystem = {
     const pet = document.getElementById("ds-companion");
     const bubble = document.getElementById("ds-companion-bubble");
     if (!pet || !bubble) return;
+    if (type === "correct" || type === "wrong" || type === "complete") this.clearCompanionAttention();
     clearTimeout(this._companionTimer);
     clearTimeout(this._companionReactTimer);
     const copy = {
