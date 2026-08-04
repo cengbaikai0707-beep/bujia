@@ -534,6 +534,26 @@ const DetectiveSystem = {
   },
   petStageNames: ["偵探蛋","幼年期","少年期","成熟期"],
 
+  // 每個階段要有看得出來的差別：外型、動作、消耗速度、說話方式。
+  petStageInfo: [
+    { stage:0, name:"偵探蛋", icon:"🥚", tone:"安靜",
+      desc:"蛋殼偶爾晃一下，正在感受你的照顧。",
+      ability:"先摸摸牠、湊齊兩館材料，就能孵化。", decay:1 },
+    { stage:1, name:"幼年期", icon:"🌱", tone:"好奇",
+      desc:"步伐小、動作快，走幾步就要停下來東看西看。",
+      ability:"跑得急但走不遠，肚子也餓得比較快。", decay:1 },
+    { stage:2, name:"少年期", icon:"🔥", tone:"活潑",
+      desc:"開始有自己的主意，會自己跑去玩線索球。",
+      ability:"解鎖丟球互動；待機動作變多，消耗略慢。", decay:.85 },
+    { stage:3, name:"成熟期", icon:"⭐", tone:"沉穩",
+      desc:"走路穩、話變少，會安靜地陪你把任務做完。",
+      ability:"體力消耗最慢，並解鎖成熟期專屬台詞。", decay:.7 }
+  ],
+  petStageDecay(stage) {
+    const info = this.petStageInfo[Number(stage) || 0];
+    return info ? info.decay : 1;
+  },
+
   petItems: {
     petFood:  { id:"petFood",  name:"偵探飼料",   emoji:"🍖", cost:4, desc:"補充飽足；喜歡飼料的夥伴效果更好。" },
     petSnack: { id:"petSnack", name:"特調點心",   emoji:"🍮", cost:6, desc:"同時補充飽足與心情。" },
@@ -644,8 +664,9 @@ const DetectiveSystem = {
     let hours = Math.max(0, (now - last) / 3600000);
     hours = Math.min(hours, this.PET_MAX_OFFLINE_HOURS);
     if (pet.stage > 0 && hours > 0) {
-      pet.hunger = Math.max(15, pet.hunger - hours * this.PET_HUNGER_RATE);
-      pet.mood = Math.max(20, pet.mood - hours * this.PET_MOOD_RATE);
+      const decay = this.petStageDecay(pet.stage);
+      pet.hunger = Math.max(15, pet.hunger - hours * this.PET_HUNGER_RATE * decay);
+      pet.mood = Math.max(20, pet.mood - hours * this.PET_MOOD_RATE * decay);
       pet.zeroHours = 0;
     }
     pet.lastTick = new Date(now).toISOString();
@@ -877,6 +898,7 @@ const DetectiveSystem = {
       pet, species,
       emoji: species.stages[pet.stage],
       stageName: this.petStageNames[pet.stage],
+      stageInfo: this.petStageInfo[pet.stage] || this.petStageInfo[0],
       hunger: Math.round(pet.hunger),
       mood: Math.round(pet.mood),
       sick: pet.sick,

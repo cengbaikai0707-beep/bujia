@@ -36,6 +36,7 @@
           <button class="habitat-item bowl" data-habitat="food" type="button"><span>🥣</span><small>食盆</small></button>
           <button class="habitat-item bed" data-habitat="bed" type="button"><span>🛏️</span><small>小床</small></button>
           <button class="habitat-item toy" data-habitat="toy" type="button"><span>🧶</span><small>玩具</small></button>
+          <span class="habitat-ball" id="habitat-ball" aria-hidden="true">🧶</span>
           <div class="pet-avatar-wrap" id="pet-avatar-wrap">
             <span class="pet-avatar" id="pet-avatar">🥚</span>
             <span class="pet-accessory" id="pet-accessory"></span>
@@ -45,6 +46,9 @@
         <p class="habitat-help">點房間地面呼叫牠；點食盆、床或玩具與牠互動。牠也會依狀態自行靠近家具。</p>
         <p class="pet-mood-line" id="pet-line"></p>
         <p class="personality" id="pet-personality"></p>
+
+        <div class="growth-track" id="growth-track" aria-label="成長階段"></div>
+        <p class="growth-note" id="growth-note"></p>
 
         <div class="stat">
           <div><span>🍖 飽足</span><b id="stat-hunger-num"></b></div>

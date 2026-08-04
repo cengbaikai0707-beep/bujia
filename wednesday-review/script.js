@@ -4,7 +4,7 @@
   const DS = window.DetectiveSystem;
   const STORAGE_KEY = "yl_wednesday_review_v1";
   const $ = id => document.getElementById(id);
-  const state = { student:"", bank:[], queue:[], index:0, answers:[], locked:false, baseCount:12, repairs:0, sessionId:"" };
+  const state = { student:"", bank:[], queue:[], index:0, answers:[], locked:false, baseCount:12, repairs:0, sessionId:"", reviewFilter:"all" };
 
   function esc(value){return String(value==null?"":value).replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[ch]);}
   function normalizeName(value){return String(value||"").replace(/[\s　]/g,"").trim();}
@@ -125,7 +125,13 @@
   }
   function answer(index){
     if(state.locked)return;state.locked=true;const item=state.queue[state.index],chosen=item.sessionOptions[index],correct=chosen===item.answer;
-    state.answers.push({id:item.id,skill:item.skill,errorCode:item.errorCode,correct,remedial:!!item.remedial,status:item.status});
+    // 保存實際顯示過的題目快照；動態題之後重新產生數字，也不會改掉本次回顧內容。
+    state.answers.push({
+      number:state.answers.length+1,id:item.id,unit:item.unit,topic:item.topic,skill:item.skill,
+      questionType:item.questionType,difficulty:item.difficulty,stem:item.stem,
+      options:[...item.sessionOptions],chosen,answer:item.answer,explanation:item.explanation,
+      prerequisite:item.prerequisite,errorCode:item.errorCode,correct,remedial:!!item.remedial,status:item.status,dynamic:!!item.dynamic
+    });
     document.querySelectorAll("[data-option]").forEach((button,i)=>{button.disabled=true;const value=item.sessionOptions[i];if(value===item.answer)button.classList.add("correct");else if(i===index)button.classList.add("wrong");});
     const repairAdded=!correct&&scheduleRepair(item);$("feedback").className=`feedback ${correct?"good":"bad"}`;$("feedback-title").textContent=correct?"判斷正確":"先修復這條數學線索";$("feedback-explanation").textContent=item.explanation;$("feedback-error").textContent=correct?`能力：${item.skill}`:`常見錯誤：${item.errorCode}${repairAdded?"；後面會再出一題同技能換題修復。":"；已記入下次優先複習。"}`;
     $("show-hint").classList.add("hidden");$("next-question").classList.remove("hidden");$("next-question").textContent=state.index===state.queue.length-1?"查看本次診斷":"下一題";
@@ -134,23 +140,64 @@
     const all=loadProgress(),progress=studentProgress(state.student);state.answers.forEach(answer=>{progress.seen[answer.id]=(progress.seen[answer.id]||0)+1;if(answer.correct)progress.wrong[answer.id]=Math.max(0,(progress.wrong[answer.id]||0)-1);else{progress.wrong[answer.id]=(progress.wrong[answer.id]||0)+1;progress.errors[answer.errorCode]=(progress.errors[answer.errorCode]||0)+1;}});
     const correct=state.answers.filter(a=>a.correct).length,accuracy=Math.round(correct/state.answers.length*100);progress.history.unshift({at:new Date().toISOString(),correct,total:state.answers.length,accuracy});progress.history=progress.history.slice(0,20);all[state.student]=progress;saveProgress(all);return {all,progress,correct,accuracy};
   }
+  function renderReview(filter=state.reviewFilter){
+    state.reviewFilter=filter;
+    const wrong=state.answers.filter(answer=>!answer.correct),shown=filter==="wrong"?wrong:state.answers;
+    $("review-summary").textContent=`共 ${state.answers.length} 題；答錯 ${wrong.length} 題。點開題目可查看答案與解析。`;
+    document.querySelectorAll("[data-review-filter]").forEach(button=>button.classList.toggle("active",button.dataset.reviewFilter===filter));
+    $("review-list").innerHTML=shown.length?shown.map(item=>`
+      <details class="review-item ${item.correct?"":"wrong"}" ${item.correct?"":"open"}>
+        <summary>
+          <span class="review-number">${item.number}</span>
+          <span class="review-question">${esc(item.stem)}</span>
+          <span class="review-state">${item.correct?"✓ 答對":"✕ 答錯"}</span>
+          <span class="review-tags"><span>${esc(item.unit)} ${esc(item.topic)}</span><span>${esc(item.skill)}</span><span>${difficultyLabel(item.difficulty)}</span>${item.remedial?"<span>換題修復</span>":""}${item.dynamic?"<span>動態數字</span>":""}</span>
+        </summary>
+        <div class="review-body">
+          <div class="review-answer">
+            <div class="${item.correct?"correct-choice":"wrong-choice"}"><strong>你的答案</strong><span>${esc(item.chosen)}</span></div>
+            <div><strong>正確答案</strong><span>${esc(item.answer)}</span></div>
+          </div>
+          <p class="review-explanation"><strong>解析：</strong>${esc(item.explanation||"依題意重新檢查運算步驟與單位。")}</p>
+          ${item.correct?"":`<small class="review-error">回補方向：${esc(item.prerequisite||item.skill)}｜錯誤分類：${esc(item.errorCode)}</small>`}
+        </div>
+      </details>`).join(""):`<p class="review-empty">這次沒有錯題，全部答對了！</p>`;
+    $("retry-wrong").disabled=wrong.length===0;
+    $("retry-wrong").textContent=wrong.length?`🔁 ${wrong.length} 題錯題再練（動態題會換數字）`:"✓ 本次沒有需要重練的錯題";
+  }
+  function retryWrongQuestions(){
+    const wrongIds=[...new Set(state.answers.filter(answer=>!answer.correct).map(answer=>answer.id))];
+    const used=new Set(),queue=[];
+    wrongIds.forEach((id,index)=>{
+      const base=state.bank.find(question=>question.id===id);
+      if(!base)return;
+      const item=instantiate(base,used,index+211);
+      if(item)queue.push(Object.assign({},item,{remedial:true}));
+    });
+    if(!queue.length)return;
+    state.baseCount=queue.length;state.queue=shuffle(queue);state.index=0;state.answers=[];state.repairs=0;state.locked=false;state.sessionId=`wed_retry_${state.student}_${Date.now()}`;
+    $("screen-result").classList.add("hidden");$("screen-quiz").classList.remove("hidden");$("quiz-student").textContent=`${state.student}的錯題換數字再練`;renderQuestion();
+  }
   function finishReview(){
     const saved=updateStoredProgress(),week=weekKey();let rewardText="";
     if(!saved.progress.rewardWeeks[week]){
       saved.progress.rewardWeeks[week]=true;saved.all[state.student]=saved.progress;saveProgress(saved.all);
       const mistakes=state.answers.filter(a=>!a.correct).map(a=>a.errorCode);
       const result=DS.completeModule("math",{accuracy:saved.accuracy,correct:saved.correct,total:state.answers.length,mistakes,reasoning:true,sessionId:state.sessionId});
-      rewardText=`本週主要獎勵已結算：＋${result.coins||0} 偵探幣、＋${result.evidence||0} 證據${result.petMatDrop?`、＋1 ${result.petMatDrop.emoji}${result.petMatDrop.name}`:result.petFragDrop?`、＋1/2 ${result.petFragDrop.emoji}${result.petFragDrop.name}碎片`:""}。`;
+      const bonus=(result.petBonusDrops||[]).map(item=>`${item.emoji}${item.name}${item.combined?"（已合成）":"碎片"}`).join("、");
+      rewardText=`本週主要獎勵已結算：＋${result.coins||0} 偵探幣、＋${result.evidence||0} 證據${result.petMatDrop?`、＋1 ${result.petMatDrop.emoji}${result.petMatDrop.name}`:""}${bonus?`、隨機材料：${bonus}`:""}。`;
     }else rewardText="本週主要獎勵已領取；這次練習仍會更新錯題與能力紀錄。";
     $("screen-quiz").classList.add("hidden");$("screen-result").classList.remove("hidden");$("result-title").textContent=`${state.student}完成本次複習`;$("result-summary").textContent=saved.accuracy>=85?"核心線索掌握穩定，可以挑戰變化題。":saved.accuracy>=70?"基本概念正在穩定，錯題修復後會更扎實。":"已找到需要回補的能力，下一次會優先重現。";$("result-accuracy").textContent=`${saved.accuracy}%`;$("result-correct").textContent=`${saved.correct}/${state.answers.length}`;$("result-repairs").textContent=state.answers.filter(a=>a.remedial).length;
     const stats={};state.answers.forEach(a=>{stats[a.skill]=stats[a.skill]||{correct:0,total:0};stats[a.skill].total++;if(a.correct)stats[a.skill].correct++;});
     $("skill-results").innerHTML=Object.entries(stats).sort((a,b)=>a[1].correct/a[1].total-b[1].correct/b[1].total).map(([skill,s])=>{const pct=Math.round(s.correct/s.total*100);return `<div class="skill-row"><div><strong>${esc(skill)}</strong><small>${s.correct}/${s.total} 題正確</small></div><b class="${pct>=70?"good":"need"}">${pct>=70?"穩定":"需回補"}</b></div>`;}).join("");
-    $("reward-result").textContent=rewardText;
+    renderReview("all");$("reward-result").textContent=rewardText;
   }
 
   $("find-student").onclick=findStudent;$("student-name").addEventListener("keydown",event=>{if(event.key==="Enter")findStudent();});$("start-review").onclick=startReview;
   $("show-hint").onclick=()=>{const item=state.queue[state.index];$("hint-box").textContent=`先想想：${item.prerequisite||item.skill}`;$("hint-box").classList.remove("hidden");$("show-hint").classList.add("hidden");};
   $("next-question").onclick=()=>{if(state.index<state.queue.length-1){state.index++;renderQuestion();}else finishReview();};
+  document.querySelectorAll("[data-review-filter]").forEach(button=>button.onclick=()=>renderReview(button.dataset.reviewFilter));
+  $("retry-wrong").onclick=retryWrongQuestions;
   $("retry-review").onclick=()=>{state.queue=chooseQuestions(state.student,state.baseCount);state.index=0;state.answers=[];state.repairs=0;state.sessionId=`wed_${state.student}_${Date.now()}`;$("screen-result").classList.add("hidden");$("screen-quiz").classList.remove("hidden");renderQuestion();};
   renderCoverage();
 })();

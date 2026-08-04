@@ -75,6 +75,17 @@
       <header class="result-head"><span>📁</span><p class="eyebrow">案件歸檔</p><h1 id="result-title"></h1><p id="result-summary"></p></header>
       <div class="result-stats"><div><strong id="result-accuracy"></strong><span>正確率</span></div><div><strong id="result-correct"></strong><span>答對</span></div><div><strong id="result-repairs"></strong><span>修復題</span></div></div>
       <section class="diagnosis"><h2>本次能力紀錄</h2><div id="skill-results"></div></section>
+      <section class="review-panel">
+        <div class="review-head">
+          <div><p class="eyebrow">Answer Review</p><h2>本次題目回顧</h2><p id="review-summary"></p></div>
+          <div class="review-filters" role="group" aria-label="篩選回顧題目">
+            <button class="active" data-review-filter="all" type="button">全部題目</button>
+            <button data-review-filter="wrong" type="button">只看錯題</button>
+          </div>
+        </div>
+        <div id="review-list" class="review-list"></div>
+        <button id="retry-wrong" class="retry-wrong" type="button">🔁 錯題再練（動態題會換數字）</button>
+      </section>
       <div id="reward-result" class="reward-result"></div>
       <div class="result-actions"><button id="retry-review" type="button">再抽一組</button><a href="../pet/index.html">看看偵探夥伴</a><a href="../index.html">回大廳</a></div>
     </section>

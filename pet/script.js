@@ -6,6 +6,42 @@
   let selectedMats = new Set();
   let growthKey = "";
 
+  // 每個階段的移動節奏：幼年期急、成熟期穩。
+  const STAGE_PACE = [1150, 800, 1100, 1450];
+  const STAGE_TALK = {
+    1:{ come:["咚咚咚——我來了！","等等我，我用跑的！","我來了我來了！"],
+        idle:["這裡有什麼？","嗅嗅……好像有味道。","再看一下下就好。"],
+        pat:["嘿嘿，好舒服！","再摸一下嘛～","你的手好溫暖。"] },
+    2:{ come:["聽到你叫我了。","來了！剛剛在練跳躍。","馬上到。"],
+        idle:["我想玩線索球。","這個角落我還沒查過。","巡邏一圈再回來。"],
+        pat:["你今天也有來看我。","被你摸到就想睡了。","我有變強一點吧？"] },
+    3:{ come:["我在。","慢慢走過去。","需要我嗎？"],
+        idle:["把線索排整齊。","我在這裡陪你。","你休息一下也沒關係。"],
+        pat:["謝謝你一直照顧我。","我們一起走了好久了。","我記得你每一次的摸摸。"] }
+  };
+  const pick = list => list[Math.floor(Math.random() * list.length)];
+  function stageTalk(kind, fallback) {
+    const pet = DS.state.pet;
+    const pack = pet && STAGE_TALK[pet.stage];
+    return pack && pack[kind] ? pick(pack[kind]) : fallback;
+  }
+  function timeLine() {
+    const hour = new Date().getHours();
+    if (hour < 6) return "夜深了，你也早點休息。";
+    if (hour < 11) return "早安，今天想先查哪一館？";
+    if (hour < 18) return "下午了，做一題再休息一下。";
+    return "晚上光線暗，別盯螢幕太久。";
+  }
+  function emote(symbol) {
+    const wrap = $("pet-avatar-wrap");
+    if (!wrap) return;
+    const node = document.createElement("span");
+    node.className = "pet-emote";
+    node.textContent = symbol;
+    wrap.appendChild(node);
+    setTimeout(() => node.remove(), 1200);
+  }
+
   function esc(value) {
     return String(value == null ? "" : value).replace(/[&<>"']/g, char => ({
       "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
@@ -66,13 +102,23 @@
     const room = DS.petCosmetics[roomId];
     return { name:room ? room.name : "偵探書房", emoji:room ? room.emoji : "🗂️" };
   }
+  function renderGrowth(status) {
+    $("growth-track").innerHTML = DS.petStageInfo.map(info => {
+      const state = info.stage === status.pet.stage ? "current" : info.stage < status.pet.stage ? "done" : "";
+      return `<div class="growth-step ${state}"><b>${info.icon} ${esc(info.name)}</b>${esc(info.tone)}</div>`;
+    }).join("");
+    $("growth-note").textContent = `${status.stageInfo.desc}　${status.stageInfo.ability}`;
+  }
+
   function renderPet() {
     const status = DS.petStatus();
     const pet = status.pet, species = status.species;
     $("pet-species").textContent = species.name;
     $("pet-name").textContent = pet.name;
-    $("pet-stage").textContent = status.stageName;
+    $("pet-stage").textContent = `${status.stageInfo.icon} ${status.stageName}`;
+    $("pet-stage").dataset.stage = String(pet.stage);
     $("pet-count").textContent = `收藏 ${status.ownedCount}/9`;
+    renderGrowth(status);
     if (pet.stage === 0) {
       $("pet-avatar").classList.remove("pixel");
       $("pet-avatar").textContent = status.emoji;
@@ -149,6 +195,21 @@
     clearTimeout(bubble._hideTimer);
     bubble._hideTimer = setTimeout(() => bubble.classList.remove("show"), duration);
   }
+  function throwBall() {
+    const habitat = $("pet-habitat");
+    const ball = $("habitat-ball");
+    const ratio = .22 + Math.random() * .56;
+    if (!habitat || !ball) return ratio;
+    ball.classList.add("show");
+    ball.style.left = `${Math.max(10, (habitat.clientWidth - 36) * ratio)}px`;
+    ball.style.bottom = "92px";
+    setTimeout(() => { ball.style.bottom = "22px"; }, 280);
+    return ratio;
+  }
+  function hideBall() {
+    const ball = $("habitat-ball");
+    if (ball) ball.classList.remove("show");
+  }
   function moveHabitat(ratio, message, mode="idle") {
     const habitat = $("pet-habitat");
     const wrap = $("pet-avatar-wrap");
@@ -157,15 +218,17 @@
     const max = Math.max(8, habitat.clientWidth - wrap.offsetWidth - 8);
     const target = Math.max(8, Math.min(max, max * ratio));
     const current = parseFloat(wrap.style.left) || max * .44;
+    const pace = STAGE_PACE[(DS.state.pet && DS.state.pet.stage) || 0] || 1150;
     wrap.classList.remove("sleeping");
     wrap.classList.add("walking");
+    wrap.style.transitionDuration = `${pace / 1000}s`;
     wrap.style.setProperty("--habitat-face", target < current ? "-1" : "1");
     wrap.style.left = `${target}px`;
     if (message) habitatSpeak(message);
     habitatMoveTimer = setTimeout(() => {
       wrap.classList.remove("walking");
       wrap.classList.toggle("sleeping", mode === "sleep");
-    }, 1150);
+    }, pace);
   }
   function scheduleHabitat(delay=3500) {
     clearTimeout(habitatTimer);
@@ -199,11 +262,20 @@
           penguin:{ ratio:.18, msg:"物品要排整齊。", mode:"idle" },
           dragon:{ ratio:.52, msg:"感覺到新的線索能量！", mode:"idle" }
         };
-        const choices = pet.bond >= 8 && personality[pet.species] ? [...common, personality[pet.species], personality[pet.species]] : common;
-        const choice = choices[Math.floor(Math.random() * choices.length)];
-        moveHabitat(choice.ratio, choice.msg, choice.mode);
+        // 階段差異：幼年期小碎步、少年期跑大範圍、成熟期定點久待。
+        const byStage = {
+          1:[{ ratio:.34, msg:"這邊！那邊！", mode:"idle" }, { ratio:.5, msg:"跑一跑好開心。", mode:"idle" }],
+          2:[{ ratio:.72, msg:"我可以跑到最遠那頭！", mode:"idle" }, { ratio:.12, msg:"再繞回來看看。", mode:"idle" }],
+          3:[{ ratio:.46, msg:"站在這裡就看得到你。", mode:"idle" }, { ratio:.88, msg:"我在小床邊守著。", mode:"sleep" }]
+        };
+        const choices = common
+          .concat(pet.bond >= 8 && personality[pet.species] ? [personality[pet.species]] : [])
+          .concat(byStage[pet.stage] || []);
+        const choice = pick(choices);
+        moveHabitat(choice.ratio, Math.random() < .22 ? timeLine() : stageTalk("idle", choice.msg), choice.mode);
       }
-      scheduleHabitat(5200 + Math.random() * 4200);
+      const rest = pet.stage === 1 ? 3400 : pet.stage === 3 ? 7200 : 5200;
+      scheduleHabitat(rest + Math.random() * 4200);
     }, delay);
   }
   function bindHabitat() {
@@ -213,28 +285,36 @@
     habitat.addEventListener("click", event => {
       if (event.target.closest("[data-habitat],#pet-avatar-wrap")) return;
       const rect = habitat.getBoundingClientRect();
-      moveHabitat((event.clientX - rect.left) / rect.width, "我來了！");
+      moveHabitat((event.clientX - rect.left) / rect.width, stageTalk("come", "我來了！"));
     });
     $("pet-avatar-wrap").addEventListener("click", () => {
       const result = DS.petPat();
-      habitatSpeak(result.msg);
+      habitatSpeak(result.success ? stageTalk("pat", result.msg) : result.msg);
+      if (result.success) emote(pick(["❤️","✨","🎵"]));
       react(result);
     });
     document.querySelectorAll("[data-habitat]").forEach(button => {
       button.addEventListener("click", () => {
         const action = button.dataset.habitat;
+        const pet = DS.state.pet;
         if (action === "bed") {
           moveHabitat(.9, "蓋好被子，休息一下。", "sleep");
+          emote("💤");
           $("pet-message").textContent = "休息不會消耗用品，牠只是安靜睡一會兒。";
           return;
         }
         const itemId = action === "food" ? "petFood" : "petToy";
-        moveHabitat(action === "food" ? .03 : .65, action === "food" ? "開飯囉！" : "來玩線索球！");
+        // 少年期起解鎖丟球：球先飛出去，夥伴自己去追。
+        const canThrow = action === "toy" && pet && pet.stage >= 2 && (DS.state.inventory.petToy || 0) >= 1;
+        const ratio = canThrow ? throwBall() : action === "food" ? .03 : .65;
+        moveHabitat(ratio, canThrow ? "球飛出去了，我去追！" : action === "food" ? "開飯囉！" : "來玩線索球！");
         setTimeout(() => {
+          if (canThrow) hideBall();
           const result = DS.petUse(itemId);
           habitatSpeak(result.msg);
+          if (result.success) emote(action === "food" ? "🍖" : "🎵");
           react(result);
-        }, 850);
+        }, canThrow ? 1000 : 850);
       });
     });
     scheduleHabitat();
