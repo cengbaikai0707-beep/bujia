@@ -35,3 +35,28 @@
 .habitat-ball.show{opacity:1}
 .pet-avatar-wrap{cursor:pointer}
 @media(max-width:680px){.growth-step{font-size:10px;padding:7px 2px}.growth-step b{font-size:12px}}
+
+/* ---- A＋C 成長差異：三套獨立圖、強色調、階段徽章與不同步態 ---- */
+.actions{grid-template-columns:repeat(auto-fit,minmax(112px,1fr))}
+.pet-stage-card[data-pet-stage="1"]{box-shadow:var(--shadow),inset 0 0 0 3px #b9ddb5}
+.pet-stage-card[data-pet-stage="2"]{box-shadow:var(--shadow),inset 0 0 0 3px #efc086}
+.pet-stage-card[data-pet-stage="3"]{box-shadow:var(--shadow),inset 0 0 0 3px #e6c24e}
+.pet-avatar-wrap[data-stage="1"] .pet-avatar.pixel{scale:.96;filter:brightness(1.12) saturate(.78) sepia(.1) drop-shadow(0 6px 6px #0002)}
+.pet-avatar-wrap[data-stage="2"] .pet-avatar.pixel{scale:1;filter:saturate(1.18) contrast(1.04) drop-shadow(0 8px 7px #0002)}
+.pet-avatar-wrap[data-stage="3"] .pet-avatar.pixel{scale:1.04;filter:saturate(1.08) contrast(1.14) drop-shadow(0 0 9px #ffd15d) drop-shadow(0 8px 7px #0002)}
+.pet-habitat .pet-avatar-wrap[data-stage="1"] .pet-avatar.pixel{scale:.96}
+.pet-habitat .pet-avatar-wrap[data-stage="2"] .pet-avatar.pixel{scale:1}
+.pet-habitat .pet-avatar-wrap[data-stage="3"] .pet-avatar.pixel{scale:1.04}
+.pet-stage-emblem{position:absolute;z-index:6;right:-7px;top:2px;display:grid;place-items:center;width:29px;height:29px;border:2px solid #fff;border-radius:50%;background:#fff3bd;box-shadow:0 3px 8px #0003;font-size:16px}
+.pet-avatar-wrap[data-stage="0"] .pet-stage-emblem:empty{display:none}
+.pet-avatar-wrap[data-stage="1"] .pet-stage-emblem{background:#e5f5df}
+.pet-avatar-wrap[data-stage="2"] .pet-stage-emblem{background:#fff0dc}
+.pet-avatar-wrap[data-stage="3"] .pet-stage-emblem{background:#fff3bd;animation:stageBadge 2s ease-in-out infinite}
+.pet-habitat .pet-stage-emblem{right:0;top:7px}
+.pet-avatar-wrap[data-stage="1"].walking .pet-avatar{animation:stageToddle .28s ease-in-out infinite}
+.pet-avatar-wrap[data-stage="2"].walking .pet-avatar{animation:stageDash .32s steps(2,end) infinite}
+.pet-avatar-wrap[data-stage="3"].walking .pet-avatar{animation:stageStride .56s ease-in-out infinite}
+@keyframes stageToddle{30%{transform:scaleX(var(--habitat-face)) translateY(-8px) rotate(-7deg)}70%{transform:scaleX(var(--habitat-face)) translateY(-2px) rotate(6deg)}}
+@keyframes stageDash{50%{transform:scaleX(var(--habitat-face)) translateY(-8px) rotate(-2deg)}}
+@keyframes stageStride{50%{transform:scaleX(var(--habitat-face)) translateY(-3px)}}
+@keyframes stageBadge{50%{transform:translateY(-2px);box-shadow:0 3px 12px #e0a62d88}}

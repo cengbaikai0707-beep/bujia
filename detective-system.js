@@ -198,6 +198,7 @@ const DetectiveSystem = {
       if (!pet.accessory) pet.accessory = "none";
       if (!pet.room) pet.room = "study";
       if (pet.sick == null) pet.sick = false;
+      if (pet.studyUntil == null) pet.studyUntil = 0;
     });
     if (!Array.isArray(profile.titles)) profile.titles = [];
     if (!Array.isArray(profile.history)) profile.history = [];
@@ -540,14 +541,14 @@ const DetectiveSystem = {
       desc:"蛋殼偶爾晃一下，正在感受你的照顧。",
       ability:"先摸摸牠、湊齊兩館材料，就能孵化。", decay:1 },
     { stage:1, name:"幼年期", icon:"🌱", tone:"好奇",
-      desc:"步伐小、動作快，走幾步就要停下來東看西看。",
-      ability:"跑得急但走不遠，肚子也餓得比較快。", decay:1 },
+      desc:"身形圓小、腳步搖晃，會跌跌撞撞地追著你跑。",
+      ability:"解鎖餵食與摸摸；跑得急但走不遠，肚子也餓得比較快。", decay:1 },
     { stage:2, name:"少年期", icon:"🔥", tone:"活潑",
       desc:"開始有自己的主意，會自己跑去玩線索球。",
       ability:"解鎖丟球互動；待機動作變多，消耗略慢。", decay:.85 },
     { stage:3, name:"成熟期", icon:"⭐", tone:"沉穩",
       desc:"走路穩、話變少，會安靜地陪你把任務做完。",
-      ability:"體力消耗最慢，並解鎖成熟期專屬台詞。", decay:.7 }
+      ability:"解鎖 10 分鐘陪讀模式；會守在題目旁，不撒嬌遮題。", decay:.7 }
   ],
   petStageDecay(stage) {
     const info = this.petStageInfo[Number(stage) || 0];
@@ -638,6 +639,7 @@ const DetectiveSystem = {
       care:0, bond:0, careDay:"", petsToday:0,
       growthModules:[],
       accessory:"none", room:"study",
+      studyUntil:0,
       lastTick:new Date().toISOString(), adoptedAt:new Date().toISOString()
     };
     this.state.pets[speciesId] = pet;
@@ -724,6 +726,22 @@ const DetectiveSystem = {
     if (unlocked.length) msg += ` 解鎖「${unlocked.map(item => item.name).join("、")}」！`;
     this.save();
     return { success:true, msg, unlocked };
+  },
+
+  petStudyActive(pet) {
+    const target = pet || this.state.pet;
+    return !!target && Number(target.stage || 0) >= 3 && Number(target.studyUntil || 0) > Date.now();
+  },
+
+  startPetStudy(minutes=10) {
+    const pet = this.state.pet;
+    if (!pet) return { success:false, msg:"還沒有偵探夥伴。" };
+    if (pet.stage < 3) return { success:false, msg:"陪讀模式要到成熟期才會解鎖。" };
+    const duration = Math.max(1, Math.min(30, Number(minutes) || 10));
+    pet.studyUntil = Date.now() + duration * 60000;
+    this.clearCompanionAttention(true);
+    this.save();
+    return { success:true, until:pet.studyUntil, msg:`${pet.name}進入 ${duration} 分鐘陪讀模式：會待在題目旁，不再撒嬌遮住題目。` };
   },
 
   buyPetItem(itemId) {
@@ -968,8 +986,12 @@ const DetectiveSystem = {
     this._assetBase = script ? new URL("./", script.src).href : new URL("./", location.href).href;
     return this._assetBase;
   },
-  petImageUrl(speciesId) {
-    return `${this.assetBase()}assets/pets/${speciesId || "dog"}.png`;
+  petImageUrl(speciesId, stage) {
+    const species = speciesId || "dog";
+    const number = Math.max(0, Math.min(3, Number(stage) || 0));
+    return number > 0
+      ? `${this.assetBase()}assets/pets/stages/${species}-${number}.png`
+      : `${this.assetBase()}assets/pets/${species}.png`;
   },
 
   setCompanionVisible(visible) {
@@ -1019,9 +1041,14 @@ const DetectiveSystem = {
         border:0;padding:0;background:transparent;pointer-events:auto;cursor:pointer;user-select:none;touch-action:manipulation;
         transition:left 3s linear,top 3s linear;filter:drop-shadow(0 5px 5px #17232d38)}
       #ds-companion-visual{display:block;width:100%;height:100%}
-      #ds-companion[data-stage="1"] #ds-companion-visual{transform:scale(.84);transform-origin:center bottom}
-      #ds-companion[data-stage="2"] #ds-companion-visual{transform:scale(1);transform-origin:center bottom}
-      #ds-companion[data-stage="3"] #ds-companion-visual{transform:scale(1.1);transform-origin:center bottom;filter:drop-shadow(0 0 6px #ffd65c)}
+      #ds-companion[data-stage="1"] #ds-companion-visual{transform:scale(.96);transform-origin:center bottom;filter:brightness(1.12) saturate(.78) sepia(.1)}
+      #ds-companion[data-stage="2"] #ds-companion-visual{transform:scale(1);transform-origin:center bottom;filter:saturate(1.18) contrast(1.04)}
+      #ds-companion[data-stage="3"] #ds-companion-visual{transform:scale(1.04);transform-origin:center bottom;filter:saturate(1.08) contrast(1.14) drop-shadow(0 0 6px #ffd65c)}
+      #ds-companion[data-stage="1"]:after,#ds-companion[data-stage="2"]:after,#ds-companion[data-stage="3"]:after{position:absolute;right:-2px;top:5px;display:grid;place-items:center;width:23px;height:23px;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 6px #0003;font-size:13px}
+      #ds-companion[data-stage="1"]:after{content:"🌱";background:#e5f5df}
+      #ds-companion[data-stage="2"]:after{content:"🔥";background:#fff0dc}
+      #ds-companion[data-stage="3"]:after{content:"⭐";background:#fff3bd}
+      #ds-companion[data-study="on"]:before{content:"陪讀中";position:absolute;left:50%;top:-18px;translate:-50% 0;padding:2px 6px;border-radius:99px;background:#183c57;color:#fff;font:800 10px/1.4 "Microsoft JhengHei",sans-serif;white-space:nowrap}
       #ds-companion[data-bond="trust"] #ds-companion-visual{filter:drop-shadow(0 0 8px #ffd65c) drop-shadow(0 0 4px #fff)}
       #ds-companion img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated;
         transform:scaleX(var(--face));transform-origin:center bottom}
@@ -1037,6 +1064,9 @@ const DetectiveSystem = {
         pointer-events:auto;cursor:grab;touch-action:none;box-shadow:0 3px 8px #0002;transition:transform .15s}
       #ds-companion-toy:active{cursor:grabbing;transform:scale(1.12)}
       #ds-companion.walk img{animation:ds-pet-walk .38s steps(2,end) infinite}
+      #ds-companion[data-stage="1"].walk img{animation:ds-pet-toddle .28s ease-in-out infinite}
+      #ds-companion[data-stage="2"].walk img{animation:ds-pet-dash .32s steps(2,end) infinite}
+      #ds-companion[data-stage="3"].walk img{animation:ds-pet-stride .56s ease-in-out infinite}
       #ds-companion.idle img{animation:ds-pet-idle 1.8s ease-in-out infinite}
       #ds-companion.sleep img{animation:ds-pet-sleep 2.4s ease-in-out infinite;filter:saturate(.75)}
       #ds-companion.excited img{animation:ds-pet-jump .48s ease-in-out 2}
@@ -1052,6 +1082,9 @@ const DetectiveSystem = {
         opacity:0;transform:scale(.3) rotate(-8deg);transition:.18s;filter:drop-shadow(0 4px 5px #17232d77)}
       #ds-companion-bite.show{opacity:.92;transform:scale(1) rotate(-8deg);animation:ds-screen-bite .28s ease-in-out 3}
       @keyframes ds-pet-walk{50%{transform:scaleX(var(--face)) translateY(-4px) rotate(-1deg)}}
+      @keyframes ds-pet-toddle{30%{transform:scaleX(var(--face)) translateY(-7px) rotate(-7deg)}70%{transform:scaleX(var(--face)) translateY(-2px) rotate(6deg)}}
+      @keyframes ds-pet-dash{50%{transform:scaleX(var(--face)) translateY(-8px) rotate(-2deg)}}
+      @keyframes ds-pet-stride{50%{transform:scaleX(var(--face)) translateY(-3px)}}
       @keyframes ds-pet-idle{50%{transform:scaleX(var(--face)) translateY(-2px)}}
       @keyframes ds-pet-sleep{50%{transform:scaleX(var(--face)) translateY(2px) scale(.98)}}
       @keyframes ds-pet-jump{45%{transform:scaleX(var(--face)) translateY(-20px) rotate(4deg)}}
@@ -1182,7 +1215,7 @@ const DetectiveSystem = {
     const target = this.companionQuestionTarget();
     const status = this.petStatus();
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (!pet || !zone || !target || reduced || zone.style.display === "none" || !status || status.pet.stage === 0) return false;
+    if (!pet || !zone || !target || reduced || zone.style.display === "none" || !status || status.pet.stage === 0 || this.petStudyActive(status.pet)) return false;
     const rect = target.getBoundingClientRect();
     this._companionBegging = true;
     clearTimeout(this._companionTimer);
@@ -1200,7 +1233,7 @@ const DetectiveSystem = {
     return true;
   },
   companionBite() {
-    if (!this._companionBegging) return false;
+    if (!this._companionBegging || this.petStudyActive()) return false;
     const pet = document.getElementById("ds-companion");
     const bite = document.getElementById("ds-companion-bite");
     const target = this.companionQuestionTarget();
@@ -1229,12 +1262,12 @@ const DetectiveSystem = {
     const inPetRoom = typeof location !== "undefined" && /\/pet\/(?:index\.html)?$/.test(location.pathname);
     zone.style.display = pet && !inPetRoom && this.state.companionVisible !== false ? "" : "none";
     if (!pet) return;
-    const visualKey = `${pet.species}:${pet.stage === 0 ? "egg" : "pet"}`;
+    const visualKey = `${pet.species}:${pet.stage}`;
     if (visual.dataset.key !== visualKey) {
       visual.dataset.key = visualKey;
       visual.innerHTML = pet.stage === 0
         ? `<span class="ds-pet-egg">🥚</span>`
-        : `<img src="${this.petImageUrl(pet.species)}" alt="${String(pet.name || "偵探夥伴").replace(/"/g, "&quot;")}">`;
+        : `<img src="${this.petImageUrl(pet.species, pet.stage)}" onerror="this.onerror=null;this.src='${this.petImageUrl(pet.species)}'" alt="${String(pet.name || "偵探夥伴").replace(/"/g, "&quot;")}">`;
     }
     const button = document.getElementById("ds-companion");
     if (button) {
@@ -1242,6 +1275,7 @@ const DetectiveSystem = {
       button.dataset.stage = String(pet.stage || 0);
       button.dataset.species = pet.species;
       button.dataset.bond = (pet.bond || 0) >= 25 ? "trust" : "normal";
+      button.dataset.study = this.petStudyActive(pet) ? "on" : "off";
     }
     const toy = document.getElementById("ds-companion-toy");
     if (toy) toy.style.display = pet.stage > 0 ? "" : "none";
@@ -1260,6 +1294,22 @@ const DetectiveSystem = {
       const roll = Math.random();
       const status = this.petStatus();
       const quietFor = Date.now() - (this._lastCompanionPat || Date.now());
+      if (status && this.petStudyActive(status.pet)) {
+        this.clearCompanionAttention(true);
+        const target = this.companionQuestionTarget();
+        if (target && roll < .42) {
+          const rect = target.getBoundingClientRect();
+          const roomRight = window.innerWidth - rect.right;
+          const clientX = roomRight > pet.offsetWidth + 28
+            ? rect.right + pet.offsetWidth / 2 + 12
+            : rect.left - pet.offsetWidth / 2 - 12;
+          this.companionMoveTo(clientX, "我在旁邊。先找題目問什麼。", rect.top + rect.height / 2);
+        } else {
+          pet.className = roll < .7 ? "idle" : "sleep";
+          this.scheduleCompanion(2400 + Math.random() * 2600);
+        }
+        return;
+      }
       if (status && status.pet.stage > 0 && quietFor > 45000 && Date.now() > (this._companionBegCooldownUntil || 0) && roll < .12) {
         if (this.companionBeg()) return;
       }

@@ -66,7 +66,7 @@
     }
     const preview = owned && pet.stage === 0
       ? species.stages[0]
-      : `<img src="${DS.petImageUrl(species.id)}" alt="${esc(species.name)}">`;
+      : `<img src="${DS.petImageUrl(species.id, owned ? pet.stage : 1)}" onerror="this.onerror=null;this.src='${DS.petImageUrl(species.id)}'" alt="${esc(species.name)}">`;
     return `<article class="species-card ${active ? "active" : ""} ${status.unlocked ? "" : "locked"}"
       ${mode === "adopt" && status.unlocked ? `data-egg="${species.id}"` : ""}>
       <span class="species-emoji">${preview}</span>
@@ -124,12 +124,20 @@
       $("pet-avatar").textContent = status.emoji;
     } else {
       $("pet-avatar").classList.add("pixel");
-      $("pet-avatar").innerHTML = `<img src="${DS.petImageUrl(pet.species)}" alt="${esc(pet.name)}">`;
+      $("pet-avatar").innerHTML = `<img src="${DS.petImageUrl(pet.species, pet.stage)}" onerror="this.onerror=null;this.src='${DS.petImageUrl(pet.species)}'" alt="${esc(pet.name)}">`;
     }
     $("pet-avatar-wrap").dataset.stage = String(pet.stage);
     $("pet-avatar-wrap").dataset.species = pet.species;
     $("pet-avatar-wrap").classList.toggle("trusted", status.bond >= 25);
     $("pet-accessory").textContent = status.accessory === "none" ? "" : ((DS.petCosmetics[status.accessory] || {}).emoji || "");
+    $("pet-stage-emblem").textContent = pet.stage ? status.stageInfo.icon : "";
+    $("pet-room").dataset.petStage = String(pet.stage);
+    $("habitat-help").textContent = [
+      "先摸摸蛋殼；湊齊兩館材料就會孵化。",
+      "幼年期會跌跌撞撞跑來；餵食和摸摸最適合牠。",
+      "少年期可點玩具丟球，牠會快速跑去追。",
+      "成熟期可啟動陪讀；牠會守在題目旁，不撒嬌遮題。"
+    ][pet.stage] || "點房間和牠互動。";
     $("pet-line").textContent = moodLine(status);
     $("pet-personality").textContent = `${species.personality}　最喜歡：${favoriteName(species)}。`;
     $("pet-bond").textContent = status.bond;
@@ -155,11 +163,19 @@
       { id:"petToy",label:"🧶 玩玩具",count:inv.petToy || 0 },
       { id:"petMed",label:"🧃 活力飲",count:inv.petMed || 0 }
     ];
+    const studyActive = DS.petStudyActive(pet);
+    const studyRemain = studyActive ? Math.max(1, Math.ceil((pet.studyUntil - Date.now()) / 60000)) : 10;
     $("pet-actions").innerHTML = acts.map(action => `
       <button data-use="${action.id}" ${action.count < 1 ? "disabled" : ""}>${action.label}<small>背包 ×${action.count}</small></button>
-    `).join("") + `<button data-pat>🤚 摸摸牠<small>今天 ${pet.petsToday}/5</small></button>`;
+    `).join("") + `<button data-pat>🤚 摸摸牠<small>今天 ${pet.petsToday}/5</small></button>
+      <button data-study ${pet.stage < 3 || studyActive ? "disabled" : ""}>📚 ${studyActive ? "陪讀中" : "陪我複習"}<small>${pet.stage < 3 ? "成熟期解鎖" : studyActive ? `剩 ${studyRemain} 分鐘` : "安靜陪讀 10 分鐘"}</small></button>`;
     document.querySelectorAll("[data-use]").forEach(button => button.onclick = () => react(DS.petUse(button.dataset.use)));
     document.querySelector("[data-pat]").onclick = () => react(DS.petPat());
+    document.querySelector("[data-study]").onclick = () => {
+      const result = DS.startPetStudy(10);
+      habitatSpeak(result.msg, 2600);
+      react(result);
+    };
     renderWish(status.wish);
   }
 

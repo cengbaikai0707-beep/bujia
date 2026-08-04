@@ -62,7 +62,7 @@
       $("hub-pet-avatar").textContent = status.emoji;
     } else {
       $("hub-pet-avatar").className = `pixel stage-${status.pet.stage}`;
-      $("hub-pet-avatar").innerHTML = `<img src="${DS.petImageUrl(status.pet.species)}" alt="${esc(status.pet.name)}">`;
+      $("hub-pet-avatar").innerHTML = `<img src="${DS.petImageUrl(status.pet.species, status.pet.stage)}" onerror="this.onerror=null;this.src='${DS.petImageUrl(status.pet.species)}'" alt="${esc(status.pet.name)}">`;
     }
     $("hub-pet-accessory").textContent = status.accessory === "none" ? "" : ((DS.petCosmetics[status.accessory] || {}).emoji || "");
     $("hub-pet-name").textContent = status.pet.name;
