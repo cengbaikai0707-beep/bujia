@@ -12,9 +12,14 @@ const DIMENSION_TIPS = {
 };
 const state = {
   name:"", mode:"diagnostic", band:"middle", diff:"mixed", count:8,
+  retestStudent:"婕荏", retestCount:12,
   queue:[], index:0, stage:"reading", answers:[], locked:false,
   currentOptions:[], hintUsed:false
 };
+
+function isTwoStageMode() {
+  return state.mode === "diagnostic" || state.mode === "retest";
+}
 
 function shuffle(items) {
   const copy = items.slice();
@@ -45,12 +50,33 @@ function selectChoice(selector, button) {
 
 function updateModeUI() {
   const practice = state.mode === "practice";
+  const retest = state.mode === "retest";
   $("practice-settings").classList.toggle("hidden", !practice);
-  $("btn-start").textContent = practice ? "開始自由練習" : "開始完整診斷";
-  $("mode-summary").textContent = practice ? "自由練習會從原題庫抽題：" : "完整診斷會測六項能力：";
+  $("retest-settings").classList.toggle("hidden", !retest);
+  $("band-settings").classList.toggle("hidden", retest);
+  $("btn-start").textContent = practice ? "開始自由練習" : retest ? "開始再檢測應用題" : "開始完整診斷";
+  $("mode-summary").textContent = practice ? "自由練習會從原題庫抽題：" : retest ? "再檢測應用題會依個人範圍出題：" : "完整診斷會測六項能力：";
   $("mode-detail").textContent = practice
     ? "適合課堂暖身與反覆熟練；結果只呈現本次練習表現，不把單題失誤當成能力定論。"
-    : "問句定位、條件篩選、關係辨認、步驟排序、限制判斷、單位與表徵。";
+    : retest
+      ? "每題先判斷問句、條件或步驟，再進入計算；重新開始會更換題目情境與數字。"
+      : "問句定位、條件篩選、關係辨認、步驟排序、限制判斷、單位與表徵。";
+  if (retest) {
+    state.retestStudent = $("retest-student").value;
+    $("student-name").value = state.retestStudent;
+    renderRetestPlan();
+  }
+}
+
+function renderRetestPlan() {
+  const source = window.READING_RETEST;
+  const config = source && source.students[state.retestStudent];
+  if (!config) {
+    $("retest-plan").textContent = "找不到這位學生的再檢測範圍。";
+    return;
+  }
+  const units = config.plan.map(([unit]) => `${unit === "mixed" ? "混合" : unit} ${source.unitMeta[unit] || ""}`.trim());
+  $("retest-plan").textContent = `本次範圍：${units.join("、")}。${config.note}。`;
 }
 
 document.querySelectorAll("[data-mode]").forEach(button => button.addEventListener("click", function () {
@@ -70,6 +96,15 @@ document.querySelectorAll("[data-count]").forEach(button => button.addEventListe
   selectChoice("[data-count]", this);
   state.count = Number(this.dataset.count);
 }));
+document.querySelectorAll("[data-retest-count]").forEach(button => button.addEventListener("click", function () {
+  selectChoice("[data-retest-count]", this);
+  state.retestCount = Number(this.dataset.retestCount);
+}));
+$("retest-student").addEventListener("change", function () {
+  state.retestStudent = this.value;
+  $("student-name").value = this.value;
+  renderRetestPlan();
+});
 
 function drawDiagnostic() {
   const bank = window.READING_DIAGNOSTIC_BANK || [];
@@ -97,17 +132,26 @@ function drawPractice() {
   return shuffle(pool).slice(0, Math.min(state.count, pool.length));
 }
 
+function drawRetest() {
+  const source = window.READING_RETEST;
+  if (!source) return [];
+  const queue = source.generate(state.retestStudent, state.retestCount);
+  const upperCount = queue.filter(question => question.band === "upper").length;
+  state.band = upperCount > queue.length / 2 ? "upper" : "middle";
+  return queue;
+}
+
 function startGame() {
-  state.name = $("student-name").value.trim() || "無名偵探";
+  state.name = state.mode === "retest" ? state.retestStudent : ($("student-name").value.trim() || "無名偵探");
   state.worldSessionId = `reading_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-  state.queue = state.mode === "diagnostic" ? drawDiagnostic() : drawPractice();
-  const expected = state.mode === "diagnostic" ? 12 : 1;
+  state.queue = state.mode === "diagnostic" ? drawDiagnostic() : state.mode === "retest" ? drawRetest() : drawPractice();
+  const expected = state.mode === "diagnostic" ? 12 : state.mode === "retest" ? state.retestCount : 1;
   if (state.queue.length < expected) {
-    alert("題庫內容不足，請確認 questions.js 與 diagnostic-questions.js 都已放在 reading 資料夾。");
+    alert("題庫內容不足，請確認 questions.js、diagnostic-questions.js 與 retest-questions.js 都在 reading 資料夾。");
     return;
   }
   state.index = 0;
-  state.stage = state.mode === "diagnostic" ? "reading" : "practice";
+  state.stage = isTwoStageMode() ? "reading" : "practice";
   state.answers = [];
   show("screen-game");
   renderQuestion();
@@ -156,25 +200,27 @@ function renderQuestion() {
   state.locked = false;
   state.hintUsed = false;
 
-  const diagnostic = state.mode === "diagnostic";
-  const progressDone = diagnostic
+  const twoStage = isTwoStageMode();
+  const progressDone = twoStage
     ? state.index * 2 + (state.stage === "calc" ? 1 : 0)
     : state.index;
-  const progressTotal = diagnostic ? state.queue.length * 2 : state.queue.length;
+  const progressTotal = twoStage ? state.queue.length * 2 : state.queue.length;
   $("rail-fill").style.width = `${progressDone / progressTotal * 100}%`;
-  $("bar-progress").textContent = diagnostic
+  $("bar-progress").textContent = twoStage
     ? `${state.index + 1} / ${state.queue.length}`
     : `${state.index + 1} / ${state.queue.length}`;
-  $("bar-title").textContent = diagnostic ? `讀題 · ${question.dimension}` : `練習 · ${question.skill}`;
-  $("q-meta").textContent = diagnostic
-    ? `${BAND_LABEL[state.band]} ｜ ${question.dimension} ｜ ${question.difficulty}`
+  $("bar-title").textContent = twoStage ? `讀題 · ${question.dimension}` : `練習 · ${question.skill}`;
+  $("q-meta").textContent = twoStage
+    ? state.mode === "retest"
+      ? `${question.unit} ${question.topic} ｜ ${question.dimension} ｜ ${question.difficulty}`
+      : `${BAND_LABEL[state.band]} ｜ ${question.dimension} ｜ ${question.difficulty}`
     : `${question.skill} ｜ ${question.difficulty}`;
-  $("stage-badge").textContent = diagnostic
+  $("stage-badge").textContent = twoStage
     ? (state.stage === "reading" ? "第 1 關｜讀懂" : "第 2 關｜算對")
     : "自由練習";
   $("stage-badge").className = `stage-badge ${state.stage === "calc" ? "calc" : ""}`;
 
-  renderStimulus(diagnostic ? question.stimulus : null);
+  renderStimulus(twoStage ? question.stimulus : null);
   $("q-text").textContent = part.prompt;
   $("hint-box").textContent = part.hint || "再讀一次問句，找出真正要回答的量。";
   $("hint-box").classList.add("hidden");
@@ -212,6 +258,8 @@ function answer(optionIndex) {
     dimension:question.dimension || question.skill,
     skill:question.skill || question.dimension,
     difficulty:question.difficulty,
+    unit:question.unit || "",
+    topic:question.topic || "",
     trap:question.trap || "其他",
     chosen:chosen.text,
     correct:chosen.correct,
@@ -234,29 +282,29 @@ function answer(optionIndex) {
   $("btn-next").classList.remove("hidden");
 
   const isLastQuestion = state.index === state.queue.length - 1;
-  if (state.mode === "diagnostic" && state.stage === "reading") {
+  if (isTwoStageMode() && state.stage === "reading") {
     $("btn-next").textContent = "進入第 2 關：算出答案";
   } else {
     $("btn-next").textContent = isLastQuestion ? "查看偵查報告" : "下一題";
   }
 
-  const completed = state.mode === "diagnostic"
+  const completed = isTwoStageMode()
     ? state.index * 2 + (state.stage === "reading" ? 1 : 2)
     : state.index + 1;
-  const total = state.mode === "diagnostic" ? state.queue.length * 2 : state.queue.length;
+  const total = isTwoStageMode() ? state.queue.length * 2 : state.queue.length;
   $("rail-fill").style.width = `${completed / total * 100}%`;
 }
 
 function nextQuestion() {
   if (!state.locked) return;
-  if (state.mode === "diagnostic" && state.stage === "reading") {
+  if (isTwoStageMode() && state.stage === "reading") {
     state.stage = "calc";
     renderQuestion();
     return;
   }
   if (state.index < state.queue.length - 1) {
     state.index += 1;
-    state.stage = state.mode === "diagnostic" ? "reading" : "practice";
+    state.stage = isTwoStageMode() ? "reading" : "practice";
     renderQuestion();
   } else {
     showResult();
@@ -366,17 +414,46 @@ function practiceResult() {
   return { practice:result, skills };
 }
 
+function retestResult() {
+  const readingRecords = state.answers.filter(record => record.stage === "reading");
+  const calcRecords = state.answers.filter(record => record.stage === "calc");
+  const reading = rate(readingRecords);
+  const calc = rate(calcRecords);
+  const topics = groupedStats(calcRecords, "topic");
+
+  $("diagnostic-scores").classList.remove("hidden");
+  $("practice-score").classList.add("hidden");
+  $("skills-title").textContent = "本次再檢測單元";
+  $("r-reading").textContent = `${reading.pct}%`;
+  $("r-reading-count").textContent = `答對 ${reading.correct} / ${reading.total}`;
+  $("r-calc").textContent = `${calc.pct}%`;
+  $("r-calc-count").textContent = `答對 ${calc.correct} / ${calc.total}`;
+  renderSkillRows(topics, Object.keys(topics));
+  renderTraps(state.answers);
+
+  const weak = Object.keys(topics)
+    .sort((a,b) => topics[a].correct / topics[a].total - topics[b].correct / topics[b].total)
+    .filter(name => topics[name].correct < topics[name].total)
+    .slice(0,2);
+  $("r-next").textContent = weak.length
+    ? `下一輪先補「${weak.join("、")}」：先說出問句要找的量，再列算式；不要只背這次的數字。`
+    : "本回讀題與計算都很穩。可再做一次，系統會更換數字與部分題型，確認不是記住答案。";
+  $("r-note").textContent = "本模式依再檢測冊別與單元控制數值範圍，用於課前回補與形成性練習；不取代正式再檢測結果。";
+  return { reading, calc, topics };
+}
+
 function showResult() {
   $("r-name").textContent = `${state.name}的偵查報告`;
-  $("r-context").textContent = `${state.mode === "diagnostic" ? "完整診斷" : "自由練習"} ｜ ${BAND_LABEL[state.band]} ｜ ${new Date().toLocaleDateString("zh-TW")}`;
-  const stats = state.mode === "diagnostic" ? diagnosticResult() : practiceResult();
+  const modeName = state.mode === "diagnostic" ? "完整診斷" : state.mode === "retest" ? "再檢測應用題" : "自由練習";
+  $("r-context").textContent = `${modeName} ｜ ${state.mode === "retest" ? state.retestStudent : BAND_LABEL[state.band]} ｜ ${new Date().toLocaleDateString("zh-TW")}`;
+  const stats = state.mode === "diagnostic" ? diagnosticResult() : state.mode === "retest" ? retestResult() : practiceResult();
   state.lastStats = stats;
   const summary = rate(state.answers);
   if (window.DetectiveSystem) {
     window.DetectiveSystem.completeModule("reading", {
       accuracy:summary.pct, correct:summary.correct, total:summary.total,
       mistakes:state.answers.filter(record => !record.correct).map(record => record.trap || record.skill || "問句定位"),
-      reasoning:state.mode === "diagnostic", sessionId:state.worldSessionId
+      reasoning:isTwoStageMode(), sessionId:state.worldSessionId
     });
   }
   show("screen-result");
@@ -389,6 +466,7 @@ function exportResult() {
     studentName:state.name,
     mode:state.mode,
     band:state.band,
+    retestStudent:state.mode === "retest" ? state.retestStudent : undefined,
     difficulty:state.mode === "practice" ? state.diff : undefined,
     questionCount:state.queue.length,
     summary:state.lastStats,

@@ -28,15 +28,23 @@
 
         <div class="setup">
           <label>偵探姓名（可不填）
-            <input id="student-name" maxlength="12" placeholder="輸入姓名或代號">
+            <input id="student-name" maxlength="12" placeholder="輸入姓名或代號" list="student-name-list">
+            <datalist id="student-name-list">
+              <option value="婕荏"><option value="修聖"><option value="瑀婕"><option value="詠議">
+              <option value="吉祥"><option value="吉成"><option value="薪恩">
+            </datalist>
           </label>
 
           <fieldset>
             <legend>選擇任務</legend>
-            <div class="choices two">
+            <div class="choices three mode-choices">
               <button class="choice selected" data-mode="diagnostic">
                 <strong>🧭 完整診斷</strong>
                 <span>12 題、每題兩關；六項能力各測 2 次</span>
+              </button>
+              <button class="choice" data-mode="retest">
+                <strong>🎯 再檢測應用題</strong>
+                <span>依學生下一次範圍出題；每回自動換情境數字</span>
               </button>
               <button class="choice" data-mode="practice">
                 <strong>✏️ 自由練習</strong>
@@ -45,7 +53,7 @@
             </div>
           </fieldset>
 
-          <fieldset>
+          <fieldset id="band-settings">
             <legend>年級帶</legend>
             <div class="choices two">
               <button class="choice selected" data-band="middle">
@@ -56,6 +64,29 @@
               </button>
             </div>
           </fieldset>
+
+          <div id="retest-settings" class="practice-settings hidden">
+            <fieldset>
+              <legend>選擇再檢測學生</legend>
+              <label class="select-field">學生姓名
+                <select id="retest-student">
+                  <option value="婕荏">婕荏</option><option value="修聖">修聖</option>
+                  <option value="瑀婕">瑀婕</option><option value="詠議">詠議</option>
+                  <option value="吉祥">吉祥</option><option value="吉成">吉成</option>
+                  <option value="薪恩">薪恩</option>
+                </select>
+              </label>
+              <p id="retest-plan" class="range-note"></p>
+            </fieldset>
+            <fieldset>
+              <legend>本回題數</legend>
+              <div class="choices three">
+                <button class="choice" data-retest-count="10"><strong>10 題</strong></button>
+                <button class="choice selected" data-retest-count="12"><strong>12 題</strong></button>
+                <button class="choice" data-retest-count="15"><strong>15 題</strong></button>
+              </div>
+            </fieldset>
+          </div>
 
           <div id="practice-settings" class="practice-settings hidden">
             <fieldset>
@@ -147,6 +178,7 @@
   <script src="../detective-system.js"></script>
   <script src="questions.js"></script>
   <script src="diagnostic-questions.js"></script>
+  <script src="retest-questions.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -30,10 +30,13 @@ body { margin:0; background:var(--paper); color:var(--ink); font-family:var(--sa
   padding:24px; box-shadow:0 3px 0 rgba(44,36,28,.08);
 }
 label, legend { font-weight:800; font-size:15px; }
-input {
+input, select {
   display:block; width:100%; margin-top:8px; padding:13px 14px;
   border:1px solid var(--line); border-radius:10px; font:inherit; background:#fff;
 }
+.select-field { display:block; margin-top:10px; }
+.range-note { margin:11px 0 0; padding:12px 14px; border-radius:10px; background:#FFF6D9; color:#72551F; font-size:14px; line-height:1.65; }
+.mode-choices .choice { min-height:104px; }
 fieldset { border:0; padding:0; margin:22px 0; }
 .choices { display:grid; gap:10px; margin-top:9px; }
 .choices.two { grid-template-columns:repeat(2,1fr); }
